@@ -1,4 +1,3 @@
-
 'use client';
 
 const TOCEntry = ({ number, title, page, redacted = false }) => (
