@@ -33,11 +33,11 @@ export default function Hero() {
   return (
     <section className="relative min-h-[70vh] flex flex-col items-center justify-center text-center p-6 pt-4 border-4 border-[#1A1A1A] bg-[#E8DCC8] overflow-hidden">
       <CoffeeStain />
-      <div className="absolute top-6 right-8 z-20">
-        <Stamp text="CLASSIFIED" color="#C0392B" rotation={-15} />
+      <div className="absolute top-4 right-6 z-20 opacity-60">
+        <Stamp text="CLASSIFIED" color="#C0392B" rotation={-12} />
       </div>
-      <div className="absolute top-12 right-4 z-30">
-        <Stamp text="DECLASSIFIED" color="#2C5F8A" rotation={25} />
+      <div className="absolute top-8 right-10 z-30">
+        <Stamp text="DECLASSIFIED" color="#2C5F8A" rotation={18} />
       </div>
 
       <div className="z-10">
