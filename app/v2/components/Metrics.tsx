@@ -43,7 +43,7 @@ const AnimatedNumber = ({ value, isString = false }) => {
 
 const metrics = [
     { value: 20847, label: "Active Operators" },
-    { value: 94.7, label: "Avg Success Rate" },
+    { value: 94.7, label: "Avg Success Rate", suffix: "%" },
     { value: "50+", label: "Influence Frameworks", isString: true },
     { value: "24/7", label: "AI Availability", isString: true },
 ];
@@ -86,7 +86,7 @@ export const Metrics = () => {
                 >
                     <div className="text-4xl font-bold text-white md:text-5xl">
                         <AnimatedNumber value={metric.value} isString={metric.isString} />
-                        {metric.label.includes('%') && '%'}
+                        {metric.suffix && metric.suffix}
                     </div>
                     <p className="mt-2 text-sm uppercase tracking-wider text-gray-400">{metric.label}</p>
                 </motion.div>
@@ -109,7 +109,7 @@ export const Metrics = () => {
                 transition={{ duration: 0.5, delay: 1 + index * 0.2 }}
                 className="relative rounded-lg border border-[#333] bg-[#111] p-8"
              >
-                <div className="absolute top-4 right-4 font-mono text-xs uppercase text-red-500 transform -rotate-15 border-2 border-red-500 px-2 py-1">CLASSIFIED</div>
+                <div className="absolute -top-3 right-4 font-mono text-[10px] uppercase text-red-500 transform -rotate-12 border border-red-500 px-2 py-0.5 bg-[#0A0A0A] z-10">CLASSIFIED</div>
                 <p className="text-gray-300">{testimonial.report}</p>
                 <p className="mt-6 font-mono text-sm font-semibold uppercase tracking-wider text-[#FF8C00]">FIELD REPORT // {testimonial.codename}</p>
              </motion.div>

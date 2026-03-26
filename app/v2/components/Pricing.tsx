@@ -38,6 +38,7 @@ export const Pricing = () => {
             Full Operator Access
           </h3>
           <div className="my-8 text-center">
+            <span className="text-2xl text-gray-500 line-through mr-3">$97</span>
             <span className="text-6xl font-bold text-[#FF8C00]">$47</span>
             <span className="text-lg text-gray-400">/month</span>
           </div>

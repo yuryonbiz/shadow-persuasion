@@ -10,7 +10,7 @@ const conversation = [
   },
   {
     speaker: 'ai',
-    text: "Deploy the Scarcity Frame. Here's your script: [detailed tactical response about creating perceived scarcity of their skills]",
+    text: "Deploy the Scarcity Frame. Here's your script: 'I've been approached by [competitor] about a role that better reflects my market value. I wanted to give you the chance to match it before I make a decision. I'd prefer to stay — but I need to be realistic.' Then go silent. Let the void do the work.",
   },
   {
     speaker: 'user',
