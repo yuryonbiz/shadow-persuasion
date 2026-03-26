@@ -25,15 +25,10 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  /* No default colors — each page version controls its own theme */
 }
-
-/* Default dark theme for root page */
-body {
-  color: #E8E8E0;
-  background: #0A0A0A;
-}
-
-/* Scrollbar styling */
 
 .font-serif {
   font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;

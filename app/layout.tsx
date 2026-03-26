@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cormorant.className} bg-white text-[#111111]`}>{children}</body>
+      <body className={cormorant.className}>{children}</body>
     </html>
   );
 }
