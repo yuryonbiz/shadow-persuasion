@@ -33,7 +33,7 @@ export default function ChatListPage() {
           ))}
         </div>
       ) : (
-        <div className="p-10 text-center bg-[#1A1A1A] rounded-lg border border-dashed border-[#333333]">
+        <div className="p-10 text-center rounded-lg border border-dashed border-[#333333]">
            <p className="text-gray-400">No conversations yet. Start one to begin your training.</p>
         </div>
       )}
