@@ -1,9 +1,11 @@
-'use client';
-
 import { scenarios } from '@/lib/scenarios';
 import { techniques } from '@/lib/techniques';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+export function generateStaticParams() {
+  return scenarios.map(s => ({ id: s.id }));
+}
 
 export default function ScenarioDetailPage({ params }: { params: { id: string } }) {
   const scenario = scenarios.find(s => s.id === params.id);

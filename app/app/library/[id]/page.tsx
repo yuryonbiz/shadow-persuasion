@@ -1,6 +1,8 @@
-'use client';
-
 import { techniques } from '@/lib/techniques';
+
+export function generateStaticParams() {
+  return techniques.map(t => ({ id: t.id }));
+}
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
