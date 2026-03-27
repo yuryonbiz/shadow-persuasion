@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,29 +9,6 @@ const supabase = createClient(
 );
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY!;
-
-// --- Chunking ---
-
-function chunkText(text: string, maxWords: number = 800): string[] {
-  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 30);
-  const chunks: string[] = [];
-  let current = '';
-  
-  for (const para of paragraphs) {
-    const combined = current + '\n\n' + para;
-    if (combined.split(/\s+/).length > maxWords && current) {
-      chunks.push(current.trim());
-      current = para;
-    } else {
-      current = combined;
-    }
-  }
-  if (current.trim()) chunks.push(current.trim());
-  
-  return chunks;
-}
-
-// --- AI calls ---
 
 async function getEmbedding(text: string): Promise<number[]> {
   const res = await fetch('https://openrouter.ai/api/v1/embeddings', {
@@ -45,7 +22,6 @@ async function getEmbedding(text: string): Promise<number[]> {
       input: text.slice(0, 8000),
     }),
   });
-  
   if (!res.ok) throw new Error(`Embedding error: ${res.status}`);
   const data = await res.json();
   return data.data[0].embedding;
@@ -82,7 +58,6 @@ Text: ${chunk.slice(0, 1500)}` }
   });
 
   if (!res.ok) return defaultMetadata();
-  
   try {
     const data = await res.json();
     const content = data.choices[0].message.content
@@ -95,35 +70,23 @@ Text: ${chunk.slice(0, 1500)}` }
 
 function defaultMetadata() {
   return {
-    technique_name: 'General',
-    technique_id: 'general',
-    category: 'influence',
-    chunk_type: 'technique_overview',
-    difficulty: 'beginner',
-    use_cases: [],
-    risk_level: 'low',
-    related_techniques: [],
+    technique_name: 'General', technique_id: 'general', category: 'influence',
+    chunk_type: 'technique_overview', difficulty: 'beginner',
+    use_cases: [], risk_level: 'low', related_techniques: [],
   };
 }
 
-// --- POST: Ingest book (receives extracted text from client) ---
-
+// POST: Process a BATCH of chunks (client sends 3 at a time)
 export async function POST(req: NextRequest) {
   try {
-    const { text, title, author } = await req.json();
+    const { chunks, title, author } = await req.json();
 
-    if (!text || !title || !author) {
-      return NextResponse.json({ error: 'Text, title, and author required' }, { status: 400 });
+    if (!chunks || !Array.isArray(chunks) || !title || !author) {
+      return NextResponse.json({ error: 'chunks array, title, and author required' }, { status: 400 });
     }
 
-    if (text.length < 100) {
-      return NextResponse.json({ error: 'Text appears too short' }, { status: 400 });
-    }
-
-    // Chunk
-    const chunks = chunkText(text);
     let successCount = 0;
-    
+
     for (const chunk of chunks) {
       try {
         const [metadata, embedding] = await Promise.all([
@@ -149,17 +112,12 @@ export async function POST(req: NextRequest) {
         });
 
         if (!error) successCount++;
-        await new Promise(r => setTimeout(r, 200));
       } catch (e) {
         console.error('Chunk error:', e);
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      chunks: successCount,
-      total: chunks.length,
-    });
+    return NextResponse.json({ success: true, processed: successCount });
 
   } catch (error: any) {
     console.error('[INGEST] Error:', error);
@@ -167,15 +125,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// --- DELETE ---
-
+// DELETE
 export async function DELETE(req: NextRequest) {
   try {
     const { title } = await req.json();
-    const { error } = await supabase
-      .from('knowledge_chunks')
-      .delete()
-      .eq('book_title', title);
+    const { error } = await supabase.from('knowledge_chunks').delete().eq('book_title', title);
     if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (error: any) {
