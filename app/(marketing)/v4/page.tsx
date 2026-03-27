@@ -23,6 +23,10 @@ import ClassifiedComparison from './components/ClassifiedComparison';
 import AccessRequest from './components/AccessRequest';
 import Footer from './components/Footer';
 import SectionDivider from './components/SectionDivider';
+import LiveAnalysisDemo from './components/LiveAnalysisDemo';
+import CaseFileBrowser from './components/CaseFileBrowser';
+import DossierAnalysis from './components/DossierAnalysis';
+import ConversationBreakdown from './components/ConversationBreakdown';
 
 const specialElite = Special_Elite({ subsets: ['latin'], weight: '400' });
 
@@ -49,11 +53,19 @@ export default function V4Page() {
         <InfluenceDecoder />
       </div>
 
+      <LiveAnalysisDemo />
+      <DossierAnalysis />
+
       <SectionDivider text="// CLASSIFIED MATERIAL — RESTRICTED ACCESS //" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <TableOfContents />
         <SubjectFiles />
+      </div>
+
+      <CaseFileBrowser />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <OperationalModules />
       </div>
 
@@ -71,6 +83,7 @@ export default function V4Page() {
       <Evidence />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+        <ConversationBreakdown />
         <Statements />
         <Architects />
       </div>

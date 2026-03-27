@@ -18,12 +18,13 @@ const Redacted = () => <span className="bg-black text-black select-none">██�
 
 const ClassifiedComparison = () => {
   return (
-    <section className={`relative py-16 ${styles.container}`}>
+    <section className={`bg-[#0D0D0D] w-full ${styles.container}`}>
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         <div className="text-center mb-12">
-            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
+            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-400">
                 DOCUMENT COMPARISON
             </h2>
-            <p className="text-3xl mt-2">Access Levels</p>
+            <p className="text-3xl mt-2 text-white">Access Levels</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-2 border-gray-400 bg-[#F4ECD8] shadow-lg p-6 sm:p-8">
@@ -62,6 +63,7 @@ const ClassifiedComparison = () => {
                  </button>
             </div>
         </div>
+      </div>
     </section>
   )
 }

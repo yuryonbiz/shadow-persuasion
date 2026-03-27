@@ -21,13 +21,14 @@ const Stamp = ({ text, className }: { text: string; className?: string }) => (
 
 const DeploymentFeed = () => {
   return (
-    <section className="relative py-16">
-        <div className="text-left mb-12">
-            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
+    <section className="bg-[#0D0D0D] w-full">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+        <div className="text-left mb-12 relative">
+            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-400">
                 LIVE DEPLOYMENT FEED
             </h2>
-            <p className="text-3xl mt-2">Monitoring Active</p>
-            <Stamp text="REAL-TIME — UNREDACTED" className="-bottom-8 right-0 rotate-3" />
+            <p className="text-3xl mt-2 text-white">Monitoring Active</p>
+            <Stamp text="REAL-TIME — UNREDACTED" className="top-0 right-0 rotate-3" />
         </div>
 
         <div className="bg-[#1A1A1A] text-white p-6 sm:p-8 border-2 border-gray-700 shadow-lg relative font-mono">
@@ -67,6 +68,7 @@ const DeploymentFeed = () => {
                  <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#1A1A1A] to-transparent"></div>
             </div>
         </div>
+      </div>
     </section>
   );
 };

@@ -40,7 +40,7 @@ export const SystemPreview = () => {
   });
 
   return (
-    <section ref={ref} className="relative bg-[#EAE3D2] py-16 sm:py-24 border-b-2 border-dashed border-gray-400">
+    <section ref={ref} className="relative bg-[#EAE3D2] py-16 sm:py-24 px-6 sm:px-8 border-b-2 border-dashed border-gray-400">
         <div className="text-left mb-8">
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
             Exhibit B
