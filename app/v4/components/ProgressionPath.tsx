@@ -46,7 +46,7 @@ const ProgressionPath = () => {
             animate={inView ? {width: '100%'} : {}}
             transition={{duration: 2, ease: 'easeInOut'}}
           />
-          <div className="relative flex justify-between">
+          <div className="relative flex justify-between overflow-visible">
             {levels.map((level, index) => (
               <div key={level.name} className="flex flex-col items-center z-10">
                   <motion.div
@@ -58,7 +58,7 @@ const ProgressionPath = () => {
                         <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                     </div>
                   </motion.div>
-                  <div className="text-center mt-4 w-48">
+                  <div className="text-center mt-4 w-32">
                       <motion.h3 
                         className="font-mono text-sm uppercase tracking-widest text-black"
                         initial={{opacity: 0}}
