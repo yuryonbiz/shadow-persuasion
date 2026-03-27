@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -64,60 +65,62 @@ const FieldAssessment = () => {
   }
 
   return (
-    <section className="relative py-16">
-        <div className="text-left mb-12">
-            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
-                FIELD ASSESSMENT
-            </h2>
-            <p className="text-3xl mt-2">Operator Evaluation</p>
-        </div>
+    <section className="relative -mx-6 md:-mx-12 px-6 md:px-12 py-20 bg-[#1A1A1A] text-[#E8E8E0]">
+        <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+                 <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-wider text-white">Operator Evaluation</h2>
+                <div className="w-24 h-1 bg-red-600 mt-4 mx-auto"></div>
+            </div>
 
-        <div className="border-2 border-gray-400 bg-[#F4ECD8] p-6 sm:p-8 shadow-lg min-h-[300px]">
-            <AnimatePresence mode="wait">
-            {
-              showResults ? (
-                <motion.div 
-                  key="results"
-                  initial={{opacity: 0, y: 20}}
-                  animate={{opacity: 1, y: 0}}
-                  transition={{duration: 0.5}}
-                  className="text-center"
-                >
-                    <h3 className="font-mono text-lg uppercase tracking-widest text-black">FIELD ASSESSMENT RESULT</h3>
-                    <div className="my-4 border-t border-dashed border-gray-400"></div>
-                    <p className="text-2xl mt-4">{score >= 2 ? results.operator.title : results.potential.title}</p>
-                    <p className="text-lg mt-2 text-gray-700">{score >= 2 ? results.operator.description : results.potential.description}</p>
-                    <button onClick={() => { setAnswers([]); setCurrentQuestion(0); setShowResults(false); }} className='mt-8 bg-black text-white font-mono uppercase px-4 py-2 text-sm'>
-                      Retake Assessment
-                    </button>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key={currentQuestion}
-                  initial={{opacity: 0, x: 20}}
-                  animate={{opacity: 1, x: 0}}
-                  exit={{opacity: 0, x: -20}}
-                  transition={{duration: 0.3}}
-                >
-                    <p className="text-lg mb-6 leading-relaxed">{currentQuestion + 1}. {questions[currentQuestion].question}</p>
-                    <div className="space-y-3">
-                        {questions[currentQuestion].options.map((option, index) => (
-                            <button 
-                              key={index} 
-                              onClick={() => handleAnswer(index)}
-                              className="flex items-start gap-3 text-left w-full p-3 border border-transparent hover:border-gray-400 hover:bg-[#EDE3D0] transition-colors duration-200"
-                            >
-                                <span className="font-mono text-lg">({String.fromCharCode(65 + index)})</span>
-                                <span className='text-lg'>{option}</span>
-                            </button>
-                        ))}
-                    </div>
-                </motion.div>
-              )
-            }
-            </AnimatePresence>
+            <div className="border border-amber-900/50 bg-[#222222] p-6 sm:p-8 shadow-2xl min-h-[350px] rounded-lg flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                {
+                  showResults ? (
+                    <motion.div 
+                      key="results"
+                      initial={{opacity: 0, y: 20}}
+                      animate={{opacity: 1, y: 0}}
+                      transition={{duration: 0.5}}
+                      className="text-center flex flex-col items-center"
+                    >
+                        <h3 className="font-mono text-lg uppercase tracking-widest text-[#D4A017]">Field Assessment Result</h3>
+                        <div className="my-4 w-1/2 border-t border-dashed border-amber-900/50"></div>
+                        <div className="p-6 border border-amber-500/30 rounded-lg bg-black/20">
+                            <p className="text-2xl text-amber-400 font-bold">{score >= 2 ? results.operator.title : results.potential.title}</p>
+                            <p className="text-lg mt-2 text-gray-300 max-w-md mx-auto">{score >= 2 ? results.operator.description : results.potential.description}</p>
+                        </div>
+                        <button onClick={() => { setAnswers([]); setCurrentQuestion(0); setShowResults(false); }} className='mt-8 bg-[#D4A017] text-black font-mono uppercase px-6 py-2 text-sm font-bold tracking-wider hover:bg-amber-300 transition-colors'>
+                          Retake Assessment
+                        </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key={currentQuestion}
+                      initial={{opacity: 0, x: 20}}
+                      animate={{opacity: 1, x: 0}}
+                      exit={{opacity: 0, x: -20}}
+                      transition={{duration: 0.3}}
+                      className="w-full"
+                    >
+                        <p className="text-xl mb-8 leading-relaxed text-center text-gray-200">{currentQuestion + 1}. {questions[currentQuestion].question}</p>
+                        <div className="space-y-3 max-w-2xl mx-auto">
+                            {questions[currentQuestion].options.map((option, index) => (
+                                <button 
+                                  key={index} 
+                                  onClick={() => handleAnswer(index)}
+                                  className="flex items-start gap-4 text-left w-full p-4 border rounded-md transition-all duration-200 group border-amber-500/20 hover:bg-amber-500/10 hover:border-amber-500/50"
+                                >
+                                    <span className="font-mono text-lg text-amber-400 group-hover:text-amber-300">({String.fromCharCode(65 + index)})</span>
+                                    <span className='text-lg text-gray-300 group-hover:text-white'>{option}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                  )
+                }
+                </AnimatePresence>
+            </div>
         </div>
-
     </section>
   )
 }

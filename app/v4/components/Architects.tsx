@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -35,18 +36,16 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const Stamp = ({ text, color, className }: { text: string; color: string; className?: string }) => (
-    <div className={`absolute -rotate-6 scale-100 border-2 ${color} px-2 py-1 text-sm font-bold uppercase tracking-wider ${color} opacity-90 ${className}`}>
-      {text}
-    </div>
-);
-
 export const Architects = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
-    <section ref={ref} className="relative py-16 sm:py-24 border-b-2 border-dashed border-gray-400 bg-[#EAE3D2]">
-       <Stamp text="CLASSIFIED" color="border-red-600 text-red-600" className="top-8 left-8" />
+    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
+        <div className="absolute top-8 right-8 rotate-12 opacity-70">
+            <div className="border-2 border-red-600 text-red-600 font-bold uppercase tracking-wider p-2 text-sm transform -rotate-12">
+                Personnel File
+            </div>
+        </div>
         <div className="text-left mb-12">
             <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">Personnel Files</h2>
             <p className="font-special-elite text-3xl text-black mt-2">Classification: RESTRICTED</p>

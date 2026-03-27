@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -22,12 +23,12 @@ const InfluenceDecoder = () => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 });
 
   return (
-    <section ref={ref} className="relative py-16">
+    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
       <div className="text-left mb-12">
         <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
           EXHIBIT D: INFLUENCE DECODER
         </h2>
-        <p className="text-3xl mt-2">Field Analysis</p>
+        <p className="text-3xl mt-2 text-black">Field Analysis</p>
       </div>
 
       <div className="relative border-2 border-gray-400 bg-[#F4ECD8] p-6 sm:p-8 shadow-lg">

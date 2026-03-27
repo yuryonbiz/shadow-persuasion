@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -43,13 +44,19 @@ export const SystemCapabilities = () => {
   });
 
   return (
-    <section ref={ref} className="relative py-16 sm:py-24 border-b-2 border-dashed border-gray-400">
+    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
+        <div className="absolute top-8 right-8 -rotate-12 opacity-70">
+            <div className="border-2 border-green-600 text-green-600 font-bold uppercase tracking-wider p-2 text-sm">
+                Verified
+            </div>
+        </div>
         <div className="text-left mb-12">
-          <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
-            Section 2
+          <h2 className="text-4xl md:text-5xl font-bold text-black">
+            System Capabilities
           </h2>
-          <p className="font-special-elite text-3xl text-black mt-2">
-            System Capabilities (Declassified)
+          <div className="w-24 h-1 bg-red-600 mt-4"></div>
+          <p className="font-mono text-sm uppercase tracking-widest text-gray-600 mt-4">
+            Declassified Overview
           </p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -60,7 +67,7 @@ export const SystemCapabilities = () => {
               initial="hidden"
               animate={inView ? 'visible' : 'hidden'}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="relative flex flex-col rounded-sm border border-[#999] bg-[#EDE3D0] p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black"
+              className="relative flex flex-col rounded-sm border border-[#999] bg-[#F4ECD8] p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black"
             >
               {capability.classified && (
                 <Stamp text="CLASSIFIED" color="border-red-600 text-red-600" className="top-4 right-4" />
