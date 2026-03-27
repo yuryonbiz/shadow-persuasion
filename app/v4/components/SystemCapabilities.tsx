@@ -44,7 +44,6 @@ export const SystemCapabilities = () => {
 
   return (
     <section ref={ref} className="relative py-16 sm:py-24 border-b-2 border-dashed border-gray-400">
-      <div className="mx-auto max-w-4xl px-6 lg:px-8">
         <div className="text-left mb-12">
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
             Section 2
@@ -83,7 +82,6 @@ export const SystemCapabilities = () => {
             </motion.div>
           ))}
         </div>
-      </div>
     </section>
   );
 };

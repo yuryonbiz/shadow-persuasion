@@ -23,8 +23,8 @@ const conversation = [
 ];
 
 const messageVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
 };
 
 const Stamp = ({ text, color, className }: { text: string; color: string; className?: string }) => (
@@ -34,14 +34,13 @@ const Stamp = ({ text, color, className }: { text: string; color: string; classN
 );
 
 export const SystemPreview = () => {
-  const [ref, inView] = useInView({
+  const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
   });
 
   return (
     <section ref={ref} className="relative bg-[#EAE3D2] py-16 sm:py-24 border-b-2 border-dashed border-gray-400">
-      <div className="mx-auto max-w-4xl px-6 lg:px-8">
         <div className="text-left mb-8">
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
             Exhibit B
@@ -59,22 +58,32 @@ export const SystemPreview = () => {
           
           <div className="space-y-6 font-special-elite text-lg text-gray-900">
             {conversation.map((msg, index) => (
-              <motion.div
+               <motion.div
                 key={index}
-                variants={messageVariants}
                 initial="hidden"
-                animate={inView ? 'visible' : 'hidden'}
-                transition={{ duration: 0.5, delay: index * 0.4 }}
-                className="grid grid-cols-[100px_1fr] gap-4 items-start"
-              >
-                <div className="font-mono text-sm pt-1">{msg.speaker}:</div>
-                <p className="leading-relaxed">{msg.text.replace(/\'/g, "`")}</p>
-              </motion.div>
+                animate={inView ? "visible" : "hidden"}
+                variants={messageVariants}
+                transition={{ duration: 0.5, delay: index * 1.5 }}
+                 className="grid grid-cols-[100px_1fr] gap-4 items-start"
+               >
+                 <div className="font-mono text-sm pt-1">{msg.speaker}:</div>
+                 <motion.p className="leading-relaxed">
+                  {inView && msg.text.split("").map((char, charIndex) => (
+                    <motion.span
+                      key={charIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.05, delay: index * 1.5 + charIndex * 0.02 }}
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </motion.p>
+               </motion.div>
             ))}
           </div>
           <Stamp text="AUTHENTIC — VERIFIED" color="border-red-600 text-red-600" className="-bottom-5 -right-5" />
         </div>
-      </div>
     </section>
   );
 };
