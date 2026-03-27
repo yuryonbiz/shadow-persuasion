@@ -1,13 +1,14 @@
 import { techniques } from '@/lib/techniques';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
 export function generateStaticParams() {
   return techniques.map(t => ({ id: t.id }));
 }
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
 
-export default function TechniqueDetailPage({ params }: { params: { id: string } }) {
-  const technique = techniques.find(t => t.id === params.id);
+export default async function TechniqueDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const technique = techniques.find(t => t.id === id);
 
   if (!technique) {
     notFound();
@@ -42,7 +43,6 @@ export default function TechniqueDetailPage({ params }: { params: { id: string }
        </div>
 
        <div className="text-center">
-            {/* Find a scenario that uses this technique and link to it */}
             <Link href="/app/scenarios" className="inline-block px-8 py-3 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B030] transition-transform hover:scale-105">
                 Practice This Technique
             </Link>

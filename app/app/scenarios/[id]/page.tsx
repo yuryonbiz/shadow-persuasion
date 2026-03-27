@@ -7,8 +7,9 @@ export function generateStaticParams() {
   return scenarios.map(s => ({ id: s.id }));
 }
 
-export default function ScenarioDetailPage({ params }: { params: { id: string } }) {
-  const scenario = scenarios.find(s => s.id === params.id);
+export default async function ScenarioDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const scenario = scenarios.find(s => s.id === id);
 
   if (!scenario) {
     notFound();
@@ -52,4 +53,3 @@ export default function ScenarioDetailPage({ params }: { params: { id: string } 
     </div>
   );
 }
-// force deploy Fri Mar 27 03:43:20 AM UTC 2026
