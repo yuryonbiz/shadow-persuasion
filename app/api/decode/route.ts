@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chatCompletion } from '@/lib/openrouter';
 import { DECODE_SYSTEM_PROMPT } from '@/lib/prompts';
 
-export const maxDuration = 30; 
-
-function extractContent(text: string) {
-    const analysisMatch = text.match(/<analysis>([\s\S]*?)<\/analysis>/);
-    const suggestionsMatch = text.match(/<suggestions>([\s\S]*?)<\/suggestions>/);
-    const techniquesMatch = text.match(/<techniques>([\s\S]*?)<\/techniques>/);
-
-    return {
-        analysis: analysisMatch ? analysisMatch[1].trim() : 'No analysis provided.',
-        suggestions: suggestionsMatch ? suggestionsMatch[1].trim().split('\n').filter(s => s) : [],
-        techniques_identified: techniquesMatch ? techniquesMatch[1].trim().split(',').map(t => t.trim()).filter(t => t) : [],
-    };
-}
-
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,38 +16,43 @@ export async function POST(req: NextRequest) {
     const imageBase64 = Buffer.from(imageBuffer).toString('base64');
     const imageDataUrl = `data:${image.type};base64,${imageBase64}`;
 
-    const response = await chatCompletion(
-      [
-        {
-          role: 'system',
-          content: DECODE_SYSTEM_PROMPT,
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: imageDataUrl,
-              },
-            },
-            {
-              type: 'text',
-              text: "Analyze this conversation screenshot. Give me the analysis, suggested responses, and identified techniques inside XML tags: <analysis>, <suggestions>, and <techniques> (comma-separated).",
-            },
-          ],
-        },
-      ],
-      {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://shadow-persuasion.vercel.app',
+        'X-Title': 'Shadow Persuasion',
+      },
+      body: JSON.stringify({
         model: 'openai/gpt-4o',
-        stream: false,
-      }
-    );
-     
-    const content = response.choices[0].message.content;
-    const extracted = extractContent(content);
+        messages: [
+          { role: 'system', content: DECODE_SYSTEM_PROMPT },
+          {
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: imageDataUrl } },
+              { type: 'text', text: 'Analyze this conversation screenshot. Provide your full analysis.' },
+            ],
+          },
+        ],
+      }),
+    });
 
-    return NextResponse.json(extracted);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenRouter error:', response.status, errorText);
+      return NextResponse.json({ error: 'AI service error' }, { status: 502 });
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    return NextResponse.json({ 
+      analysis: content,
+      suggestions: [],
+      techniques_identified: [] 
+    });
 
   } catch (error) {
     console.error('[DECODE API] Error:', error);

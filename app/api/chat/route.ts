@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server';
-import { chatCompletion } from '@/lib/openrouter';
 import { HANDLER_SYSTEM_PROMPT } from '@/lib/prompts';
-import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 export const runtime = 'edge';
 
@@ -14,42 +12,82 @@ export async function POST(req: NextRequest) {
       content: HANDLER_SYSTEM_PROMPT,
     };
     
-    // Use the last 5 messages to keep context window small for demo
-    const recentMessages = messages.slice(-5); 
+    const recentMessages = messages.slice(-10);
 
-    const response = await chatCompletion(
-      [systemMessage, ...recentMessages],
-      {
-        model: 'anthropic/claude-3.5-sonnet',
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://shadow-persuasion.vercel.app',
+        'X-Title': 'Shadow Persuasion',
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-sonnet-4-20250514',
+        messages: [systemMessage, ...recentMessages],
         stream: true,
-      }
-    );
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenRouter error:', response.status, errorText);
+      return new Response(`AI service error: ${response.status}`, { status: 502 });
+    }
+
+    if (!response.body) {
+      return new Response('No response body', { status: 502 });
+    }
+
+    // Transform SSE stream to plain text stream
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
     
     const stream = new ReadableStream({
-        async start(controller) {
-            const reader = response.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value);
-                // SSE format for streaming
-                const lines = chunk.split('\n').filter(line => line.trim() !== '');
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const json = JSON.parse(line.substring(6));
-                        if (json.choices && json.choices[0].delta.content) {
-                            controller.enqueue(new TextEncoder().encode(json.choices[0].delta.content));
-                        }
-                    }
+      async start(controller) {
+        const reader = response.body!.getReader();
+        let buffer = '';
+        
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed || !trimmed.startsWith('data: ')) continue;
+              
+              const data = trimmed.slice(6);
+              if (data === '[DONE]') continue;
+              
+              try {
+                const json = JSON.parse(data);
+                const content = json.choices?.[0]?.delta?.content;
+                if (content) {
+                  controller.enqueue(encoder.encode(content));
                 }
+              } catch {
+                // Skip unparseable lines
+              }
             }
-            controller.close();
-        },
+          }
+        } catch (e) {
+          console.error('Stream error:', e);
+        } finally {
+          controller.close();
+        }
+      },
     });
 
     return new Response(stream, {
-        headers: { 'Content-Type': 'text/plain' },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+      },
     });
 
   } catch (error) {
