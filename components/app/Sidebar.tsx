@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Eye, MessageSquare, FileText, BookOpen, Settings, Sun, Moon, Upload, Edit, Brain, Users } from 'lucide-react';
+import { Home, Eye, MessageSquare, FileText, BookOpen, Settings, Sun, Moon, Upload, Edit, Brain, Users, Zap, Shield, Target, Swords, Layers, Trophy, UserSearch, ClipboardList } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 const navItems = [
@@ -14,6 +14,17 @@ const navItems = [
   { href: '/app/scenarios', icon: FileText, label: 'Practice Scenarios' },
   { href: '/app/library', icon: BookOpen, label: 'Technique Library' },
   { href: '/app/admin', icon: Upload, label: 'Admin' },
+];
+
+const newFeatureItems = [
+  { href: '/app/quickfire', icon: Zap, label: 'Quick-Fire' },
+  { href: '/app/profiler', icon: UserSearch, label: 'Person Profiler' },
+  { href: '/app/scanner', icon: Shield, label: 'Defense Scanner' },
+  { href: '/app/journal', icon: ClipboardList, label: 'Field Reports' },
+  { href: '/app/missions', icon: Target, label: 'Daily Missions' },
+  { href: '/app/sparring', icon: Swords, label: 'Sparring' },
+  { href: '/app/stacking', icon: Layers, label: 'Technique Stacking' },
+  { href: '/app/score', icon: Trophy, label: 'Persuasion Score' },
 ];
 
 export function Sidebar() {
@@ -50,6 +61,27 @@ export function Sidebar() {
               </Link>
             ))}
           </nav>
+          <div className="mt-6 pt-4 border-t border-[#E5E2DB] dark:border-[#333333]">
+            <p className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-[#D4A017]">New Features</p>
+            <nav className="space-y-1">
+              {newFeatureItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors
+                    ${
+                      isActive(item.href)
+                        ? 'bg-[#D4A017] dark:bg-[#D4A017] text-[#0A0A0A] dark:text-[#0A0A0A]'
+                        : 'hover:bg-[#E5E2DB] dark:hover:bg-[#222222]'
+                    }
+                  `}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="font-medium text-sm">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
         <div className="pt-4 border-t border-[#E5E2DB] dark:border-[#333333]">
            <button
