@@ -103,29 +103,61 @@ function highlightText(original: string, tactics: Tactic[]): React.ReactNode[] {
 
 export default function ScannerPage() {
   const [text, setText] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [mode, setMode] = useState<'text' | 'image'>('text');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleScan = async () => {
-    if (!text.trim()) return;
+    if (mode === 'text' && !text.trim()) return;
+    if (mode === 'image' && !imageFile) return;
 
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const res = await fetch('/api/scanner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim() }),
-      });
+      let res: Response;
+
+      if (mode === 'image' && imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        res = await fetch('/api/scanner', { method: 'POST', body: formData });
+      } else {
+        res = await fetch('/api/scanner', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text.trim() }),
+        });
+      }
 
       if (!res.ok) {
-        throw new Error('Failed to scan text.');
+        throw new Error('Failed to scan.');
       }
 
       const data = await res.json();
+      if (data.extractedText) setText(data.extractedText);
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
@@ -137,6 +169,8 @@ export default function ScannerPage() {
   const handleReset = () => {
     setResult(null);
     setText('');
+    setImageFile(null);
+    setImagePreview(null);
     setError(null);
   };
 
@@ -153,17 +187,74 @@ export default function ScannerPage() {
 
       {!result && !isLoading && (
         <div className="space-y-4">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste any message, email, or sales pitch..."
-            className="w-full h-48 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-4 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors resize-none"
-            autoFocus
-          />
+          {/* Mode tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setMode('text')}
+              className={`flex-1 py-2 text-sm font-mono uppercase tracking-wider rounded-lg border transition-all ${
+                mode === 'text'
+                  ? 'bg-[#D4A017] text-[#0A0A0A] border-[#D4A017] font-bold'
+                  : 'bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#333] text-gray-500 dark:text-gray-400 hover:border-[#D4A017]'
+              }`}
+            >
+              Paste Text
+            </button>
+            <button
+              onClick={() => setMode('image')}
+              className={`flex-1 py-2 text-sm font-mono uppercase tracking-wider rounded-lg border transition-all ${
+                mode === 'image'
+                  ? 'bg-[#D4A017] text-[#0A0A0A] border-[#D4A017] font-bold'
+                  : 'bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#333] text-gray-500 dark:text-gray-400 hover:border-[#D4A017]'
+              }`}
+            >
+              Upload Screenshot
+            </button>
+          </div>
+
+          {mode === 'text' ? (
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Paste any message, email, or sales pitch..."
+              className="w-full h-48 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-4 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors resize-none"
+              autoFocus
+            />
+          ) : (
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('scanner-image-input')?.click()}
+              className={`h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                imagePreview
+                  ? 'border-green-500/50 bg-green-500/5'
+                  : 'border-gray-300 dark:border-[#444] hover:border-[#D4A017]'
+              }`}
+            >
+              <input
+                id="scanner-image-input"
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              {imagePreview ? (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={imagePreview} alt="Preview" className="max-h-28 rounded" />
+                  <span className="text-sm text-green-400 font-mono">{imageFile?.name}</span>
+                </div>
+              ) : (
+                <>
+                  <span className="text-3xl mb-2">📸</span>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Drop a screenshot here or click to browse</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">PNG, JPG, or WEBP</p>
+                </>
+              )}
+            </div>
+          )}
 
           <button
             onClick={handleScan}
-            disabled={!text.trim()}
+            disabled={mode === 'text' ? !text.trim() : !imageFile}
             className="w-full py-3 bg-[#D4A017] text-[#0A0A0A] font-mono font-bold uppercase tracking-wider rounded-lg hover:bg-[#E8B830] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             Scan for Manipulation

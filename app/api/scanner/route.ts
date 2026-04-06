@@ -79,15 +79,60 @@ Be thorough - find EVERY tactic. Even subtle ones. Rate the threat score based o
 
 export const maxDuration = 60;
 
+async function extractTextFromImage(base64Image: string): Promise<string> {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'HTTP-Referer': 'https://shadow-persuasion.vercel.app',
+      'X-Title': 'Shadow Persuasion',
+    },
+    body: JSON.stringify({
+      model: 'openai/gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Extract ALL text from this screenshot. Return only the text content, preserving the conversation structure. Include who said what if it\'s a conversation.' },
+            { type: 'image_url', image_url: { url: base64Image } },
+          ],
+        },
+      ],
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) throw new Error('Failed to extract text from image');
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
+    let textToScan = '';
+    let isImage = false;
 
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json(
-        { error: 'Text to scan is required.' },
-        { status: 400 }
-      );
+    const contentType = req.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+      // Image upload
+      const formData = await req.formData();
+      const file = formData.get('image') as File | null;
+      if (!file) {
+        return NextResponse.json({ error: 'Image file is required.' }, { status: 400 });
+      }
+      const bytes = await file.arrayBuffer();
+      const base64 = `data:${file.type};base64,${Buffer.from(bytes).toString('base64')}`;
+      textToScan = await extractTextFromImage(base64);
+      isImage = true;
+    } else {
+      // Text input
+      const { text } = await req.json();
+      if (!text || typeof text !== 'string') {
+        return NextResponse.json({ error: 'Text to scan is required.' }, { status: 400 });
+      }
+      textToScan = text;
     }
 
     const knowledgeContext = await searchKnowledge();
@@ -104,7 +149,7 @@ export async function POST(req: NextRequest) {
         model: 'openai/gpt-4o',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT + knowledgeContext },
-          { role: 'user', content: `Analyze this text for manipulation tactics:\n\n${text}` },
+          { role: 'user', content: `Analyze this text for manipulation tactics:\n\n${textToScan}` },
         ],
         response_format: { type: 'json_object' },
         temperature: 0.3,
@@ -126,6 +171,10 @@ export async function POST(req: NextRequest) {
     }
 
     const parsed = JSON.parse(content);
+    // Include extracted text so the frontend can display it for image uploads
+    if (isImage) {
+      parsed.extractedText = textToScan;
+    }
     return NextResponse.json(parsed);
   } catch (error) {
     console.error('[SCANNER API] Error:', error);
