@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Eye, MessageSquare, FileText, BookOpen, Upload, Edit, Brain, Zap, Shield, Target, Swords, Layers, Trophy, UserSearch, ClipboardList, LogOut } from 'lucide-react';
+import { Home, Eye, MessageSquare, FileText, BookOpen, Upload, Edit, Brain, Zap, Shield, Target, Swords, Layers, Trophy, UserSearch, ClipboardList, LogOut, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/lib/auth-context';
 
 const ADMIN_EMAILS = ['ybyalik@gmail.com'];
@@ -30,6 +31,7 @@ const newFeatureItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
 
   const isActive = (href: string) => {
@@ -39,7 +41,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-[260px] bg-[#1A1A1A] p-4 border-r border-[#333333]">
+      <aside className="hidden md:flex flex-col w-[260px] bg-[#F5F2EB] dark:bg-[#1A1A1A] p-4 border-r border-[#E5E2DB] dark:border-[#333333]">
         <div className="flex-1">
           <div className="mb-8">
             <h1 className="text-xl font-bold text-center font-mono tracking-wider">SHADOW.OPS</h1>
@@ -112,6 +114,13 @@ export function Sidebar() {
                <span className="text-sm truncate text-[#888888]">{user.displayName || user.email}</span>
              </div>
            )}
+           <button
+             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+             className="w-full flex items-center justify-center space-x-3 px-3 py-2 rounded-lg hover:bg-[#222222] dark:hover:bg-[#222222] hover:bg-[#E5E2DB] transition-colors"
+           >
+             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+             <span className="font-medium">Toggle Theme</span>
+           </button>
            <button
              onClick={signOut}
              className="w-full flex items-center justify-center space-x-3 px-3 py-2 rounded-lg hover:bg-[#222222] transition-colors text-red-400 hover:text-red-300"
