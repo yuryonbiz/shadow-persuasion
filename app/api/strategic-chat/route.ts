@@ -93,10 +93,39 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, goal, goalTitle } = await req.json();
+    const { messages, goal, goalTitle, session_id } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'No messages provided.' }, { status: 400 });
+    }
+
+    // Resolve or create session for persistence
+    let activeSessionId = session_id;
+    if (!activeSessionId) {
+      try {
+        const { data: newSession } = await supabase
+          .from('chat_sessions')
+          .insert({
+            title: goalTitle || 'Strategic Session',
+            goal: goal || null,
+            goal_title: goalTitle || null,
+            session_type: 'strategic',
+          })
+          .select('id')
+          .single();
+        activeSessionId = newSession?.id;
+      } catch (e) {
+        console.error('Failed to create strategic session:', e);
+      }
+    }
+
+    // Save user message
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
+    if (activeSessionId && lastUserMsg) {
+      supabase
+        .from('chat_messages')
+        .insert({ session_id: activeSessionId, role: 'user', content: lastUserMsg.content })
+        .then(({ error }) => { if (error) console.error('Save user msg error:', error); });
     }
 
     // Get the latest user message for knowledge search
@@ -140,12 +169,65 @@ Tailor all advice and tactics specifically to support this objective. Consider t
       return NextResponse.json({ error: 'AI service error' }, { status: 502 });
     }
 
-    // Return the streaming response
-    return new Response(response.body, {
+    // Tee stream to persist assistant response
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    let fullAssistantContent = '';
+
+    const transformStream = new TransformStream({
+      transform(chunk, controller) {
+        const text = decoder.decode(chunk, { stream: true });
+        fullAssistantContent += text;
+        controller.enqueue(chunk);
+      },
+      flush() {
+        // Save assistant message after stream completes
+        if (activeSessionId && fullAssistantContent) {
+          // Extract text content from SSE format
+          let plainContent = '';
+          const lines = fullAssistantContent.split('\n');
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const json = JSON.parse(data);
+              const content = json.choices?.[0]?.delta?.content;
+              if (content) plainContent += content;
+            } catch {}
+          }
+          if (plainContent) {
+            // Strip guidance metadata for clean storage
+            const cleanContent = plainContent.replace(/<!--GUIDANCE:[\s\S]*?-->/, '').trim();
+            supabase
+              .from('chat_messages')
+              .insert({
+                session_id: activeSessionId,
+                role: 'assistant',
+                content: cleanContent,
+                metadata: {},
+              })
+              .then(({ error }) => { if (error) console.error('Save strategic assistant msg error:', error); });
+
+            supabase
+              .from('chat_sessions')
+              .update({ updated_at: new Date().toISOString() })
+              .eq('id', activeSessionId)
+              .then(() => {});
+          }
+        }
+      },
+    });
+
+    const readableStream = response.body!.pipeThrough(transformStream);
+
+    return new Response(readableStream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
+        ...(activeSessionId ? { 'X-Session-Id': activeSessionId } : {}),
       },
     });
 

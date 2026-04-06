@@ -32,10 +32,10 @@ async function getEmbedding(text: string): Promise<number[]> {
   }
 }
 
-// Search knowledge base for conversation analysis techniques
-async function searchConversationKnowledge(): Promise<string> {
+// Search knowledge base using a query derived from conversation content
+async function searchConversationKnowledge(query: string): Promise<string> {
   try {
-    const embedding = await getEmbedding('conversation analysis power dynamics influence techniques psychological patterns');
+    const embedding = await getEmbedding(query);
     if (embedding.length === 0) return '';
 
     const { data, error } = await supabase.rpc('match_chunks', {
@@ -46,7 +46,7 @@ async function searchConversationKnowledge(): Promise<string> {
 
     if (error || !data || data.length === 0) return '';
 
-    const context = data.map((chunk: any) => 
+    const context = data.map((chunk: any) =>
       `[${chunk.book_title} by ${chunk.author} - ${chunk.technique_name}]\n${chunk.content}`
     ).join('\n\n---\n\n');
 
@@ -73,10 +73,44 @@ export async function POST(req: NextRequest) {
     const imageBase64 = Buffer.from(imageBuffer).toString('base64');
     const imageDataUrl = `data:${image.type};base64,${imageBase64}`;
 
-    // Get relevant knowledge for conversation analysis
-    const knowledgeContext = await searchConversationKnowledge();
+    // PASS 1: Ask the LLM to summarize the conversation from the image
+    const summaryResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://shadow-persuasion.vercel.app',
+        'X-Title': 'Shadow Persuasion',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-4o',
+        messages: [
+          { role: 'system', content: 'You are a conversation analyst. Provide a brief text summary of the conversation in this screenshot: who is speaking, what they said, what the dynamic is, and what influence or persuasion techniques (if any) are being used. Keep it under 300 words.' },
+          {
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: imageDataUrl } },
+              { type: 'text', text: 'Summarize this conversation screenshot.' },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!summaryResponse.ok) {
+      const errorText = await summaryResponse.text();
+      console.error('OpenRouter summary error:', summaryResponse.status, errorText);
+      return NextResponse.json({ error: 'AI service error' }, { status: 502 });
+    }
+
+    const summaryData = await summaryResponse.json();
+    const conversationSummary = summaryData.choices[0].message.content;
+
+    // Use the summary to search for relevant knowledge base techniques
+    const knowledgeContext = await searchConversationKnowledge(conversationSummary);
     const enhancedPrompt = DECODE_SYSTEM_PROMPT + knowledgeContext;
 
+    // PASS 2: Full analysis with image + RAG context
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -87,6 +121,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o',
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: enhancedPrompt },
           {

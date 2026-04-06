@@ -107,8 +107,11 @@ export async function POST(req: NextRequest) {
       : '';
 
     // Search knowledge base for relevant techniques
-    const knowledgeContext = await searchKnowledge(message);
-    const enhancedPrompt = REWRITE_SYSTEM_PROMPT + knowledgeContext;
+    const knowledgeContext = await searchKnowledge(message + (goal ? ` ${goal}` : ''));
+    const goalInstruction = goal
+      ? `\n\nIMPORTANT: The user's primary goal is "${goal}". Prioritize and emphasize this goal across ALL rewrite versions. Each version should be optimized to support "${goal}" while still applying its respective category strategy. The best version for achieving "${goal}" should be listed first.`
+      : '';
+    const enhancedPrompt = REWRITE_SYSTEM_PROMPT + goalInstruction + knowledgeContext;
 
     console.log('[REWRITE API] Calling OpenRouter with model: openai/gpt-4o');
     
@@ -122,11 +125,12 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o',
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: enhancedPrompt },
-          { 
-            role: 'user', 
-            content: `Rewrite this message for maximum psychological impact: "${message}"\n\n${contextualPrompt}` 
+          {
+            role: 'user',
+            content: `Rewrite this message for maximum psychological impact: "${message}"\n\n${contextualPrompt}`
           },
         ],
         stream: false, // Explicitly disable streaming

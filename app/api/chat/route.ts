@@ -67,7 +67,7 @@ async function searchKnowledge(query: string, limit: number = 5): Promise<Search
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages, session_id } = await req.json();
     const recentMessages = messages.slice(-10);
     
     // Get the latest user message for RAG search
@@ -121,6 +121,33 @@ ${ragContext}`;
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
     
+    // Resolve or create session for persistence
+    let activeSessionId = session_id;
+    if (!activeSessionId) {
+      try {
+        const firstUserMsg = recentMessages.find((m: any) => m.role === 'user');
+        const title = firstUserMsg?.content?.slice(0, 80) || 'New Chat';
+        const { data: newSession } = await supabase
+          .from('chat_sessions')
+          .insert({ title, session_type: 'general' })
+          .select('id')
+          .single();
+        activeSessionId = newSession?.id;
+      } catch (e) {
+        console.error('Failed to create session:', e);
+      }
+    }
+
+    // Save user message
+    if (activeSessionId && lastUserMessage) {
+      supabase
+        .from('chat_messages')
+        .insert({ session_id: activeSessionId, role: 'user', content: lastUserMessage.content })
+        .then(({ error }) => { if (error) console.error('Save user msg error:', error); });
+    }
+
+    let fullAssistantContent = '';
+
     const stream = new ReadableStream({
       async start(controller) {
         const reader = response.body!.getReader();
@@ -140,7 +167,10 @@ ${ragContext}`;
               try {
                 const json = JSON.parse(data);
                 const content = json.choices?.[0]?.delta?.content;
-                if (content) controller.enqueue(encoder.encode(content));
+                if (content) {
+                  fullAssistantContent += content;
+                  controller.enqueue(encoder.encode(content));
+                }
               } catch {}
             }
           }
@@ -152,12 +182,36 @@ ${ragContext}`;
             controller.enqueue(encoder.encode(`\n\n<!--SOURCES:${JSON.stringify(ragResult.sources)}-->`));
           }
           controller.close();
+
+          // Save assistant message to DB
+          if (activeSessionId && fullAssistantContent) {
+            const cleanContent = fullAssistantContent.replace(/\n\n<!--SOURCES:.*?-->/, '');
+            supabase
+              .from('chat_messages')
+              .insert({
+                session_id: activeSessionId,
+                role: 'assistant',
+                content: cleanContent,
+                metadata: ragResult.sources.length > 0 ? { sources: ragResult.sources } : {},
+              })
+              .then(({ error }) => { if (error) console.error('Save assistant msg error:', error); });
+
+            supabase
+              .from('chat_sessions')
+              .update({ updated_at: new Date().toISOString() })
+              .eq('id', activeSessionId)
+              .then(() => {});
+          }
         }
       },
     });
 
     return new Response(stream, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        ...(activeSessionId ? { 'X-Session-Id': activeSessionId } : {}),
+      },
     });
 
   } catch (error) {

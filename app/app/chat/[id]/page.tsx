@@ -27,10 +27,26 @@ export default function ChatPage({ params }: { params: { id: string } }) {
     scrollToBottom();
   }, [messages]);
   
-  // A mock for fetching initial messages (if any)
+  const [sessionId, setSessionId] = useState<string | null>(params.id !== 'new' ? params.id : null);
+
+  // Load existing messages from DB
   useEffect(() => {
     if (params.id !== 'new') {
-        // Fetch existing messages for params.id
+      fetch(`/api/conversations/messages?session_id=${params.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.messages && data.messages.length > 0) {
+            setMessages(
+              data.messages.map((m: any) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                sources: m.metadata?.sources || undefined,
+              }))
+            );
+          }
+        })
+        .catch(e => console.error('Failed to load messages:', e));
     }
   }, [params.id]);
 
@@ -44,8 +60,14 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: [...messages, userMessage] }),
+          body: JSON.stringify({ messages: [...messages, userMessage], session_id: sessionId }),
       });
+
+      // Track session id from response for new chats
+      const returnedSessionId = response.headers.get('X-Session-Id');
+      if (returnedSessionId && !sessionId) {
+        setSessionId(returnedSessionId);
+      }
 
       if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

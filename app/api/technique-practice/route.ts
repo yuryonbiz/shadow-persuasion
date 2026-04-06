@@ -120,11 +120,12 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o',
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: enhancedPrompt },
-          { 
-            role: 'user', 
-            content: `Create interactive practice scenarios for the technique: "${techniqueName}"\n\nDescription: ${description}\n\nGenerate 3-4 realistic scenarios that test proper application of this technique in different contexts. Include common mistakes and optimal approaches with detailed explanations.` 
+          {
+            role: 'user',
+            content: `Create interactive practice scenarios for the technique: "${techniqueName}"\n\nDescription: ${description}\n\nGenerate 3-4 realistic scenarios that test proper application of this technique in different contexts. Include common mistakes and optimal approaches with detailed explanations.`
           },
         ],
         stream: false,
