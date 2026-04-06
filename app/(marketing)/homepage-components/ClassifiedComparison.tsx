@@ -1,71 +1,87 @@
 'use client';
 
-import styles from './ClassifiedComparison.module.css';
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 const features = [
-    { name: "Basic Influence Guide", civilian: true, operator: true },
-    { name: "AI Operator Console", civilian: false, operator: true },
-    { name: "Visual Intelligence", civilian: false, operator: true },
-    { name: "50+ Dark Patterns", civilian: false, operator: true },
-    { name: "Negotiation Simulator", civilian: false, operator: true },
-    { name: "Script Generator", civilian: false, operator: true },
-    { name: "Psychological Profiling", civilian: false, operator: true },
-    { name: "Private Community", civilian: false, operator: true },
+  { name: "Basic Influence Guide", civilian: true, operator: true },
+  { name: "AI Operator Console", civilian: false, operator: true },
+  { name: "Visual Intelligence", civilian: false, operator: true },
+  { name: "50+ Dark Patterns", civilian: false, operator: true },
+  { name: "Negotiation Simulator", civilian: false, operator: true },
+  { name: "Script Generator", civilian: false, operator: true },
+  { name: "Psychological Profiling", civilian: false, operator: true },
+  { name: "Private Community", civilian: false, operator: true },
 ];
 
-const Checkmark = () => <span className="text-green-600 font-bold">✓</span>;
-const Redacted = () => <span className="bg-black text-black select-none">██████</span>
+const Checkmark = ({ gold }: { gold?: boolean }) => (
+  <span className={`font-bold text-lg ${gold ? 'text-[#D4A017]' : 'text-gray-500'}`}>&#10003;</span>
+);
+const Redacted = () => <span className="bg-gray-600 text-gray-600 select-none text-sm font-mono">DENIED</span>;
 
 const ClassifiedComparison = () => {
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.15 });
+
   return (
-    <section className={`bg-[#0D0D0D] w-full ${styles.container}`}>
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+    <section ref={ref} className="bg-[#0D0D0D] w-full py-20 px-6 md:px-12">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-            <h2 className="font-mono text-sm uppercase tracking-widest text-gray-400">
-                DOCUMENT COMPARISON
-            </h2>
-            <p className="text-3xl mt-2 text-white">Access Levels</p>
+          <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500 mb-2">
+            DOCUMENT COMPARISON
+          </h2>
+          <p className="text-3xl md:text-4xl font-bold text-white">Access Levels</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-2 border-gray-400 bg-[#F4ECD8] shadow-lg p-6 sm:p-8">
-            {/* Civilian Access */}
-            <div className="border border-dashed border-gray-400 p-6">
-                <h3 className="text-2xl text-center font-bold">CIVILIAN ACCESS</h3>
-                <p className="text-center font-mono text-lg text-gray-600 mb-6">FREE</p>
-                <ul className="space-y-4">
-                    {features.map(f => (
-                        <li key={f.name} className="flex justify-between items-center text-lg">
-                            <span>{f.name}</span>
-                            {f.civilian ? <Checkmark/> : <div className={styles.redacted}><Redacted/></div>}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Operator Access */}
-            <div className="border-2 border-amber-500 p-6 bg-[#fffef7] shadow-2xl relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-mono text-xs uppercase px-2 py-1 font-bold">RECOMMENDED</div>
-                <h3 className="text-2xl text-center font-bold text-amber-900">OPERATOR ACCESS</h3>
-                <p className="text-center font-mono text-lg mb-6">
-                    <span className="line-through text-gray-500">$97</span>
-                    <span className="text-amber-700 font-bold"> $47/MO</span>
-                </p>
-                <ul className="space-y-4">
-                    {features.map(f => (
-                        <li key={f.name} className="flex justify-between items-center text-lg">
-                            <span>{f.name}</span>
-                            {f.operator ? <Checkmark/> : <Redacted/>}
-                        </li>
-                    ))}
-                </ul>
-                 <button className='w-full mt-8 bg-black text-white font-mono uppercase px-4 py-3 text-lg hover:bg-amber-700 transition-colors duration-300'>
-                      Activate Operator Access
-                 </button>
-            </div>
+        {/* Table header */}
+        <div className="grid grid-cols-[1fr_120px_120px] md:grid-cols-[1fr_160px_160px] items-end gap-0 mb-0">
+          <div />
+          <div className="text-center py-3 border-b border-white/10">
+            <p className="font-mono text-xs uppercase tracking-wider text-gray-500">Civilian</p>
+            <p className="text-white font-mono text-lg mt-1">FREE</p>
+          </div>
+          <div className="text-center py-3 border-b-2 border-[#D4A017] bg-[#D4A017]/5 rounded-t-lg">
+            <p className="font-mono text-xs uppercase tracking-wider text-[#D4A017]">Operator</p>
+            <p className="text-[#D4A017] font-bold font-mono text-lg mt-1">$99/MO</p>
+          </div>
         </div>
+
+        {/* Feature rows */}
+        {features.map((f, i) => (
+          <motion.div
+            key={f.name}
+            className="grid grid-cols-[1fr_120px_120px] md:grid-cols-[1fr_160px_160px] items-center border-b border-white/5"
+            initial={{ opacity: 0, y: 10 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.3, delay: i * 0.08 }}
+          >
+            <p className="text-gray-300 py-4 text-sm md:text-base">{f.name}</p>
+            <div className="text-center py-4">
+              {f.civilian ? <Checkmark /> : <Redacted />}
+            </div>
+            <div className="text-center py-4 bg-[#D4A017]/5">
+              {f.operator ? <Checkmark gold /> : <Redacted />}
+            </div>
+          </motion.div>
+        ))}
+
+        {/* CTA row */}
+        <motion.div
+          className="grid grid-cols-[1fr_120px_120px] md:grid-cols-[1fr_160px_160px] items-center mt-0"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.5, delay: features.length * 0.08 + 0.2 }}
+        >
+          <div />
+          <div />
+          <div className="py-4 bg-[#D4A017]/5 flex justify-center rounded-b-lg">
+            <button className="bg-[#D4A017] hover:bg-[#b88913] text-black font-bold font-mono uppercase px-4 py-2.5 text-sm tracking-wider rounded transition-colors duration-300">
+              Get Access
+            </button>
+          </div>
+        </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
 
 export default ClassifiedComparison;
