@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Eye, MessageSquare, FileText, BookOpen, Upload, Edit, Brain, Zap, Shield, Target, Swords, Layers, Trophy, UserSearch, ClipboardList, LogOut, Sun, Moon, ChevronUp } from 'lucide-react';
+import { Home, Search, MessageSquare, Edit, Users, Swords, ClipboardList, BookOpen, Trophy, Upload, LogOut, Sun, Moon, ChevronUp } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/lib/auth-context';
 
@@ -11,22 +11,13 @@ const ADMIN_EMAILS = ['ybyalik@gmail.com'];
 
 const navItems = [
   { href: '/app', icon: Home, label: 'Dashboard' },
-  { href: '/app/decode', icon: Eye, label: 'Conversation Intelligence' },
+  { href: '/app/analyze', icon: Search, label: 'Analyze' },
   { href: '/app/chat', icon: MessageSquare, label: 'Strategic Coach' },
   { href: '/app/rewrite', icon: Edit, label: 'Message Optimizer' },
-  { href: '/app/conversations', icon: Brain, label: 'Relationship Memory' },
-  { href: '/app/scenarios', icon: FileText, label: 'Practice Scenarios' },
-  { href: '/app/library', icon: BookOpen, label: 'Technique Library' },
-];
-
-const newFeatureItems = [
-  { href: '/app/quickfire', icon: Zap, label: 'Quick-Fire' },
-  { href: '/app/profiler', icon: UserSearch, label: 'Person Profiler' },
-  { href: '/app/scanner', icon: Shield, label: 'Defense Scanner' },
-  { href: '/app/journal', icon: ClipboardList, label: 'Field Reports' },
-  { href: '/app/missions', icon: Target, label: 'Daily Missions' },
-  { href: '/app/sparring', icon: Swords, label: 'Sparring' },
-  { href: '/app/stacking', icon: Layers, label: 'Technique Stacking' },
+  { href: '/app/people', icon: Users, label: 'People' },
+  { href: '/app/training', icon: Swords, label: 'Training Arena' },
+  { href: '/app/field-ops', icon: ClipboardList, label: 'Field Ops' },
+  { href: '/app/techniques', icon: BookOpen, label: 'Techniques' },
   { href: '/app/score', icon: Trophy, label: 'Persuasion Score' },
 ];
 
@@ -37,9 +28,8 @@ export function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
-  // Close menu on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -79,22 +69,10 @@ export function Sidebar() {
               </Link>
             )}
           </nav>
-          <div className="mt-5 pt-4 border-t border-gray-200 dark:border-[#333333]">
-            <p className="px-3 mb-2 text-xs font-bold uppercase tracking-widest text-[#D4A017]">New Features</p>
-            <nav className="space-y-1">
-              {newFeatureItems.map((item) => (
-                <Link key={item.label} href={item.href} className={linkClass(item.href)}>
-                  <item.icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
         </div>
 
         {/* Compact user footer with popup menu */}
         <div className="relative pt-3 border-t border-gray-200 dark:border-[#333333]" ref={menuRef}>
-          {/* Popup menu */}
           {menuOpen && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-[#222] border border-gray-200 dark:border-[#444] rounded-lg shadow-lg overflow-hidden">
               <button
@@ -114,7 +92,6 @@ export function Sidebar() {
             </div>
           )}
 
-          {/* User bar */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#E5E2DB] dark:hover:bg-[#222] transition-colors"

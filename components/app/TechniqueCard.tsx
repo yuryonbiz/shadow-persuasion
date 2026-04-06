@@ -8,6 +8,7 @@ type SRStatus = 'not-started' | 'learning' | 'due' | 'mastered';
 
 interface TechniqueCardProps {
   technique: Technique;
+  href?: string;
   srStatus?: SRStatus;
 }
 
@@ -25,9 +26,9 @@ const STATUS_LABELS: Record<SRStatus, string> = {
   'not-started': 'Not started',
 };
 
-export function TechniqueCard({ technique, srStatus }: TechniqueCardProps) {
+export function TechniqueCard({ technique, href, srStatus }: TechniqueCardProps) {
   return (
-    <Link href={`/app/library/${technique.id}`} className="block p-5 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333333] transition-all hover:border-[#D4A017] hover:-translate-y-1">
+    <Link href={href || `/app/library/${technique.id}`} className="block p-5 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333333] transition-all hover:border-[#D4A017] hover:-translate-y-1">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono uppercase bg-[#D4A017]/20 text-[#D4A017] px-2 py-1 rounded-full">{technique.category}</span>
