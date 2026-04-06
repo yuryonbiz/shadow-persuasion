@@ -14,8 +14,9 @@ type ActivityEntry = {
 };
 
 type MissionsData = {
-  completed?: { id: string; completedAt: string; techniqueId?: string }[];
-  streak?: number;
+  completions?: { date: string; missionId: string; xpEarned?: number; techniqueId?: string }[];
+  currentStreak?: number;
+  totalXP?: number;
 };
 
 type JournalEntry = {
@@ -243,13 +244,15 @@ export default function ScorePage() {
   });
 
   const computeScores = useCallback(() => {
-    const missions: MissionsData = safeParse('shadow-missions-data', { completed: [], streak: 0 });
-    const journal: JournalEntry[] = safeParse('shadow-journal-data', []);
+    const missions: MissionsData = safeParse('shadow-missions-data', { completions: [], currentStreak: 0, totalXP: 0 });
+    const journalRaw = safeParse<JournalEntry[] | { reports?: JournalEntry[] }>('shadow-journal-data', []);
+    const journal: JournalEntry[] = Array.isArray(journalRaw) ? journalRaw : (journalRaw.reports ?? []);
     const sparring: SparringSession[] = safeParse('shadow-sparring-data', []);
-    const profiles: ProfilerEntry[] = safeParse('shadow-profiler-data', []);
+    const profilerData = safeParse<{ profiles?: ProfilerEntry[] } | ProfilerEntry[]>('shadow-profiler-data', { profiles: [] });
+    const profiles: ProfilerEntry[] = Array.isArray(profilerData) ? profilerData : (profilerData.profiles ?? []);
 
-    const completedMissions = missions.completed ?? [];
-    const streak = missions.streak ?? 0;
+    const completedMissions = missions.completions ?? [];
+    const streak = missions.currentStreak ?? 0;
 
     // ── Calculate total XP ──
     let xp = 0;
@@ -265,9 +268,9 @@ export default function ScorePage() {
 
     // Missions: +5 XP each
     for (const m of completedMissions) {
-      const pts = 5;
+      const pts = m.xpEarned ?? 5;
       xp += pts;
-      feed.push({ label: 'Completed Daily Mission', xp: pts, ts: new Date(m.completedAt).getTime() });
+      feed.push({ label: 'Completed Daily Mission', xp: pts, ts: new Date(m.date).getTime() });
       if (m.techniqueId && TECHNIQUE_CATEGORY_MAP[m.techniqueId]) {
         subXP[TECHNIQUE_CATEGORY_MAP[m.techniqueId]] += pts;
       }
@@ -359,9 +362,9 @@ export default function ScorePage() {
     // Strongest / weakest
     const subEntries = Object.entries(normalizedSub) as [SubScoreKey, number][];
     const sorted = [...subEntries].sort((a, b) => b[1] - a[1]);
-    const strongest = sorted[0][1] > 0 ? SUB_SCORE_META.find((m) => m.key === sorted[0][0])!.label : 'None yet';
+    const strongest = sorted[0][1] > 0 ? (SUB_SCORE_META.find((m) => m.key === sorted[0][0])?.label ?? 'None yet') : 'None yet';
     const weakest = sorted[sorted.length - 1][1] < 100
-      ? SUB_SCORE_META.find((m) => m.key === sorted[sorted.length - 1][0])!.label
+      ? (SUB_SCORE_META.find((m) => m.key === sorted[sorted.length - 1][0])?.label ?? 'None yet')
       : 'None yet';
 
     const recommendations: Record<SubScoreKey, string> = {
