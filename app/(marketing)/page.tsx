@@ -4,6 +4,7 @@ import { Special_Elite } from 'next/font/google';
 import CoverPage from './homepage-components/CoverPage';
 import ExecutiveSummary from './homepage-components/ExecutiveSummary';
 import { SystemCapabilities } from './homepage-components/SystemCapabilities';
+import AppPreview from './homepage-components/AppPreview';
 import ScenarioSimulator from './homepage-components/ScenarioSimulator';
 import ProgressionPath from './homepage-components/ProgressionPath';
 import DarkPatternRolodex from './homepage-components/DarkPatternRolodex';
@@ -34,6 +35,8 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <SystemCapabilities />
       </div>
+
+      <AppPreview />
 
       <LiveAnalysisDemo />
       <DossierAnalysis />
