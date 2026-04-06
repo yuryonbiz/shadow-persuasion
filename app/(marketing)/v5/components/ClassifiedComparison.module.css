@@ -1,0 +1,17 @@
+.container:hover .redacted span {
+    animation: flicker 0.8s infinite alternate;
+  }
+  
+  @keyframes flicker {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+      color: transparent;
+    }
+    75% {
+        color: transparent;
+    }
+  }
+  
