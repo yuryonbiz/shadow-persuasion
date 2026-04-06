@@ -44,7 +44,7 @@ export function Sidebar() {
       <aside className="hidden md:flex flex-col w-[260px] bg-[#F5F2EB] dark:bg-[#1A1A1A] p-4 border-r border-[#E5E2DB] dark:border-[#333333]">
         <div className="flex-1">
           <div className="mb-8">
-            <h1 className="text-xl font-bold text-center font-mono tracking-wider">SHADOW.OPS</h1>
+            <h1 className="text-xl font-bold text-center font-mono tracking-wider text-white dark:text-white">SHADOW.OPS</h1>
           </div>
           <nav className="space-y-2">
             {navItems.map((item) => (
@@ -55,7 +55,7 @@ export function Sidebar() {
                   ${
                     isActive(item.href)
                       ? 'bg-[#D4A017] text-[#0A0A0A]'
-                      : 'hover:bg-[#222222]'
+                      : 'text-gray-300 hover:bg-[#222222] dark:hover:bg-[#222222] hover:bg-[#E5E2DB]'
                   }
                 `}
               >
@@ -70,7 +70,7 @@ export function Sidebar() {
                   ${
                     isActive('/app/admin')
                       ? 'bg-[#D4A017] text-[#0A0A0A]'
-                      : 'hover:bg-[#222222]'
+                      : 'text-gray-300 hover:bg-[#222222] dark:hover:bg-[#222222] hover:bg-[#E5E2DB]'
                   }
                 `}
               >
