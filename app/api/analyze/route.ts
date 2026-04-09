@@ -80,15 +80,12 @@ You MUST respond with valid JSON in this exact format:
   "techniques_identified": ["Array", "of", "technique", "names", "detected"]
 }
 
-CRITICAL RULES — YOU MUST FOLLOW ALL OF THESE:
-1. EVERY field in the JSON schema above is REQUIRED. Never omit any field.
-2. Always provide exactly 4 responseOptions covering different strategic approaches.
-3. For tactics array: look for EVERY influence or persuasion technique being used, even subtle ones like strategic questions, framing, anchoring, social proof, etc. Most conversations contain at least 1-2 tactics. Only return an empty array if the message is purely factual with zero persuasive intent.
-4. threatScore: 1-3 = subtle influence only, 4-6 = moderate tactics, 7-10 = heavy manipulation. Even casual conversations with light persuasion should score 1-3, not 0.
-5. counterScript: Always provide this, even if manipulation is low. Frame it as "how to maintain your position" rather than just "neutralize manipulation."
-6. techniques_identified: Always identify at least 1-2 communication techniques being used.
-7. Be thorough and actionable. Response messages must be copy-pasteable and sound natural.
-8. overallAssessment must be at least 2-3 sentences covering both the strategic landscape and any influence dynamics.`;
+Important rules:
+- Always provide exactly 4 responseOptions covering different strategic approaches
+- For tactics array: find EVERY manipulation tactic, even subtle ones. If no manipulation is present, return an empty array
+- threatScore: 0-3 = low/no manipulation, 4-6 = moderate, 7-10 = heavy manipulation
+- Be thorough and actionable. Response messages must be copy-pasteable
+- Focus on: Cialdini's principles, NLP patterns, power dynamics, frame control, emotional intelligence`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -159,7 +156,7 @@ export async function POST(req: NextRequest) {
           { role: 'system', content: enhancedPrompt },
           { role: 'user', content: userContent },
         ],
-        temperature: 0.15,
+        temperature: 0.3,
         max_tokens: 3000,
       }),
     });
