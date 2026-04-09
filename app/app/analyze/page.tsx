@@ -1,8 +1,38 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check } from 'lucide-react';
+import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check, Clock, Trash2, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+
+// ─── History Types ──────────────────────────────────────────────────────────
+
+interface HistoryItem {
+  id: string;
+  input_text: string;
+  input_type: string;
+  threat_score: number;
+  power_yours: number;
+  power_theirs: number;
+  tactics_count: number;
+  person_id: string | null;
+  created_at: string;
+  full_result: AnalysisResult;
+}
+
+function timeAgo(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString();
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -164,6 +194,12 @@ export default function AnalyzePage() {
   const [savingToProfile, setSavingToProfile] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
+  // Analysis history state
+  const [lastAnalysisId, setLastAnalysisId] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   const getHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await user?.getIdToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -186,6 +222,51 @@ export default function AnalyzePage() {
     };
     fetchPeople();
   }, [showSaveModal, getHeaders]);
+
+  // Fetch analysis history on mount and when user changes
+  const fetchHistory = useCallback(async () => {
+    if (!user) return;
+    setHistoryLoading(true);
+    try {
+      const headers = await getHeaders();
+      const res = await fetch('/api/analyze/history?limit=10', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data.items || []);
+      }
+    } catch (e) {
+      console.error('Failed to load history:', e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [user, getHeaders]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  const handleDeleteHistory = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const headers = await getHeaders();
+      const res = await fetch(`/api/analyze/history?id=${id}`, { method: 'DELETE', headers });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((item) => item.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete history item:', err);
+    }
+  };
+
+  const handleLoadFromHistory = (item: HistoryItem) => {
+    if (item.full_result) {
+      setResult(item.full_result);
+      setText(item.input_text || '');
+      setLastAnalysisId(item.id);
+      setError(null);
+      setSelectedResponse(null);
+    }
+  };
 
   const handleSaveToProfile = async () => {
     if (!result) return;
@@ -229,6 +310,14 @@ export default function AnalyzePage() {
         });
         if (res.ok) {
           setSaveToast(`Saved to ${person?.name || 'profile'}'s profile`);
+          // Link analysis history to this person
+          if (lastAnalysisId && selectedPersonId) {
+            fetch('/api/analyze/history', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...headers },
+              body: JSON.stringify({ id: lastAnalysisId, person_id: selectedPersonId }),
+            }).catch(console.error);
+          }
         } else {
           setSaveToast('Failed to save to profile');
         }
@@ -244,7 +333,16 @@ export default function AnalyzePage() {
           }),
         });
         if (res.ok) {
+          const newPerson = await res.json();
           setSaveToast(`Saved to ${newPersonName.trim()}'s profile`);
+          // Link analysis history to newly created person
+          if (lastAnalysisId && newPerson?.id) {
+            fetch('/api/analyze/history', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...headers },
+              body: JSON.stringify({ id: lastAnalysisId, person_id: newPerson.id }),
+            }).catch(console.error);
+          }
         } else {
           setSaveToast('Failed to create profile');
         }
@@ -317,8 +415,39 @@ export default function AnalyzePage() {
       }
 
       const data = await res.json();
+      const textToAnalyze = mode === 'image' && data.extractedText ? data.extractedText : text.trim();
       if (data.extractedText) setText(data.extractedText);
       setResult(data);
+
+      // Auto-save to history (fire and forget)
+      getHeaders().then((saveHeaders) => {
+        fetch('/api/analyze/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...saveHeaders },
+          body: JSON.stringify({
+            input_text: textToAnalyze,
+            input_type: mode,
+            threat_score: data.threatScore,
+            power_yours: data.powerDynamics?.yourPower,
+            power_theirs: data.powerDynamics?.theirPower,
+            tactics: data.tactics,
+            response_options: data.responseOptions,
+            communication_style: data.communicationStyle,
+            counter_script: data.counterScript,
+            overall_assessment: data.overallAssessment,
+            techniques_identified: data.techniques_identified,
+            full_result: data,
+          }),
+        })
+          .then((r) => r.json())
+          .then((saved) => {
+            if (saved?.id) {
+              setLastAnalysisId(saved.id);
+              fetchHistory(); // refresh history list
+            }
+          })
+          .catch(console.error);
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
     } finally {
@@ -333,6 +462,7 @@ export default function AnalyzePage() {
     setImagePreview(null);
     setError(null);
     setSelectedResponse(null);
+    setLastAnalysisId(null);
   };
 
   // Power meter sub-component
@@ -388,6 +518,76 @@ export default function AnalyzePage() {
           </div>
         </div>
       </header>
+
+      {/* Recent Analyses History */}
+      {!result && !isLoading && history.length > 0 && (
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-[#D4A017]" />
+              <span className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
+                Recent Analyses
+              </span>
+            </div>
+            {history.length > 3 && (
+              <button
+                onClick={() => setHistoryExpanded(!historyExpanded)}
+                className="flex items-center gap-1 text-xs text-[#D4A017] hover:text-[#E8B830] font-mono uppercase transition-colors"
+              >
+                {historyExpanded ? 'Show Less' : 'View All'}
+                <ChevronDown className={`h-3 w-3 transition-transform ${historyExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+          </div>
+          <div className="space-y-2">
+            {(historyExpanded ? history : history.slice(0, 3)).map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleLoadFromHistory(item)}
+                className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-lg cursor-pointer hover:border-[#D4A017] transition-all group"
+              >
+                {/* Threat score badge */}
+                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center font-mono font-bold text-sm ${
+                  item.threat_score <= 3 ? 'bg-green-500/20 text-green-400' :
+                  item.threat_score <= 6 ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                  {item.threat_score}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 dark:text-white truncate">
+                    {item.input_text ? item.input_text.slice(0, 80) : 'Image analysis'}
+                    {item.input_text && item.input_text.length > 80 ? '...' : ''}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(item.created_at)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {item.tactics_count} tactic{item.tactics_count !== 1 ? 's' : ''}
+                    </span>
+                    {item.input_type === 'image' && (
+                      <span className="text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-mono">IMG</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Delete button */}
+                <button
+                  onClick={(e) => handleDeleteHistory(item.id, e)}
+                  className="flex-shrink-0 p-1.5 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all rounded hover:bg-red-500/10"
+                  title="Delete"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+          {historyLoading && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2 font-mono">Loading...</p>
+          )}
+        </div>
+      )}
 
       {/* Input Area */}
       {!result && !isLoading && (
