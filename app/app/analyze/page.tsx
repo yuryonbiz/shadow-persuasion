@@ -131,7 +131,8 @@ function highlightText(original: string, tactics: Tactic[]): React.ReactNode[] {
     if (idx === -1) continue;
 
     if (idx > lastIndex) {
-      parts.push(original.slice(lastIndex, idx));
+      const segment = original.slice(lastIndex, idx);
+      parts.push(<span key={`text-${lastIndex}`} dangerouslySetInnerHTML={{ __html: renderMarkdown(segment) }} />);
     }
 
     parts.push(
@@ -156,7 +157,8 @@ function highlightText(original: string, tactics: Tactic[]): React.ReactNode[] {
   }
 
   if (lastIndex < original.length) {
-    parts.push(original.slice(lastIndex));
+    const segment = original.slice(lastIndex);
+    parts.push(<span key={`text-${lastIndex}`} dangerouslySetInnerHTML={{ __html: renderMarkdown(segment) }} />);
   }
 
   return parts;
@@ -1020,9 +1022,13 @@ export default function AnalyzePage() {
               <span className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold block mb-3">
                 {result.tactics.length > 0 ? 'Analyzed Text — Manipulation Highlighted' : 'Analyzed Text'}
               </span>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {result.tactics.length > 0 ? highlightText(text, result.tactics) : text}
-              </p>
+              {result.tactics.length > 0 ? (
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {highlightText(text, result.tactics)}
+                </p>
+              ) : (
+                <div className="text-gray-600 dark:text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }} />
+              )}
             </div>
           )}
 
@@ -1435,7 +1441,7 @@ export default function AnalyzePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-900 dark:text-white truncate">
-                    {item.input_text ? item.input_text.slice(0, 80) : 'Image analysis'}
+                    {item.input_text ? item.input_text.replace(/\*\*/g, '').replace(/^---.*---\s*/gm, '').trim().slice(0, 80) : 'Image analysis'}
                     {item.input_text && item.input_text.length > 80 ? '...' : ''}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
