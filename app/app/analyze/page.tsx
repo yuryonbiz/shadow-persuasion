@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check, Clock, Trash2, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check, Clock, Trash2, ChevronDown, Send, MessageCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 // ─── History Types ──────────────────────────────────────────────────────────
@@ -177,8 +177,8 @@ interface PersonProfile {
 export default function AnalyzePage() {
   const { user } = useAuth();
   const [text, setText] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [mode, setMode] = useState<'text' | 'image'>('text');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -200,10 +200,45 @@ export default function AnalyzePage() {
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  // Context form state
+  const [contextExpanded, setContextExpanded] = useState(false);
+  const [ctxRole, setCtxRole] = useState<'sender' | 'receiver' | 'observer' | ''>('');
+  const [ctxGoal, setCtxGoal] = useState('');
+  const [ctxGoalCustom, setCtxGoalCustom] = useState('');
+  const [ctxPersonId, setCtxPersonId] = useState('');
+  const [ctxPersonDesc, setCtxPersonDesc] = useState('');
+  const [ctxBackground, setCtxBackground] = useState('');
+  const [ctxPeopleProfiles, setCtxPeopleProfiles] = useState<PersonProfile[]>([]);
+
+  // Follow-up chat state
+  const [followUpExpanded, setFollowUpExpanded] = useState(false);
+  const [followUpMessages, setFollowUpMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [followUpInput, setFollowUpInput] = useState('');
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  const followUpEndRef = useRef<HTMLDivElement>(null);
+
   const getHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await user?.getIdToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [user]);
+
+  // Fetch people profiles for context form
+  useEffect(() => {
+    if (!contextExpanded || !user) return;
+    const fetchCtxPeople = async () => {
+      try {
+        const headers = await getHeaders();
+        const res = await fetch('/api/profiler/people', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setCtxPeopleProfiles(data.profiles || []);
+        }
+      } catch (e) {
+        console.error('Failed to load people for context:', e);
+      }
+    };
+    fetchCtxPeople();
+  }, [contextExpanded, user, getHeaders]);
 
   // Fetch people profiles when modal opens
   useEffect(() => {
@@ -359,23 +394,35 @@ export default function AnalyzePage() {
     }
   };
 
+  const addImageFiles = (files: File[]) => {
+    const imageOnly = files.filter(f => f.type.startsWith('image/'));
+    if (imageOnly.length === 0) return;
+    const remaining = 5 - imageFiles.length;
+    const toAdd = imageOnly.slice(0, remaining);
+    if (toAdd.length === 0) return;
+    setImageFiles(prev => [...prev, ...toAdd]);
+    toAdd.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => setImagePreviews(prev => [...prev, ev.target?.result as string]);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    addImageFiles(files);
+    e.target.value = '';
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    addImageFiles(files);
   };
 
   const handleCopy = async (text: string, index?: number) => {
@@ -388,7 +435,7 @@ export default function AnalyzePage() {
 
   const handleAnalyze = async () => {
     if (mode === 'text' && !text.trim()) return;
-    if (mode === 'image' && !imageFile) return;
+    if (mode === 'image' && imageFiles.length === 0) return;
 
     setIsLoading(true);
     setError(null);
@@ -397,16 +444,30 @@ export default function AnalyzePage() {
 
     try {
       let res: Response;
+      const headers = await getHeaders();
+      const resolvedGoal = ctxGoal === 'other' ? ctxGoalCustom : ctxGoal;
 
-      if (mode === 'image' && imageFile) {
+      if (mode === 'image' && imageFiles.length > 0) {
         const formData = new FormData();
-        formData.append('image', imageFile);
-        res = await fetch('/api/analyze', { method: 'POST', body: formData });
+        imageFiles.forEach((file, i) => formData.append(`image_${i}`, file));
+        if (ctxRole) formData.append('role', ctxRole);
+        if (resolvedGoal) formData.append('goal', resolvedGoal);
+        if (ctxPersonId) formData.append('personId', ctxPersonId);
+        if (ctxPersonDesc) formData.append('personContext', ctxPersonDesc);
+        if (ctxBackground) formData.append('backgroundContext', ctxBackground);
+        res = await fetch('/api/analyze', { method: 'POST', headers, body: formData });
       } else {
         res = await fetch('/api/analyze', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text.trim() }),
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({
+            text: text.trim(),
+            role: ctxRole || undefined,
+            goal: resolvedGoal || undefined,
+            personId: ctxPersonId || undefined,
+            personContext: ctxPersonDesc || undefined,
+            backgroundContext: ctxBackground || undefined,
+          }),
         });
       }
 
@@ -458,11 +519,91 @@ export default function AnalyzePage() {
   const handleReset = () => {
     setResult(null);
     setText('');
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
     setError(null);
     setSelectedResponse(null);
     setLastAnalysisId(null);
+    setFollowUpExpanded(false);
+    setFollowUpMessages([]);
+    setFollowUpInput('');
+  };
+
+  const handleFollowUp = async () => {
+    if (!followUpInput.trim() || !result || followUpLoading) return;
+    const userMsg = followUpInput.trim();
+    setFollowUpInput('');
+    setFollowUpMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setFollowUpLoading(true);
+
+    // Build context summary from analysis
+    const resolvedGoal = ctxGoal === 'other' ? ctxGoalCustom : ctxGoal;
+    const contextParts: string[] = [];
+    if (ctxRole) contextParts.push(`User's role: ${ctxRole}`);
+    if (resolvedGoal) contextParts.push(`Goal: ${resolvedGoal}`);
+    if (ctxBackground) contextParts.push(`Background: ${ctxBackground}`);
+
+    try {
+      const headers = await getHeaders();
+      const res = await fetch('/api/analyze/followup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify({
+          originalText: text,
+          analysisResult: {
+            overallAssessment: result.overallAssessment,
+            powerDynamics: result.powerDynamics,
+            communicationStyle: result.communicationStyle,
+            threatScore: result.threatScore,
+            tactics: result.tactics.map(t => ({ tactic: t.tactic, quote: t.quote, category: t.category })),
+            responseOptions: result.responseOptions.map(r => ({ type: r.type, message: r.message })),
+            techniques_identified: result.techniques_identified,
+          },
+          context: contextParts.join('. '),
+          messages: [...followUpMessages, { role: 'user', content: userMsg }],
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to get follow-up response');
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No response stream');
+
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+      // Add placeholder for streaming
+      setFollowUpMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          const data = trimmed.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              setFollowUpMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
+                return updated;
+              });
+            }
+          } catch {}
+        }
+      }
+    } catch (err) {
+      setFollowUpMessages(prev => [...prev.filter(m => m.content !== ''), { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]);
+    } finally {
+      setFollowUpLoading(false);
+      setTimeout(() => followUpEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
   };
 
   // Power meter sub-component
@@ -555,41 +696,166 @@ export default function AnalyzePage() {
               autoFocus
             />
           ) : (
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById('analyze-image-input')?.click()}
-              className={`h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                imagePreview
-                  ? 'border-green-500/50 bg-green-500/5'
-                  : 'border-gray-300 dark:border-[#444] hover:border-[#D4A017]'
-              }`}
-            >
-              <input
-                id="analyze-image-input"
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-              {imagePreview ? (
-                <div className="flex flex-col items-center gap-2">
-                  <img src={imagePreview} alt="Preview" className="max-h-28 rounded" />
-                  <span className="text-sm text-green-400 font-mono">{imageFile?.name}</span>
+            <div className="space-y-3">
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                onClick={() => imageFiles.length < 5 && document.getElementById('analyze-image-input')?.click()}
+                className={`min-h-[8rem] border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                  imagePreviews.length > 0
+                    ? 'border-green-500/50 bg-green-500/5'
+                    : 'border-gray-300 dark:border-[#444] hover:border-[#D4A017]'
+                } ${imageFiles.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <input
+                  id="analyze-image-input"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                {imagePreviews.length > 0 ? (
+                  <div className="w-full p-3">
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      {imagePreviews.map((preview, i) => (
+                        <div key={i} className="relative group">
+                          <img src={preview} alt={`Screenshot ${i + 1}`} className="h-24 rounded border border-gray-600" />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeImage(i); }}
+                            className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {imageFiles.length < 5 && (
+                      <p className="text-xs text-gray-400 text-center mt-2">Click or drop to add more</p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-3xl mb-2">&#128248;</span>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Drop screenshots here or click to browse</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">PNG, JPG, or WEBP &mdash; up to 5 images</p>
+                  </>
+                )}
+              </div>
+              {imagePreviews.length > 0 && (
+                <div className="text-center">
+                  <span className="text-sm font-mono text-[#D4A017]">{imageFiles.length}/5 screenshots</span>
                 </div>
-              ) : (
-                <>
-                  <span className="text-3xl mb-2">&#128248;</span>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Drop a screenshot here or click to browse</p>
-                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">PNG, JPG, or WEBP</p>
-                </>
               )}
             </div>
           )}
 
+          {/* Context Form (collapsible) */}
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setContextExpanded(!contextExpanded)}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors"
+            >
+              <span className="font-mono uppercase tracking-wider text-xs">Add context for better analysis</span>
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${contextExpanded ? 'rotate-180' : ''}`} />
+            </button>
+
+            {contextExpanded && (
+              <div className="px-4 pb-4 space-y-5 border-t border-gray-200 dark:border-[#333333] pt-4">
+                {/* Role */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#D4A017] mb-2">Who are you?</label>
+                  <div className="space-y-2">
+                    {([
+                      { value: 'sender', label: "I'm the sender (left/blue)" },
+                      { value: 'receiver', label: "I'm the receiver (right/gray)" },
+                      { value: 'observer', label: "Just analyzing someone else's conversation" },
+                    ] as const).map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="ctx-role"
+                          value={opt.value}
+                          checked={ctxRole === opt.value}
+                          onChange={() => setCtxRole(opt.value)}
+                          className="accent-[#D4A017]"
+                        />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{opt.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Goal */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#D4A017] mb-2">What&apos;s your goal?</label>
+                  <select
+                    value={ctxGoal}
+                    onChange={(e) => setCtxGoal(e.target.value)}
+                    className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#D4A017] transition-colors"
+                  >
+                    <option value="">Select a goal...</option>
+                    <option value="Get them to agree to something">Get them to agree to something</option>
+                    <option value="Set a boundary">Set a boundary</option>
+                    <option value="Detect if I'm being manipulated">Detect if I&apos;m being manipulated</option>
+                    <option value="Build rapport / strengthen relationship">Build rapport / strengthen relationship</option>
+                    <option value="Close a deal / negotiate">Close a deal / negotiate</option>
+                    <option value="Understand their psychology">Understand their psychology</option>
+                    <option value="Craft the perfect response">Craft the perfect response</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {ctxGoal === 'other' && (
+                    <input
+                      type="text"
+                      value={ctxGoalCustom}
+                      onChange={(e) => setCtxGoalCustom(e.target.value)}
+                      placeholder="Describe your goal..."
+                      className="w-full mt-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors"
+                    />
+                  )}
+                </div>
+
+                {/* Person */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#D4A017] mb-2">Who is this person?</label>
+                  <select
+                    value={ctxPersonId}
+                    onChange={(e) => { setCtxPersonId(e.target.value); if (e.target.value) setCtxPersonDesc(''); }}
+                    className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#D4A017] transition-colors"
+                  >
+                    <option value="">Select a person...</option>
+                    {ctxPeopleProfiles.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}{p.relationshipType ? ` (${p.relationshipType})` : ''}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={ctxPersonDesc}
+                    onChange={(e) => { setCtxPersonDesc(e.target.value); if (e.target.value) setCtxPersonId(''); }}
+                    placeholder="Or describe them: e.g., my boss, a client, my ex"
+                    className="w-full mt-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors"
+                  />
+                </div>
+
+                {/* Background */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-[#D4A017] mb-2">Background context</label>
+                  <textarea
+                    value={ctxBackground}
+                    onChange={(e) => setCtxBackground(e.target.value)}
+                    placeholder="Anything else the AI should know? e.g., We've been arguing about this for weeks"
+                    rows={2}
+                    className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors resize-none"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleAnalyze}
-            disabled={mode === 'text' ? !text.trim() : !imageFile}
+            disabled={mode === 'text' ? !text.trim() : imageFiles.length === 0}
             className="w-full py-3 bg-[#D4A017] text-[#0A0A0A] font-mono font-bold uppercase tracking-wider rounded-lg hover:bg-[#E8B830] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             Analyze Conversation
@@ -754,13 +1020,17 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* ── Image Preview (if image mode) ── */}
-          {imagePreview && (
+          {/* ── Image Previews (if image mode) ── */}
+          {imagePreviews.length > 0 && (
             <div className="bg-white dark:bg-[#1A1A1A] p-4 rounded-lg border border-gray-200 dark:border-[#333333]">
               <span className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold block mb-3">
-                Uploaded Screenshot
+                Uploaded Screenshot{imagePreviews.length > 1 ? 's' : ''} ({imagePreviews.length})
               </span>
-              <img src={imagePreview} alt="Conversation screenshot" className="rounded-md max-h-64 mx-auto" />
+              <div className="flex flex-wrap gap-3 justify-center">
+                {imagePreviews.map((preview, i) => (
+                  <img key={i} src={preview} alt={`Screenshot ${i + 1}`} className="rounded-md max-h-48" />
+                ))}
+              </div>
             </div>
           )}
 
@@ -965,6 +1235,88 @@ export default function AnalyzePage() {
             >
               Analyze Another Conversation
             </button>
+          </div>
+
+          {/* ── Follow-Up Chat ── */}
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setFollowUpExpanded(!followUpExpanded)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-[#222222] transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-[#D4A017]" />
+                <span className="font-mono uppercase tracking-wider text-sm text-[#D4A017] font-bold">Ask a follow-up question about this conversation</span>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${followUpExpanded ? 'rotate-180' : ''}`} />
+            </button>
+
+            {followUpExpanded && (
+              <div className="border-t border-gray-200 dark:border-[#333333]">
+                {/* Messages */}
+                <div className="max-h-96 overflow-y-auto p-4 space-y-3">
+                  {followUpMessages.length === 0 && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                      Ask anything about this conversation &mdash; predict responses, get alternative approaches, or explore the dynamics further.
+                    </p>
+                  )}
+                  {followUpMessages.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] rounded-lg px-4 py-2.5 text-sm whitespace-pre-wrap ${
+                        msg.role === 'user'
+                          ? 'bg-[#D4A017] text-[#0A0A0A]'
+                          : 'bg-gray-100 dark:bg-[#222222] text-gray-900 dark:text-gray-200 border border-gray-200 dark:border-[#333333]'
+                      }`}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                  {followUpLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-lg px-4 py-2.5 flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-[#D4A017]" />
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Thinking...</span>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={followUpEndRef} />
+                </div>
+
+                {/* Suggested prompts */}
+                {followUpMessages.length === 0 && (
+                  <div className="px-4 pb-3 flex flex-wrap gap-2">
+                    {['What if they say no?', 'How should I open this conversation?', "What's their likely motivation?", 'Give me 3 different approaches'].map((chip) => (
+                      <button
+                        key={chip}
+                        onClick={() => { setFollowUpInput(chip); }}
+                        className="text-xs bg-gray-100 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Input */}
+                <div className="p-4 border-t border-gray-200 dark:border-[#333333] flex gap-2">
+                  <input
+                    type="text"
+                    value={followUpInput}
+                    onChange={(e) => setFollowUpInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && followUpInput.trim() && !followUpLoading) handleFollowUp(); }}
+                    placeholder="Ask about this conversation..."
+                    className="flex-1 bg-gray-50 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors"
+                  />
+                  <button
+                    onClick={handleFollowUp}
+                    disabled={!followUpInput.trim() || followUpLoading}
+                    className="px-4 py-2.5 bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B830] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

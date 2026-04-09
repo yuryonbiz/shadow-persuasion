@@ -3,6 +3,7 @@ import { DECODE_SYSTEM_PROMPT, RAG_ENFORCEMENT } from '@/lib/prompts';
 import { searchKnowledge } from '@/lib/rag';
 import { getUserFromRequest } from '@/lib/auth-api';
 import { getVoiceProfile } from '@/lib/voice-profile';
+import { createClient } from '@supabase/supabase-js';
 
 export const maxDuration = 60;
 
@@ -96,33 +97,130 @@ export async function POST(req: NextRequest) {
     let imageDataUrl: string | null = null;
     let isImage = false;
 
+    // Context fields
+    let role = '';
+    let goal = '';
+    let personId = '';
+    let personContext = '';
+    let backgroundContext = '';
+
     const contentType = req.headers.get('content-type') || '';
 
     if (contentType.includes('multipart/form-data')) {
-      // Image upload
+      // Image upload — supports multiple images (image_0, image_1, ... image_4)
       const formData = await req.formData();
-      const file = formData.get('image') as File | null;
-      if (!file) {
-        return NextResponse.json({ error: 'Image file is required.' }, { status: 400 });
+      const imageFiles: File[] = [];
+      for (let i = 0; i < 5; i++) {
+        const file = formData.get(`image_${i}`) as File | null;
+        if (file) imageFiles.push(file);
       }
-      const bytes = await file.arrayBuffer();
-      imageDataUrl = `data:${file.type};base64,${Buffer.from(bytes).toString('base64')}`;
+      // Fallback: single 'image' field for backwards compatibility
+      if (imageFiles.length === 0) {
+        const single = formData.get('image') as File | null;
+        if (single) imageFiles.push(single);
+      }
+      if (imageFiles.length === 0) {
+        return NextResponse.json({ error: 'At least one image file is required.' }, { status: 400 });
+      }
 
-      // Pass 1: Extract text + initial summary from image
-      textContent = await extractTextFromImage(imageDataUrl);
+      // Process each image: convert to base64 and extract text
+      const imageDataUrls: string[] = [];
+      const extractedTexts: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const bytes = await imageFiles[i].arrayBuffer();
+        const dataUrl = `data:${imageFiles[i].type};base64,${Buffer.from(bytes).toString('base64')}`;
+        imageDataUrls.push(dataUrl);
+        const extracted = await extractTextFromImage(dataUrl);
+        extractedTexts.push(`--- Screenshot ${i + 1} ---\n${extracted}`);
+      }
+
+      textContent = extractedTexts.join('\n\n');
+      imageDataUrl = imageDataUrls[0]; // primary image for analysis context
+
+      // Extract context fields from formData
+      role = (formData.get('role') as string) || '';
+      goal = (formData.get('goal') as string) || '';
+      personId = (formData.get('personId') as string) || '';
+      personContext = (formData.get('personContext') as string) || '';
+      backgroundContext = (formData.get('backgroundContext') as string) || '';
+
       isImage = true;
     } else {
       // Text input
-      const { text } = await req.json();
+      const body = await req.json();
+      const { text } = body;
       if (!text || typeof text !== 'string') {
         return NextResponse.json({ error: 'Text to analyze is required.' }, { status: 400 });
       }
       textContent = text;
+
+      // Extract context fields from JSON body
+      role = body.role || '';
+      goal = body.goal || '';
+      personId = body.personId || '';
+      personContext = body.personContext || '';
+      backgroundContext = body.backgroundContext || '';
     }
+
+    // If personId is provided, fetch the People profile from Supabase
+    if (personId && userId) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        const { data: profile } = await supabase
+          .from('user_profiles_people')
+          .select('name, relationship_type, traits, notes')
+          .eq('id', personId)
+          .eq('user_id', userId)
+          .single();
+        if (profile) {
+          const parts: string[] = [];
+          parts.push(`Name: ${profile.name}`);
+          if (profile.relationship_type) parts.push(`Relationship: ${profile.relationship_type}`);
+          if (profile.traits) {
+            const t = profile.traits;
+            if (t.communication?.sensoryPreference) parts.push(`Sensory preference: ${t.communication.sensoryPreference}`);
+            if (t.communication?.emotionalPattern) parts.push(`Emotional pattern: ${t.communication.emotionalPattern}`);
+            if (t.communication?.summary) parts.push(`Communication summary: ${t.communication.summary}`);
+            if (t.triggers?.defensive?.length) parts.push(`Known defensive triggers: ${t.triggers.defensive.join(', ')}`);
+            if (t._lastAnalysis) {
+              parts.push(`Previous threat score: ${t._lastAnalysis.threat_score}`);
+              if (t._lastAnalysis.techniques_identified?.length) {
+                parts.push(`Previously identified techniques: ${t._lastAnalysis.techniques_identified.join(', ')}`);
+              }
+            }
+          }
+          if (profile.notes) parts.push(`Notes: ${profile.notes}`);
+          personContext = parts.join('\n');
+        }
+      } catch (e) {
+        console.error('[ANALYZE] Failed to fetch person profile:', e);
+      }
+    }
+
+    // Build user context block
+    const contextParts: string[] = [];
+    if (role) {
+      const roleLabels: Record<string, string> = {
+        sender: 'the sender (left/blue side)',
+        receiver: 'the receiver (right/gray side)',
+        observer: 'an outside observer analyzing someone else\'s conversation',
+      };
+      contextParts.push(`- The user is ${roleLabels[role] || role} in this conversation`);
+    }
+    if (goal) contextParts.push(`- Their goal: ${goal}`);
+    if (personContext) contextParts.push(`- The other person: ${personContext}`);
+    if (backgroundContext) contextParts.push(`- Background: ${backgroundContext}`);
+
+    const userContextBlock = contextParts.length > 0
+      ? `\n\nUSER CONTEXT:\n${contextParts.join('\n')}\n\nUse this context to tailor your analysis. Address the user based on their role. Focus your response options on achieving their stated goal.`
+      : '';
 
     // RAG search using the actual content
     const ragContext = await searchKnowledge(textContent);
-    const enhancedPrompt = COMPREHENSIVE_SYSTEM_PROMPT + (ragContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n${ragContext}` : '') + voiceContext;
+    const enhancedPrompt = COMPREHENSIVE_SYSTEM_PROMPT + userContextBlock + (ragContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n${ragContext}` : '') + voiceContext;
 
     // Build the analysis message
     const userContent: any[] = [];
