@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error('[PROFILER_PEOPLE]', 'Error fetching profiles:', error);
-      return NextResponse.json({ error: 'Failed to fetch people profiles' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch people profiles', details: error.message, code: error.code }, { status: 500 });
     }
 
     return NextResponse.json({ profiles: (data || []).map(mapProfile) });
@@ -81,13 +81,13 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('[PROFILER_PEOPLE]', 'Error creating profile:', error);
-      return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create profile', details: error.message, code: error.code }, { status: 500 });
     }
 
     return NextResponse.json({ profile: mapProfile(data) });
   } catch (error) {
     console.error('[PROFILER_PEOPLE]', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error', details: String(error) }, { status: 500 });
   }
 }
 
