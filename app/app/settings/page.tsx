@@ -77,19 +77,10 @@ export default function SettingsPage() {
     }
   };
 
-  const handleResetOnboarding = async () => {
+  const handleResetOnboarding = () => {
     if (!confirm('This will show the onboarding flow next time you visit the dashboard. Continue?')) return;
-    try {
-      const headers = await getHeaders();
-      await fetch('/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...headers },
-        body: JSON.stringify({ goals: [] }),
-      });
-      window.location.href = '/app';
-    } catch (e) {
-      console.error('Failed to reset onboarding:', e);
-    }
+    localStorage.setItem('shadow-force-onboarding', 'true');
+    window.location.href = '/app';
   };
 
   if (loading) {

@@ -363,12 +363,18 @@ export default function DashboardPage() {
         if (completionsRes?.completions) setCompletions(completionsRes.completions);
         if (conversationsRes?.sessions) setSessions(conversationsRes.sessions);
 
-        // Determine if user is brand new (no activity + no sessions)
-        const hasActivity = (progressRes?.recentActivity?.length ?? 0) > 0;
-        const hasSessions = (conversationsRes?.sessions?.length ?? 0) > 0;
-        const hasXP = (progressRes?.totalXP ?? 0) > 0;
-        if (!hasActivity && !hasSessions && !hasXP) {
+        // Check if onboarding was requested via settings or user is brand new
+        const forceOnboarding = localStorage.getItem('shadow-force-onboarding') === 'true';
+        if (forceOnboarding) {
+          localStorage.removeItem('shadow-force-onboarding');
           setOnboardingComplete(false);
+        } else {
+          const hasActivity = (progressRes?.recentActivity?.length ?? 0) > 0;
+          const hasSessions = (conversationsRes?.sessions?.length ?? 0) > 0;
+          const hasXP = (progressRes?.totalXP ?? 0) > 0;
+          if (!hasActivity && !hasSessions && !hasXP) {
+            setOnboardingComplete(false);
+          }
         }
       } catch (err) {
         console.error('Dashboard fetch error:', err);
