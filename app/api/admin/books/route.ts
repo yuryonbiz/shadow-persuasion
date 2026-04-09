@@ -6,6 +6,37 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// PUT: Update book title and/or author across all chunks
+export async function PUT(req: NextRequest) {
+  try {
+    const { oldTitle, newTitle, newAuthor } = await req.json();
+
+    if (!oldTitle) {
+      return NextResponse.json({ error: 'oldTitle is required' }, { status: 400 });
+    }
+
+    const updates: Record<string, string> = {};
+    if (newTitle) updates.book_title = newTitle;
+    if (newAuthor) updates.author = newAuthor;
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
+    }
+
+    const { error, count } = await supabase
+      .from('knowledge_chunks')
+      .update(updates)
+      .eq('book_title', oldTitle);
+
+    if (error) throw error;
+
+    return NextResponse.json({ updated: count });
+  } catch (error: any) {
+    console.error('[ADMIN_BOOKS]', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 // GET: List all books with chunk counts
 export async function GET() {
   try {

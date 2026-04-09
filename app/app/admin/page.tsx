@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, BookOpen, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, BookOpen, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 const ADMIN_EMAILS = ['ybyalik@gmail.com'];
@@ -87,6 +87,48 @@ export default function AdminPage() {
   const [statusText, setStatusText] = useState('');
   const [expandedSkipped, setExpandedSkipped] = useState<string | null>(null);
   
+  // Edit book state
+  const [editingBook, setEditingBook] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editAuthor, setEditAuthor] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const startEdit = (book: DBBook) => {
+    setEditingBook(book.title);
+    setEditTitle(book.title);
+    setEditAuthor(book.author);
+  };
+
+  const cancelEdit = () => {
+    setEditingBook(null);
+    setEditTitle('');
+    setEditAuthor('');
+  };
+
+  const saveEdit = async () => {
+    if (!editingBook || (!editTitle.trim() && !editAuthor.trim())) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch('/api/admin/books', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oldTitle: editingBook,
+          newTitle: editTitle.trim() || undefined,
+          newAuthor: editAuthor.trim() || undefined,
+        }),
+      });
+      if (res.ok) {
+        await loadBooks();
+        cancelEdit();
+      }
+    } catch (e) {
+      console.error('Failed to update book:', e);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   // Chunk browser state
   const [viewingBook, setViewingBook] = useState<string | null>(null);
   const [chunks, setChunks] = useState<Chunk[]>([]);
@@ -447,21 +489,61 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-2">
             {dbBooks.map(book => (
-              <div key={book.title} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#222] rounded-lg border border-gray-200 dark:border-[#333]">
-                <div>
-                  <p className="text-gray-800 dark:text-[#E8E8E0] font-medium">{book.title}</p>
-                  <p className="text-gray-500 text-sm">{book.author} · {book.chunks} chunks</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => loadChunks(book.title)}
-                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors" title="View chunks">
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => handleDelete(book.title)}
-                    className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Delete book">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+              <div key={book.title} className="p-3 bg-gray-50 dark:bg-[#222] rounded-lg border border-gray-200 dark:border-[#333]">
+                {editingBook === book.title ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-mono text-gray-500 uppercase mb-1">Title</label>
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="w-full p-2 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-mono text-gray-500 uppercase mb-1">Author</label>
+                        <input
+                          type="text"
+                          value={editAuthor}
+                          onChange={(e) => setEditAuthor(e.target.value)}
+                          className="w-full p-2 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 justify-end">
+                      <button onClick={cancelEdit} className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Cancel">
+                        <X className="h-4 w-4" />
+                      </button>
+                      <button onClick={saveEdit} disabled={savingEdit} className="flex items-center gap-1 px-3 py-1.5 bg-[#D4A017] text-[#0A0A0A] text-xs font-mono font-bold rounded hover:bg-[#E8B830] disabled:opacity-50 transition-colors">
+                        {savingEdit ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-800 dark:text-[#E8E8E0] font-medium">{book.title}</p>
+                      <p className="text-gray-500 text-sm">{book.author} · {book.chunks} chunks</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => startEdit(book)}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors" title="Edit book">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => loadChunks(book.title)}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors" title="View chunks">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDelete(book.title)}
+                        className="p-2 text-gray-500 hover:text-red-400 transition-colors" title="Delete book">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
