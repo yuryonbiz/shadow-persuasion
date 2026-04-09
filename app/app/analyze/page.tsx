@@ -74,6 +74,15 @@ const CATEGORY_COLORS: Record<string, string> = {
   Anchoring: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800',
 };
 
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\(Source: "(.*?)" by (.*?)\)/g, '<span class="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full mx-0.5">📖 $1</span>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
+
 function getCategoryStyle(category: string): string {
   return CATEGORY_COLORS[category] || 'bg-gray-900/40 text-gray-600 dark:text-gray-300 border-gray-700';
 }
@@ -871,6 +880,16 @@ export default function AnalyzePage() {
       {result && (
         <div className="space-y-6">
 
+          {/* ── Top action bar ── */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] text-gray-600 dark:text-gray-300 font-mono text-xs uppercase tracking-wider rounded-lg hover:border-[#D4A017] hover:text-[#D4A017] transition-all"
+            >
+              Analyze New Conversation
+            </button>
+          </div>
+
           {/* ── Threat Score Bar (always visible) ── */}
           <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-5">
             <div className="flex items-center justify-between mb-3">
@@ -1047,7 +1066,7 @@ export default function AnalyzePage() {
                   <blockquote className="border-l-2 border-[#D4A017] pl-3 text-sm text-gray-500 dark:text-gray-400 italic">
                     &ldquo;{tactic.quote}&rdquo;
                   </blockquote>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{tactic.explanation}</p>
+                  <div className="text-sm text-gray-600 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: renderMarkdown(tactic.explanation) }} />
                   <div className="bg-[#FAFAF8] dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#333333] rounded p-3">
                     <span className="font-mono text-xs uppercase tracking-wider text-[#D4A017] font-bold block mb-1">
                       Counter:
@@ -1078,7 +1097,7 @@ export default function AnalyzePage() {
                   <Copy className="h-3 w-3" /> Copy
                 </button>
               </div>
-              <p className="text-gray-900 dark:text-white leading-relaxed">{result.counterScript}</p>
+              <div className="text-gray-900 dark:text-white leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(result.counterScript) }} />
             </div>
           )}
 
@@ -1185,7 +1204,7 @@ export default function AnalyzePage() {
             <h2 className="font-mono text-lg uppercase text-[#D4A017] mb-4">Strategic Assessment</h2>
             <div className="space-y-4">
               <div className="prose prose-invert prose-sm max-w-none">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{result.overallAssessment}</p>
+                <div className="text-gray-600 dark:text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(result.overallAssessment) }} />
               </div>
               {result.techniques_identified.length > 0 && (
                 <div>
@@ -1249,12 +1268,25 @@ export default function AnalyzePage() {
                   )}
                   {followUpMessages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[85%] rounded-lg px-4 py-2.5 text-sm whitespace-pre-wrap ${
+                      <div className={`max-w-[85%] rounded-lg px-4 py-2.5 text-sm ${
                         msg.role === 'user'
-                          ? 'bg-[#D4A017] text-[#0A0A0A]'
+                          ? 'bg-[#D4A017] text-[#0A0A0A] whitespace-pre-wrap'
                           : 'bg-gray-100 dark:bg-[#222222] text-gray-900 dark:text-gray-200 border border-gray-200 dark:border-[#333333]'
                       }`}>
-                        {msg.content}
+                        {msg.role === 'user' ? msg.content : (
+                          <div
+                            className="prose prose-sm dark:prose-invert max-w-none [&_strong]:text-[#D4A017] [&_a]:text-[#D4A017]"
+                            dangerouslySetInnerHTML={{ __html: msg.content
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                              .replace(/^(\d+)\.\s/gm, '<br/><strong>$1.</strong> ')
+                              .replace(/^[-•]\s(.*)/gm, '<br/>→ $1')
+                              .replace(/\(Source: "(.*?)" by (.*?)\)/g, '<span class="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full">📖 $1</span>')
+                              .replace(/\n\n/g, '<br/><br/>')
+                              .replace(/\n/g, '<br/>')
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                   ))}
