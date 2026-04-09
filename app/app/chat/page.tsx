@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PlusCircle, ArrowLeft, Trash2, Zap } from 'lucide-react';
 import { GoalSelector } from '@/components/app/GoalSelector';
@@ -68,6 +67,8 @@ export default function ChatListPage() {
   const [qfCopied, setQfCopied] = useState<string | null>(null);
   const [qfHistory, setQfHistory] = useState<{ id: string; situation: string; classification?: string; technique?: string; created_at: string }[]>([]);
   const [qfHistoryExpanded, setQfHistoryExpanded] = useState(false);
+  const [resumeSessionId, setResumeSessionId] = useState<string | null>(null);
+  const [resumeMessages, setResumeMessages] = useState<any[]>([]);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -130,7 +131,10 @@ export default function ChatListPage() {
   const handleBackToGoals = () => {
     setSelectedGoal(null);
     setShowGoalSelector(true);
+    setResumeSessionId(null);
+    setResumeMessages([]);
     setMode('list');
+    fetchConversations();
   };
 
   // Quick-Fire handlers
@@ -222,7 +226,7 @@ export default function ChatListPage() {
 
   // Strategic Chat Session
   if (mode === 'strategic' && selectedGoal) {
-    return <StrategicChat goal={selectedGoal} onBack={handleBackToGoals} />;
+    return <StrategicChat goal={selectedGoal} onBack={handleBackToGoals} resumeSessionId={resumeSessionId || undefined} initialMessages={resumeMessages.length > 0 ? resumeMessages : undefined} />;
   }
 
   // Goal Selection
@@ -560,7 +564,34 @@ export default function ChatListPage() {
       ) : conversations.length > 0 ? (
         <div className="space-y-4">
           {conversations.map(convo => (
-            <Link href={`/app/chat/${convo.id}`} key={convo.id} className="block p-4 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] hover:border-[#D4A017] relative group">
+            <div
+              key={convo.id}
+              onClick={async () => {
+                if (convo.session_type === 'strategic' && convo.goal_title) {
+                  // Load messages and resume in StrategicChat
+                  try {
+                    const res = await fetch(`/api/conversations/messages?session_id=${convo.id}`);
+                    const data = await res.json();
+                    const msgs = (data.messages || []).map((m: any) => ({
+                      id: m.id,
+                      role: m.role,
+                      content: m.content,
+                      sources: m.metadata?.sources || undefined,
+                    }));
+                    setResumeSessionId(convo.id);
+                    setResumeMessages(msgs);
+                    // Find matching goal or use generic
+                    setSelectedGoal({ id: convo.goal || 'all', title: convo.goal_title || 'General', description: '', icon: null, color: '', examples: [] });
+                    setMode('strategic');
+                  } catch (e) {
+                    console.error('Failed to load session:', e);
+                  }
+                } else {
+                  // Navigate to legacy chat page
+                  window.location.href = `/app/chat/${convo.id}`;
+                }
+              }}
+              className="block p-4 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] hover:border-[#D4A017] relative group cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -585,7 +616,7 @@ export default function ChatListPage() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-            </Link>
+            </div>
           ))}
         </div>
       ) : (

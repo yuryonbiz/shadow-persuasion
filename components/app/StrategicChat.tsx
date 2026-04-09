@@ -27,6 +27,8 @@ interface Message {
 interface StrategicChatProps {
     goal: Goal;
     onBack: () => void;
+    resumeSessionId?: string;
+    initialMessages?: Message[];
 }
 
 interface PersonProfile {
@@ -39,10 +41,11 @@ interface PersonProfile {
     notes?: string;
 }
 
-export function StrategicChat({ goal, onBack }: StrategicChatProps) {
+export function StrategicChat({ goal, onBack, resumeSessionId, initialMessages }: StrategicChatProps) {
     const { user } = useAuth();
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>(initialMessages || []);
     const [isLoading, setIsLoading] = useState(false);
+    const [activeSessionId, setActiveSessionId] = useState<string | null>(resumeSessionId || null);
     const [tacticalGuidance, setTacticalGuidance] = useState<any>(null);
     const [progressScore, setProgressScore] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -144,9 +147,16 @@ export function StrategicChat({ goal, onBack }: StrategicChatProps) {
                 body: JSON.stringify({
                     messages: [...messages, userMessage],
                     goal: goal.id,
-                    goalTitle: goal.title
+                    goalTitle: goal.title,
+                    session_id: activeSessionId || undefined,
                 }),
             });
+
+            // Track session id from response
+            const returnedSessionId = response.headers.get('X-Session-Id');
+            if (returnedSessionId && !activeSessionId) {
+                setActiveSessionId(returnedSessionId);
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
