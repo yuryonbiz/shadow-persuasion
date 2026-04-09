@@ -498,8 +498,7 @@ export default function TrainingScenarioPage() {
                 )}
                 <div className="px-4 pb-3">
                   <div
-                    className="text-sm leading-relaxed"
-                    style={{ color: msg.role === 'user' ? '#0A0A0A' : '#ccc' }}
+                    className={`text-sm leading-relaxed ${msg.role === 'user' ? 'text-[#0A0A0A]' : 'text-gray-800 dark:text-[#E8E8E0]'}`}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
                   />
                 </div>
