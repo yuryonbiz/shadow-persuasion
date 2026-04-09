@@ -65,6 +65,8 @@ export default function ChatListPage() {
   const [qfIsLoading, setQfIsLoading] = useState(false);
   const [qfError, setQfError] = useState<string | null>(null);
   const [qfCopied, setQfCopied] = useState<string | null>(null);
+  const [qfHistory, setQfHistory] = useState<{ id: string; situation: string; classification?: string; technique?: string; created_at: string }[]>([]);
+  const [qfHistoryExpanded, setQfHistoryExpanded] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -142,6 +144,16 @@ export default function ChatListPage() {
   };
 
   // Quick-Fire handlers
+  const fetchQfHistory = useCallback(async () => {
+    try {
+      const res = await fetch('/api/quickfire/history?limit=10');
+      if (res.ok) {
+        const data = await res.json();
+        setQfHistory(data.history || []);
+      }
+    } catch {}
+  }, []);
+
   const handleQfSubmit = async () => {
     if (!qfSituation.trim()) return;
 
@@ -165,6 +177,22 @@ export default function ChatListPage() {
 
       const data = await res.json();
       setQfResponse(data);
+
+      // Auto-save to history
+      fetch('/api/quickfire/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          situation: qfSituation.trim(),
+          context: qfShowContext && qfContext.trim() ? qfContext.trim() : undefined,
+          classification: data.classification,
+          technique: data.technique,
+          responses: data.responses,
+          avoid: data.avoid,
+          scenarios: data.scenarios,
+          fullResult: data,
+        }),
+      }).then(() => fetchQfHistory()).catch(console.error);
     } catch (err) {
       setQfError(err instanceof Error ? err.message : 'An unknown error occurred.');
     } finally {
@@ -193,8 +221,8 @@ export default function ChatListPage() {
 
   const handleEnterQuickfire = () => {
     setMode('quickfire');
-    // Reset quickfire state for a fresh start
     handleQfReset();
+    fetchQfHistory();
   };
 
   const handleExitQuickfire = () => {
@@ -443,6 +471,61 @@ export default function ChatListPage() {
             >
               New Situation
             </button>
+          </div>
+        )}
+
+        {/* Quick-Fire History */}
+        {qfHistory.length > 0 && (
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
+                Recent Quick-Fire
+              </span>
+              {qfHistory.length > 3 && (
+                <button
+                  onClick={() => setQfHistoryExpanded(!qfHistoryExpanded)}
+                  className="text-xs text-[#D4A017] hover:text-[#E8B830] font-mono uppercase"
+                >
+                  {qfHistoryExpanded ? 'Show Less' : `View All (${qfHistory.length})`}
+                </button>
+              )}
+            </div>
+            <div className="space-y-2">
+              {(qfHistoryExpanded ? qfHistory : qfHistory.slice(0, 3)).map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-lg group"
+                >
+                  <span className="text-lg">⚡</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 dark:text-white truncate">{item.situation}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatTimestamp(item.created_at)}</span>
+                      {item.classification && (
+                        <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-[#D4A017]/10 text-[#D4A017] rounded">
+                          {item.classification.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      {item.technique && (
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">{item.technique}</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await fetch(`/api/quickfire/history?id=${item.id}`, { method: 'DELETE' });
+                        setQfHistory(prev => prev.filter(h => h.id !== item.id));
+                      } catch {}
+                    }}
+                    className="flex-shrink-0 p-1.5 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all rounded hover:bg-red-500/10"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
