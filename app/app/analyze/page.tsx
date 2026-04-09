@@ -1307,18 +1307,44 @@ export default function AnalyzePage() {
                   <div ref={followUpEndRef} />
                 </div>
 
-                {/* Suggested prompts */}
-                {followUpMessages.length === 0 && (
+                {/* Suggested prompts — dynamic based on analysis */}
+                {followUpMessages.length === 0 && result && (
                   <div className="px-4 pb-3 flex flex-wrap gap-2">
-                    {['What if they say no?', 'How should I open this conversation?', "What's their likely motivation?", 'Give me 3 different approaches'].map((chip) => (
-                      <button
-                        key={chip}
-                        onClick={() => { setFollowUpInput(chip); }}
-                        className="text-xs bg-gray-100 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
-                      >
-                        {chip}
-                      </button>
-                    ))}
+                    {(() => {
+                      const chips: string[] = [];
+                      // Tactic-specific questions
+                      if (result.tactics.length > 0) {
+                        chips.push(`How do I counter the "${result.tactics[0].tactic}" tactic?`);
+                        if (result.tactics.length > 1) chips.push(`Why are they using ${result.tactics.length} tactics on me?`);
+                      }
+                      // Power-dynamic questions
+                      if (result.powerDynamics?.theirPower > result.powerDynamics?.yourPower) {
+                        chips.push('How can I shift the power balance in my favor?');
+                      } else {
+                        chips.push('How do I press my advantage here?');
+                      }
+                      // Goal-specific
+                      if (ctxGoal && ctxGoal !== 'other') {
+                        chips.push(`What's the best next move to ${ctxGoal.toLowerCase()}?`);
+                      }
+                      // Response-based
+                      if (result.responseOptions?.length > 0) {
+                        chips.push(`What if they react badly to the "${result.responseOptions[0].type}" approach?`);
+                      }
+                      // Always useful
+                      chips.push("What's their likely endgame here?");
+                      if (result.threatScore === 0) chips.push('Give me 3 ways to strengthen my position');
+                      // Cap at 4
+                      return chips.slice(0, 4).map((chip) => (
+                        <button
+                          key={chip}
+                          onClick={() => { setFollowUpInput(chip); }}
+                          className="text-xs bg-gray-100 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
+                        >
+                          {chip}
+                        </button>
+                      ));
+                    })()}
                   </div>
                 )}
 
