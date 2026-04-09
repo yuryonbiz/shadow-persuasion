@@ -67,17 +67,23 @@ export async function POST(req: NextRequest) {
     const userId = await getUserFromRequest(req);
     const body = await req.json();
 
+    const insertPayload = {
+      name: body.name,
+      relationship_type: body.relationshipType || 'Other',
+      user_id: userId,
+      traits: body.traits || {},
+      interactions: body.interactions || [],
+    };
+
+    console.log('[PROFILER_PEOPLE] INSERT payload:', JSON.stringify({ userId, name: body.name, hasTraits: !!body.traits }));
+
     const { data, error } = await supabase
       .from(TABLE)
-      .insert({
-        name: body.name,
-        relationship_type: body.relationshipType || 'Other',
-        user_id: userId,
-        traits: body.traits || {},
-        interactions: body.interactions || [],
-      })
+      .insert(insertPayload)
       .select()
       .single();
+
+    console.log('[PROFILER_PEOPLE] INSERT result:', JSON.stringify({ data: data?.id, error: error?.message }));
 
     if (error) {
       console.error('[PROFILER_PEOPLE]', 'Error creating profile:', error);
