@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { Scenario } from '@/lib/scenarios';
+
+interface Scenario {
+  id: string;
+  title: string;
+  category: string;
+  difficulty: number;
+  description: string;
+  objective: string;
+  techniques: string[];
+}
 
 interface ScenarioCardProps {
   scenario: Scenario;

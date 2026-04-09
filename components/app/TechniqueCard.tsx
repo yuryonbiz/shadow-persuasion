@@ -2,8 +2,14 @@
 
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-// DEPRECATED: This component uses the legacy Technique type. Prefer inline cards from /api/techniques.
-import { Technique } from '@/lib/techniques';
+
+export interface Technique {
+  id: string;
+  name: string;
+  category: string;
+  difficulty: number;
+  description?: string;
+}
 
 type SRStatus = 'not-started' | 'learning' | 'due' | 'mastered';
 

@@ -1,13 +1,21 @@
 'use client';
 
-import { scenarios } from '@/lib/scenarios';
-import { techniques } from '@/lib/techniques';
 import { formatWithCitations } from '@/lib/format-citations';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Send, ChevronDown, ChevronUp, Award, Target, AlertTriangle, Lightbulb, TrendingUp, StopCircle } from 'lucide-react';
+import { Send, ChevronDown, ChevronUp, Award, Target, AlertTriangle, Lightbulb, TrendingUp, StopCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+
+type Scenario = {
+  id: string;
+  title: string;
+  category: string;
+  difficulty: number;
+  description: string;
+  objective: string;
+  techniques: string[];
+};
 
 type CoachingData = {
   feedback: string;
@@ -231,9 +239,10 @@ function DebriefCard({ debrief, onClose }: { debrief: DebriefData; onClose: () =
 export default function TrainingScenarioPage() {
   const params = useParams();
   const id = params.id as string;
-  const scenario = scenarios.find(s => s.id === id);
   const { user } = useAuth();
 
+  const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [scenarioLoading, setScenarioLoading] = useState(true);
   const [mode, setMode] = useState<'briefing' | 'practice'>('briefing');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -242,6 +251,18 @@ export default function TrainingScenarioPage() {
   const [isDebriefing, setIsDebriefing] = useState(false);
   const [scoreSaved, setScoreSaved] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch scenario from API
+  useEffect(() => {
+    fetch('/api/scenarios/list')
+      .then(res => res.json())
+      .then(data => {
+        const found = (data.scenarios || []).find((s: Scenario) => s.id === id);
+        setScenario(found || null);
+      })
+      .catch(err => console.error('Failed to fetch scenario:', err))
+      .finally(() => setScenarioLoading(false));
+  }, [id]);
 
   const getHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await user?.getIdToken();
@@ -281,6 +302,15 @@ export default function TrainingScenarioPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  if (scenarioLoading) {
+    return (
+      <div className="max-w-4xl mx-auto py-12 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#D4A017] mx-auto" />
+        <p className="mt-4 text-gray-500 dark:text-gray-400">Loading scenario...</p>
+      </div>
+    );
+  }
+
   if (!scenario) {
     return (
       <div className="max-w-4xl mx-auto py-12 text-center">
@@ -289,8 +319,6 @@ export default function TrainingScenarioPage() {
       </div>
     );
   }
-
-  const relevantTechniques = techniques.filter(t => scenario.techniques.includes(t.name));
 
   const startPractice = async () => {
     setMode('practice');
@@ -433,9 +461,9 @@ export default function TrainingScenarioPage() {
           <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333]">
             <h2 className="font-mono text-lg text-[#D4A017] uppercase mb-2">Key Techniques</h2>
             <ul className="space-y-2">
-              {relevantTechniques.map(t => (
-                <li key={t.id}>
-                  <Link href={`/app/techniques/${t.id}`} className="text-base hover:underline">{t.name}</Link>
+              {scenario.techniques.map(name => (
+                <li key={name}>
+                  <span className="text-base text-gray-800 dark:text-[#E8E8E0]">{name}</span>
                 </li>
               ))}
             </ul>

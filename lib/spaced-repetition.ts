@@ -1,6 +1,12 @@
 'use client';
 
-import { techniques } from '@/lib/techniques';
+// Techniques are now passed as parameters instead of imported from the deprecated static list.
+
+export type TechniqueRef = {
+  id: string;
+  name: string;
+  category: string;
+};
 
 /* ────────────────────────────────────────────
    Types
@@ -68,14 +74,13 @@ function getCardStatus(card: SRCard): SRCard['status'] {
  * Update a technique card based on review quality.
  * quality: 0-5 (0 = complete failure, 5 = perfect recall)
  */
-export function getNextReview(techniqueId: string, quality: number): SRCard {
+export function getNextReview(techniqueId: string, quality: number, techniqueRef?: TechniqueRef): SRCard {
   const data = loadData();
-  const technique = techniques.find((t) => t.id === techniqueId);
 
   let card: SRCard = data[techniqueId] || {
     techniqueId,
-    techniqueName: technique?.name || techniqueId,
-    category: technique?.category || 'Unknown',
+    techniqueName: techniqueRef?.name || techniqueId,
+    category: techniqueRef?.category || 'Unknown',
     easeFactor: 2.5,
     interval: 0,
     repetitions: 0,
@@ -143,25 +148,34 @@ export function getDueCards(): SRCard[] {
 /**
  * Returns all technique cards with their current status.
  * Includes techniques that haven't been started yet.
+ * Pass a techniques array from the API to include not-started cards.
  */
-export function getAllCards(): SRCard[] {
+export function getAllCards(techniquesList?: TechniqueRef[]): SRCard[] {
   const data = loadData();
   const cards: SRCard[] = [];
 
-  for (const technique of techniques) {
-    const card: SRCard = data[technique.id] || {
-      techniqueId: technique.id,
-      techniqueName: technique.name,
-      category: technique.category,
-      easeFactor: 2.5,
-      interval: 0,
-      repetitions: 0,
-      nextReviewDate: todayStr(),
-      lastReviewDate: null,
-      status: 'not-started',
-    };
-    card.status = getCardStatus(card);
-    cards.push(card);
+  if (techniquesList && techniquesList.length > 0) {
+    for (const technique of techniquesList) {
+      const card: SRCard = data[technique.id] || {
+        techniqueId: technique.id,
+        techniqueName: technique.name,
+        category: technique.category,
+        easeFactor: 2.5,
+        interval: 0,
+        repetitions: 0,
+        nextReviewDate: todayStr(),
+        lastReviewDate: null,
+        status: 'not-started',
+      };
+      card.status = getCardStatus(card);
+      cards.push(card);
+    }
+  } else {
+    // Fallback: return only cards that exist in localStorage
+    for (const card of Object.values(data)) {
+      card.status = getCardStatus(card);
+      cards.push(card);
+    }
   }
 
   return cards;
@@ -189,9 +203,8 @@ export function getNextReviewDate(): string | null {
 /**
  * Initialize a technique for spaced repetition tracking.
  */
-export function startTracking(techniqueId: string): SRCard {
+export function startTracking(techniqueId: string, techniqueRef?: TechniqueRef): SRCard {
   const data = loadData();
-  const technique = techniques.find((t) => t.id === techniqueId);
 
   if (data[techniqueId]) {
     return data[techniqueId];
@@ -199,8 +212,8 @@ export function startTracking(techniqueId: string): SRCard {
 
   const card: SRCard = {
     techniqueId,
-    techniqueName: technique?.name || techniqueId,
-    category: technique?.category || 'Unknown',
+    techniqueName: techniqueRef?.name || techniqueId,
+    category: techniqueRef?.category || 'Unknown',
     easeFactor: 2.5,
     interval: 1,
     repetitions: 0,

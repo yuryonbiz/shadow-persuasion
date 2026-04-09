@@ -1,6 +1,8 @@
 'use client';
 
-import { techniques } from '@/lib/techniques';
+// Techniques are no longer imported from the deprecated static list.
+// Name/category lookups now use data from localStorage entries which already
+// contain this information, or fall back to the id as the display name.
 
 /* ────────────────────────────────────────────
    Types
@@ -48,14 +50,20 @@ function safeParse<T>(key: string, fallback: T): T {
   }
 }
 
+// Technique name/category lookups: since we no longer have a static list,
+// we derive names from the technique ID (kebab-case to title case).
 function getTechniqueName(id: string): string {
-  const t = techniques.find((t) => t.id === id);
-  return t ? t.name : id;
+  return id
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 function getTechniqueCategory(id: string): string {
-  const t = techniques.find((t) => t.id === id);
-  return t ? t.category : 'Unknown';
+  // Without a static list, category is unknown. Callers that need accurate
+  // categories should pass technique data from the API.
+  void id;
+  return 'Unknown';
 }
 
 /* ────────────────────────────────────────────

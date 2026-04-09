@@ -1,3 +1,7 @@
+// DEPRECATED: Use /api/scenarios/list instead. This file is kept as a fallback reference only.
+// All scenario data now lives in the Supabase `scenarios` table.
+// See supabase/migrations/005_dynamic_scenarios.sql for the schema.
+
 export type Scenario = {
   id: string;
   title: string;

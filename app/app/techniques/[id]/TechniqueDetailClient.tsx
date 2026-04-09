@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Play, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
-import { scenarios } from '@/lib/scenarios';
+// Scenarios are fetched dynamically from the API
 
 // ── Types ──
 
@@ -88,11 +88,19 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
       .finally(() => setLoading(false));
   }, [techniqueId]);
 
-  // Find related training scenarios
-  const relevantScenarios = useMemo(
-    () => technique ? scenarios.filter(s => s.techniques.includes(technique.name)) : [],
-    [technique]
-  );
+  // Find related training scenarios (fetched dynamically)
+  const [relevantScenarios, setRelevantScenarios] = useState<{ id: string; title: string; category: string; difficulty: number; description: string; techniques: string[] }[]>([]);
+
+  useEffect(() => {
+    if (!technique) return;
+    fetch('/api/scenarios/list')
+      .then(res => res.json())
+      .then(data => {
+        const all = data.scenarios || [];
+        setRelevantScenarios(all.filter((s: any) => s.techniques?.includes(technique.name)));
+      })
+      .catch(err => console.error('Failed to fetch scenarios:', err));
+  }, [technique]);
 
   // Generate synthesized profile
   const handleSynthesize = async () => {

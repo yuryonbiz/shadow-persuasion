@@ -78,41 +78,11 @@ interface WeeklyReview {
 
 type TimeFilter = 'all' | 'week' | 'month';
 
-// ── Mission Pool ─────────────────────────────────────────────────────────────
+// ── Mission Pool (fetched from API) ──────────────────────────────────────────
 
-const MISSION_POOL: Mission[] = [
-  { id: 1, title: 'Spot the Anchor', description: 'During any conversation today about money, prices, or numbers, notice who sets the first number. Observe how it influences the rest of the discussion.', technique: 'Anchoring', category: 'Negotiation', difficulty: 'Beginner', xpReward: 30, type: 'observer' },
-  { id: 2, title: 'Social Proof Radar', description: 'Count how many times someone uses social proof on you today. Ads, colleagues, friends saying "everyone does it." Just notice and log each instance.', technique: 'Social Proof', category: 'Influence', difficulty: 'Beginner', xpReward: 30, type: 'observer' },
-  { id: 3, title: 'Frame Detective', description: 'In your next meeting or conversation, identify who controls the frame. Notice how the topic, tone, and direction are set by one person. Who is it and how do they do it?', technique: 'Frame Control', category: 'Framing', difficulty: 'Beginner', xpReward: 30, type: 'observer' },
-  { id: 4, title: 'Mirror Watch', description: 'Observe a conversation between two people. Notice any mirroring happening naturally: body language, speech patterns, word choices. How does it affect rapport?', technique: 'Mirroring', category: 'Rapport', difficulty: 'Beginner', xpReward: 30, type: 'observer' },
-  { id: 5, title: 'Scarcity Scanner', description: 'Track every scarcity message you encounter today: limited-time offers, exclusive access, "only 3 left." Rate each one: genuine or manufactured?', technique: 'Scarcity Frame', category: 'Influence', difficulty: 'Beginner', xpReward: 30, type: 'observer' },
-  { id: 6, title: 'The Reciprocity Drop', description: 'Do something unexpectedly helpful for someone today with no strings attached. Buy a coffee, share a useful resource, or give a genuine compliment. Notice how it shifts the dynamic.', technique: 'Reciprocity', category: 'Influence', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 7, title: 'Deploy a Mirror', description: 'In your next conversation, repeat the last 2-3 words someone says back to them as a question. Do this at least twice. Notice how it makes them elaborate.', technique: 'Mirroring', category: 'Rapport', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 8, title: 'Label an Emotion', description: 'In a conversation today, use the phrase "It seems like..." or "It sounds like..." to name what the other person is feeling. Observe their reaction.', technique: 'Labeling', category: 'Rapport', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 9, title: 'Authority Frame', description: 'Before making a recommendation today, briefly establish your credibility on the topic. Reference a specific experience, data point, or insight. Then make your suggestion.', technique: 'Authority Positioning', category: 'Framing', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 10, title: 'The Contrast Play', description: 'When presenting an option today, first mention a more expensive/difficult alternative, then present your actual recommendation. Notice how the contrast shifts perception.', technique: 'The Contrast Principle', category: 'Negotiation', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 11, title: 'Small Commitment', description: 'Get someone to agree to a small, easy request first ("Can you help me with something quick?"), then follow up with your actual request. Track how the small yes affects the bigger ask.', technique: 'Commitment & Consistency', category: 'Influence', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 12, title: 'Strategic Compliment', description: 'Share a specific, genuine vulnerability or past mistake in a professional conversation. Not a big one -- something small and relatable. Notice how it changes the dynamic.', technique: 'Strategic Vulnerability', category: 'Rapport', difficulty: 'Beginner', xpReward: 50, type: 'beginner' },
-  { id: 13, title: 'Deploy a Presupposition', description: 'Use one embedded presupposition in a real conversation today. Example: "When we finalize this deal..." instead of "If we finalize..." Notice how it subtly shifts the assumption.', technique: 'Frame Control', category: 'Framing', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 14, title: 'Tactical Empathy Disarm', description: 'In a tense or difficult conversation, summarize the other person\'s position so accurately they say "exactly" or "that\'s right." Use this as a bridge to your point.', technique: 'Tactical Empathy', category: 'Rapport', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 15, title: 'The Reframe', description: 'When someone raises an objection or problem today, reframe it. Turn a cost into an investment, a risk into an opportunity, or a weakness into a strength. Track their reaction.', technique: 'Reframing', category: 'Framing', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 16, title: 'Door-in-the-Face', description: 'Make a deliberately large request that you expect to be declined. Then immediately follow up with your real, smaller request. Compare the acceptance rate to asking directly.', technique: 'Door-in-the-Face', category: 'Negotiation', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 17, title: 'Pattern Break', description: 'In a conversation that feels stuck or scripted, do something unexpected: change the topic abruptly, ask a surprising question, or shift the energy. Notice how it creates an opening.', technique: 'Pattern Interruption', category: 'Framing', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 18, title: 'The Void', description: 'After asking an important question today, stay completely silent. Do not fill the silence. Wait for them to speak first, no matter how awkward it feels. Time how long it takes.', technique: 'The Void Pull', category: 'Rapport', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 19, title: 'Emotional Redirect', description: 'When someone is in a negative emotional state, use a story, question, or humor to shift their emotional state before making your point. Document the transition.', technique: 'Emotional Hijacking', category: 'Influence', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
-  { id: 20, title: 'Scarcity + Reciprocity Stack', description: 'Combine two techniques: give something valuable first (reciprocity), then make it clear this opportunity is limited (scarcity). Track the combined effect.', technique: 'Scarcity Frame', category: 'Influence', difficulty: 'Intermediate', xpReward: 100, type: 'intermediate' },
-  { id: 21, title: 'Label + Mirror Combo', description: 'In one conversation, use both labeling ("It seems like...") and mirroring (repeating their last few words). Use labeling for emotions and mirroring for facts. Compare the effects.', technique: 'Labeling', category: 'Rapport', difficulty: 'Intermediate', xpReward: 100, type: 'intermediate' },
-  { id: 22, title: 'Accusation Audit', description: 'Before a difficult conversation, list every negative thing the other person might think about you or your proposal. Then preemptively address them at the start. Track how it disarms them.', technique: 'The Accusation Audit', category: 'Defense', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 23, title: 'The Takeaway Close', description: 'When someone is hesitant but interested, pull back. Say "Maybe this isn\'t the right fit" or remove a benefit from your offer. Notice if they chase.', technique: 'The Takeaway', category: 'Negotiation', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 24, title: 'Full Frame War', description: 'Enter a conversation where someone else sets the frame. Your mission: politely but firmly reject their frame and establish your own. Maintain it for the entire conversation.', technique: 'Frame Control', category: 'Framing', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 25, title: 'Cognitive Overload Play', description: 'Present someone with 3-4 complex options, then offer your preferred option as the simple, clear choice. Notice how decision fatigue pushes them toward the easy path.', technique: 'Cognitive Overload', category: 'Influence', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 26, title: 'Triple Stack', description: 'In one interaction, combine three techniques: establish authority, use tactical empathy, then close with a takeaway. Document each phase.', technique: 'Authority Positioning', category: 'Framing', difficulty: 'Advanced', xpReward: 150, type: 'advanced' },
-  { id: 27, title: 'Defense Mode', description: 'Someone will try to influence you today (sales, negotiation, request). Identify the technique they use in real-time and deploy a counter-technique. Document the exchange.', technique: 'The Accusation Audit', category: 'Defense', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 28, title: 'Anchoring Ambush', description: 'In your next negotiation (price, timeline, scope), set an aggressive anchor before they can. Make it high enough to seem bold but not absurd. Track how it shifts the final number.', technique: 'Anchoring', category: 'Negotiation', difficulty: 'Advanced', xpReward: 120, type: 'advanced' },
-  { id: 29, title: 'Empathy to Ask Pipeline', description: 'Build deep rapport using tactical empathy and labeling. Once they say "that\'s right," pivot to your ask. Track the conversion from rapport to action.', technique: 'Tactical Empathy', category: 'Rapport', difficulty: 'Advanced', xpReward: 150, type: 'advanced' },
-  { id: 30, title: 'The Full Playbook', description: 'Choose any three techniques and use all three in a single high-stakes conversation. Plan your sequence in advance. Document what worked and what clashed.', technique: 'Frame Control', category: 'Framing', difficulty: 'Advanced', xpReward: 200, type: 'advanced' },
-  { id: 31, title: 'Recover a Lost Frame', description: 'Deliberately let someone take the frame, then reclaim it mid-conversation. Practice the transition from following to leading. How long did recovery take?', technique: 'Frame Control', category: 'Defense', difficulty: 'Advanced', xpReward: 150, type: 'advanced' },
-  { id: 32, title: 'Social Proof Engineering', description: 'Before making a proposal, plant social proof by casually mentioning others who have already done what you are suggesting. Make it feel natural, not forced.', technique: 'Social Proof', category: 'Influence', difficulty: 'Intermediate', xpReward: 80, type: 'intermediate' },
+// Fallback missions used while the API is loading
+const FALLBACK_MISSIONS: Mission[] = [
+  { id: 1, title: 'Loading Missions...', description: 'Fetching your daily missions from the database...', technique: 'Patience', category: 'Influence', difficulty: 'Beginner', xpReward: 0, type: 'observer' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -129,14 +99,15 @@ function getDefaultMissionsData(): MissionsData {
   };
 }
 
-function getDailyMission(dateStr?: string): Mission {
+function getDailyMission(pool: Mission[], dateStr?: string): Mission {
+  if (pool.length === 0) return FALLBACK_MISSIONS[0];
   const today = dateStr || new Date().toISOString().split('T')[0];
   let seed = 0;
   for (let i = 0; i < today.length; i++) {
     seed = (seed * 31 + today.charCodeAt(i)) >>> 0;
   }
-  const index = seed % MISSION_POOL.length;
-  return MISSION_POOL[index];
+  const index = seed % pool.length;
+  return pool[index];
 }
 
 function getDateString(date: Date = new Date()): string {
@@ -795,10 +766,30 @@ export default function FieldOpsPage() {
 
   // ── Shared state ──
   const [isLoading, setIsLoading] = useState(true);
+  const [missionPool, setMissionPool] = useState<Mission[]>([]);
+  const [poolLoading, setPoolLoading] = useState(true);
+
+  // Fetch mission pool from API
+  useEffect(() => {
+    async function fetchMissionPool() {
+      try {
+        const res = await fetch('/api/missions/pool');
+        if (res.ok) {
+          const data = await res.json();
+          setMissionPool(data.missions || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch mission pool:', err);
+      } finally {
+        setPoolLoading(false);
+      }
+    }
+    fetchMissionPool();
+  }, []);
 
   // Today's mission
   const todayStr = getDateString();
-  const todayMission = useMemo(() => getDailyMission(todayStr), [todayStr]);
+  const todayMission = useMemo(() => getDailyMission(missionPool, todayStr), [missionPool, todayStr]);
   const todayCompleted = missionsData.completions.some((c) => c.date === todayStr);
 
   // Streak
@@ -810,12 +801,12 @@ export default function FieldOpsPage() {
     for (let i = 1; i <= 7; i++) {
       const date = new Date(Date.now() - i * 86400000);
       const dateStr = getDateString(date);
-      const mission = getDailyMission(dateStr);
+      const mission = getDailyMission(missionPool, dateStr);
       const completion = missionsData.completions.find((c) => c.date === dateStr);
       missions.push({ date: dateStr, mission, completion });
     }
     return missions;
-  }, [missionsData.completions]);
+  }, [missionPool, missionsData.completions]);
 
   // Timer
   const [timeLeft, setTimeLeft] = useState('');
@@ -1094,7 +1085,7 @@ export default function FieldOpsPage() {
     });
   }, [reports, timeFilter, searchTerm]);
 
-  if (isLoading) {
+  if (isLoading || poolLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A017]"></div>

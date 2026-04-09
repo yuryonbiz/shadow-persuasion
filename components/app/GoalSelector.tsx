@@ -1,6 +1,6 @@
 'use client';
 
-import { Target, Briefcase, Heart, Zap, Shield, TrendingUp } from 'lucide-react';
+import { Target, Briefcase, Heart, Zap, Shield, TrendingUp, Star } from 'lucide-react';
 
 interface Goal {
     id: string;
@@ -15,55 +15,64 @@ interface GoalSelectorProps {
     onSelectGoal: (goal: Goal) => void;
 }
 
+// Goal IDs aligned with ONBOARDING_GOALS in app/app/page.tsx
 export function GoalSelector({ onSelectGoal }: GoalSelectorProps) {
     const goals: Goal[] = [
         {
-            id: 'negotiation',
-            title: 'Win Negotiations',
-            description: 'Close deals, get raises, secure better terms',
-            icon: <TrendingUp className="h-6 w-6" />,
+            id: 'career',
+            title: 'Dominate at Work',
+            description: 'Promotions, raises, workplace politics, getting taken seriously',
+            icon: <Briefcase className="h-6 w-6" />,
             color: 'bg-green-500',
-            examples: ['Salary negotiations', 'Contract terms', 'Deal closing']
+            examples: ['Salary negotiations', 'Office politics', 'Career advancement']
         },
         {
-            id: 'influence',
-            title: 'Build Authority & Influence',
-            description: 'Establish credibility and command respect',
-            icon: <Target className="h-6 w-6" />,
-            color: 'bg-blue-500',
-            examples: ['Leadership presence', 'Thought leadership', 'Professional influence']
-        },
-        {
-            id: 'relationships',
-            title: 'Strengthen Relationships',
-            description: 'Build rapport, resolve conflicts, deepen connections',
+            id: 'dating',
+            title: 'Attract & Connect',
+            description: 'Dating, attraction, chemistry, building romantic connections',
             icon: <Heart className="h-6 w-6" />,
             color: 'bg-pink-500',
-            examples: ['Team building', 'Conflict resolution', 'Networking']
+            examples: ['First dates', 'Building attraction', 'Deepening connections']
         },
         {
             id: 'business',
-            title: 'Business & Sales Success',
-            description: 'Persuade clients, close sales, drive results',
-            icon: <Briefcase className="h-6 w-6" />,
+            title: 'Close & Persuade',
+            description: 'Sales, clients, deals, getting people to say yes',
+            icon: <TrendingUp className="h-6 w-6" />,
             color: 'bg-amber-500',
-            examples: ['Client persuasion', 'Sales conversations', 'Stakeholder buy-in']
+            examples: ['Client persuasion', 'Sales conversations', 'Deal closing']
         },
         {
-            id: 'difficult',
-            title: 'Handle Difficult Situations',
-            description: 'Navigate conflicts, manage resistance, stay in control',
+            id: 'social',
+            title: 'Command Any Room',
+            description: 'Social power, first impressions, respect, leadership presence',
+            icon: <Star className="h-6 w-6" />,
+            color: 'bg-blue-500',
+            examples: ['Leadership presence', 'First impressions', 'Social influence']
+        },
+        {
+            id: 'defense',
+            title: 'Neutralize Toxic People',
+            description: 'Handle manipulators, set boundaries, psychological defense',
             icon: <Shield className="h-6 w-6" />,
             color: 'bg-red-500',
-            examples: ['Difficult people', 'Hostile environments', 'Crisis management']
+            examples: ['Difficult people', 'Setting boundaries', 'Counter-manipulation']
         },
         {
-            id: 'general',
-            title: 'General Communication',
-            description: 'Improve everyday conversations and interactions',
+            id: 'confidence',
+            title: 'Build Unshakable Confidence',
+            description: 'Stop seeking approval, own your presence, inner power',
             icon: <Zap className="h-6 w-6" />,
             color: 'bg-purple-500',
-            examples: ['Daily conversations', 'Social interactions', 'Persuasion skills']
+            examples: ['Self-assurance', 'Personal power', 'Presence']
+        },
+        {
+            id: 'all',
+            title: 'General Communication',
+            description: 'Master it all — every tool, every technique, every edge',
+            icon: <Target className="h-6 w-6" />,
+            color: 'bg-[#D4A017]',
+            examples: ['Daily conversations', 'Persuasion skills', 'Full arsenal']
         }
     ];
 

@@ -45,7 +45,7 @@ interface ChatSession {
 }
 
 /* ────────────────────────────────────────────
-   Mission Pool (subset for daily pick)
+   Mission Types (fetched from API)
    ──────────────────────────────────────────── */
 
 type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -60,36 +60,6 @@ interface Mission {
   difficulty: Difficulty;
   xpReward: number;
 }
-
-const MISSION_POOL: Mission[] = [
-  { id: 1, title: 'Spot the Anchor', description: 'During any conversation today about money, prices, or numbers, notice who sets the first number. Observe how it influences the rest of the discussion.', technique: 'Anchoring', category: 'Negotiation', difficulty: 'Beginner', xpReward: 30 },
-  { id: 2, title: 'Social Proof Radar', description: 'Count how many times someone uses social proof on you today. Ads, colleagues, friends saying "everyone does it." Just notice and log each instance.', technique: 'Social Proof', category: 'Influence', difficulty: 'Beginner', xpReward: 30 },
-  { id: 3, title: 'Frame Detective', description: 'In your next meeting or conversation, identify who controls the frame. Notice how the topic, tone, and direction are set by one person.', technique: 'Frame Control', category: 'Framing', difficulty: 'Beginner', xpReward: 30 },
-  { id: 4, title: 'Mirror Watch', description: 'Observe a conversation between two people. Notice any mirroring happening naturally: body language, speech patterns, word choices.', technique: 'Mirroring', category: 'Rapport', difficulty: 'Beginner', xpReward: 30 },
-  { id: 5, title: 'Scarcity Scanner', description: 'Track every scarcity message you encounter today: limited-time offers, exclusive access, "only 3 left." Rate each one: genuine or manufactured?', technique: 'Scarcity Frame', category: 'Influence', difficulty: 'Beginner', xpReward: 30 },
-  { id: 6, title: 'The Reciprocity Drop', description: 'Do something unexpectedly helpful for someone today with no strings attached. Buy a coffee, share a useful resource, or give a genuine compliment.', technique: 'Reciprocity', category: 'Influence', difficulty: 'Beginner', xpReward: 50 },
-  { id: 7, title: 'Deploy a Mirror', description: 'In your next conversation, repeat the last 2-3 words someone says back to them as a question. Do this at least twice.', technique: 'Mirroring', category: 'Rapport', difficulty: 'Beginner', xpReward: 50 },
-  { id: 8, title: 'Label an Emotion', description: 'In a conversation today, use the phrase "It seems like..." or "It sounds like..." to name what the other person is feeling.', technique: 'Labeling', category: 'Rapport', difficulty: 'Beginner', xpReward: 50 },
-  { id: 9, title: 'Authority Frame', description: 'Before making a recommendation today, briefly establish your credibility on the topic. Reference a specific experience, data point, or insight.', technique: 'Authority Positioning', category: 'Framing', difficulty: 'Beginner', xpReward: 50 },
-  { id: 10, title: 'The Contrast Play', description: 'When presenting an option today, first mention a more expensive/difficult alternative, then present your actual recommendation.', technique: 'The Contrast Principle', category: 'Negotiation', difficulty: 'Beginner', xpReward: 50 },
-  { id: 11, title: 'Small Commitment', description: 'Get someone to agree to a small, easy request first, then follow up with your actual request. Track how the small yes affects the bigger ask.', technique: 'Commitment & Consistency', category: 'Influence', difficulty: 'Beginner', xpReward: 50 },
-  { id: 12, title: 'Strategic Compliment', description: 'Share a specific, genuine vulnerability or past mistake in a professional conversation. Notice how it changes the dynamic.', technique: 'Strategic Vulnerability', category: 'Rapport', difficulty: 'Beginner', xpReward: 50 },
-  { id: 13, title: 'Deploy a Presupposition', description: 'Use one embedded presupposition in a real conversation today. Example: "When we finalize this deal..." instead of "If we finalize..."', technique: 'Frame Control', category: 'Framing', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 14, title: 'Tactical Empathy Disarm', description: "Summarize the other person's position so accurately they say \"exactly\" or \"that's right.\" Use this as a bridge to your point.", technique: 'Tactical Empathy', category: 'Rapport', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 15, title: 'The Reframe', description: 'When someone raises an objection or problem today, reframe it. Turn a cost into an investment, a risk into an opportunity.', technique: 'Reframing', category: 'Framing', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 16, title: 'Door-in-the-Face', description: 'Make a deliberately large request that you expect to be declined. Then immediately follow up with your real, smaller request.', technique: 'Door-in-the-Face', category: 'Negotiation', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 17, title: 'Pattern Break', description: 'In a conversation that feels stuck or scripted, do something unexpected: change the topic abruptly, ask a surprising question.', technique: 'Pattern Interruption', category: 'Framing', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 18, title: 'The Void', description: 'After asking an important question today, stay completely silent. Do not fill the silence. Wait for them to speak first.', technique: 'The Void Pull', category: 'Rapport', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 19, title: 'Emotional Redirect', description: 'When someone is in a negative emotional state, use a story, question, or humor to shift their emotional state before making your point.', technique: 'Emotional Hijacking', category: 'Influence', difficulty: 'Intermediate', xpReward: 80 },
-  { id: 20, title: 'Scarcity + Reciprocity Stack', description: 'Combine two techniques: give something valuable first (reciprocity), then make it clear this opportunity is limited (scarcity).', technique: 'Scarcity Frame', category: 'Influence', difficulty: 'Intermediate', xpReward: 100 },
-  { id: 21, title: 'Accusation Audit', description: "List every negative thing the other person might think about you or your proposal. Then preemptively address them at the start.", technique: 'The Accusation Audit', category: 'Defense', difficulty: 'Advanced', xpReward: 120 },
-  { id: 22, title: 'The Takeaway Close', description: "When someone is hesitant but interested, pull back. Say \"Maybe this isn't the right fit\" or remove a benefit. Notice if they chase.", technique: 'The Takeaway', category: 'Negotiation', difficulty: 'Advanced', xpReward: 120 },
-  { id: 23, title: 'Full Frame War', description: "Enter a conversation where someone else sets the frame. Politely but firmly reject their frame and establish your own.", technique: 'Frame Control', category: 'Framing', difficulty: 'Advanced', xpReward: 120 },
-  { id: 24, title: 'Cognitive Overload Play', description: 'Present someone with 3-4 complex options, then offer your preferred option as the simple, clear choice.', technique: 'Cognitive Overload', category: 'Influence', difficulty: 'Advanced', xpReward: 120 },
-  { id: 25, title: 'Triple Stack', description: 'In one interaction, combine three techniques: establish authority, use tactical empathy, then close with a takeaway.', technique: 'Authority Positioning', category: 'Framing', difficulty: 'Advanced', xpReward: 150 },
-  { id: 26, title: 'Defense Mode', description: 'Someone will try to influence you today. Identify the technique they use in real-time and deploy a counter-technique.', technique: 'The Accusation Audit', category: 'Defense', difficulty: 'Advanced', xpReward: 120 },
-  { id: 27, title: 'Social Proof Engineering', description: 'Before making a proposal, plant social proof by casually mentioning others who have already done what you are suggesting.', technique: 'Social Proof', category: 'Influence', difficulty: 'Intermediate', xpReward: 80 },
-];
 
 /* ────────────────────────────────────────────
    Helpers
@@ -120,13 +90,14 @@ function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
 }
 
-function getDailyMission(dateStr: string): Mission {
+function getDailyMission(pool: Mission[], dateStr: string): Mission | null {
+  if (pool.length === 0) return null;
   let hash = 0;
   for (let i = 0; i < dateStr.length; i++) {
     hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
     hash |= 0;
   }
-  return MISSION_POOL[Math.abs(hash) % MISSION_POOL.length];
+  return pool[Math.abs(hash) % pool.length];
 }
 
 function timeAgo(dateStr: string): string {
@@ -313,6 +284,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [completions, setCompletions] = useState<MissionCompletion[]>([]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [missionPool, setMissionPool] = useState<Mission[]>([]);
   const [onboardingComplete, setOnboardingComplete] = useState(true); // assume true until we know
   const [selectedGoal, setSelectedGoal] = useState<typeof ONBOARDING_GOALS[number] | null>(null);
   const [onboardingStep, setOnboardingStep] = useState<'goals' | 'voice' | 'getStarted'>('goals');
@@ -327,13 +299,13 @@ export default function DashboardPage() {
 
   // Today's mission
   const today = new Date().toISOString().split('T')[0];
-  const dailyMission = getDailyMission(today);
+  const dailyMission = getDailyMission(missionPool, today);
 
   // Check if today's mission is completed
-  const todayCompletion = completions.find(c => {
+  const todayCompletion = dailyMission ? completions.find(c => {
     const completedDate = c.completed_at || c.created_at || c.date || '';
     return completedDate.startsWith(today) && (c.missionId === dailyMission.id);
-  });
+  }) : null;
 
   // Compute persuasion score from totalXP (1000 XP = 100 score)
   const persuasionScore = progress ? clamp(Math.round((progress.totalXP / 1000) * 100), 0, 100) : 0;
@@ -362,15 +334,17 @@ export default function DashboardPage() {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const [progressRes, completionsRes, conversationsRes] = await Promise.all([
+        const [progressRes, completionsRes, conversationsRes, poolRes] = await Promise.all([
           fetch('/api/user/progress', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch('/api/missions/completions', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch('/api/conversations', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/missions/pool').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
 
         if (progressRes) setProgress(progressRes);
         if (completionsRes?.completions) setCompletions(completionsRes.completions);
         if (conversationsRes?.sessions) setSessions(conversationsRes.sessions);
+        if (poolRes?.missions) setMissionPool(poolRes.missions);
 
         // Check if onboarding was requested via settings or user is brand new
         const forceOnboarding = localStorage.getItem('shadow-force-onboarding') === 'true';
@@ -773,32 +747,41 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <h3 className="text-lg font-bold mb-1">{dailyMission.title}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed max-w-2xl">
-            {dailyMission.description}
-          </p>
+          {dailyMission ? (
+            <>
+              <h3 className="text-lg font-bold mb-1">{dailyMission.title}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed max-w-2xl">
+                {dailyMission.description}
+              </p>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <span className={`text-xs font-mono px-2.5 py-1 rounded-full border ${DIFFICULTY_COLORS[dailyMission.difficulty]}`}>
-              {dailyMission.difficulty}
-            </span>
-            <span className="text-xs font-mono px-2.5 py-1 rounded-full border border-gray-300 dark:border-[#444] text-gray-500 dark:text-gray-400">
-              {dailyMission.technique}
-            </span>
-            <span className="text-xs font-mono text-[#D4A017]">
-              +{dailyMission.xpReward} XP
-            </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`text-xs font-mono px-2.5 py-1 rounded-full border ${DIFFICULTY_COLORS[dailyMission.difficulty]}`}>
+                  {dailyMission.difficulty}
+                </span>
+                <span className="text-xs font-mono px-2.5 py-1 rounded-full border border-gray-300 dark:border-[#444] text-gray-500 dark:text-gray-400">
+                  {dailyMission.technique}
+                </span>
+                <span className="text-xs font-mono text-[#D4A017]">
+                  +{dailyMission.xpReward} XP
+                </span>
 
-            {!todayCompletion && (
-              <Link
-                href="/app/field-ops"
-                className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D4A017] text-black text-sm font-bold font-mono uppercase tracking-wider hover:bg-[#C4901A] transition-colors"
-              >
-                Start Mission
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            )}
-          </div>
+                {!todayCompletion && (
+                  <Link
+                    href="/app/field-ops"
+                    className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D4A017] text-black text-sm font-bold font-mono uppercase tracking-wider hover:bg-[#C4901A] transition-colors"
+                  >
+                    Start Mission
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-500">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#D4A017]" />
+              <span className="text-sm">Loading missions...</span>
+            </div>
+          )}
         </div>
       </section>
 

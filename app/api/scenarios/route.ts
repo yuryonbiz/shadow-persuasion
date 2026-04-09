@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { HANDLER_SYSTEM_PROMPT, RAG_ENFORCEMENT, HANDLER_VOICE } from '@/lib/prompts';
-import { scenarios } from '@/lib/scenarios';
-import { searchKnowledge } from '@/lib/rag';
+import { supabase, searchKnowledge } from '@/lib/rag';
 
 export const maxDuration = 60;
 
@@ -11,8 +10,13 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, scenarioId } = await req.json();
 
-    const scenario = scenarios.find(s => s.id === scenarioId);
-    if (!scenario) {
+    const { data: scenario, error: scenarioError } = await supabase
+      .from('scenarios')
+      .select('*')
+      .eq('id', scenarioId)
+      .single();
+
+    if (scenarioError || !scenario) {
       return NextResponse.json({ error: 'Scenario not found.' }, { status: 404 });
     }
 
