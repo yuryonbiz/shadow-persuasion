@@ -107,6 +107,12 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
   const [nextReview, setNextReview] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
+  // Format snake_case/slug categories into display names
+  const formatCategory = (cat: string) => cat
+    .split(/[_-]/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
   // Derive category list dynamically from API data
   const dynamicCategories = ['All', ...Array.from(new Set(apiTechniques.map(t => t.category))).sort()];
 
@@ -244,7 +250,7 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
                   : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222]'}
               `}
             >
-              {category}
+              {formatCategory(category)}
             </button>
           ))}
         </div>
@@ -289,7 +295,7 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono uppercase bg-[#D4A017]/20 text-[#D4A017] px-2 py-1 rounded-full">{technique.category}</span>
+                  <span className="text-xs font-mono uppercase bg-[#D4A017]/20 text-[#D4A017] px-2 py-1 rounded-full">{formatCategory(technique.category)}</span>
                   {mounted && cardStatusMap[technique.id] && (
                     <span
                       className={`h-2.5 w-2.5 rounded-full shrink-0 ${

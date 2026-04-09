@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, Play, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+const formatLabel = (s: string) => s.split(/[_-]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 import NextLink from 'next/link';
 // Scenarios are fetched dynamically from the API
 
@@ -317,15 +319,15 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
         </button>
 
         <div className="flex items-center gap-3 mb-2">
-          <p className="font-mono text-sm text-[#D4A017] uppercase">{technique.category}</p>
+          <p className="font-mono text-sm text-[#D4A017] uppercase">{formatLabel(technique.category)}</p>
           <span className="text-gray-500">-</span>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Difficulty: {'*'.repeat(technique.difficulty)}
+            Difficulty: {formatLabel(String(technique.difficulty))}
           </p>
           {technique.riskLevel && technique.riskLevel !== 'unknown' && (
             <>
               <span className="text-gray-500">-</span>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Risk: {technique.riskLevel}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Risk: {formatLabel(technique.riskLevel)}</p>
             </>
           )}
         </div>
@@ -526,7 +528,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
                       <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-[#D4A017] transition-colors">
                         {s.title}
                       </span>
-                      <span className="text-xs text-gray-500 ml-2">{s.category}</span>
+                      <span className="text-xs text-gray-500 ml-2">{formatLabel(s.category)}</span>
                     </div>
                     <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                       {'*'.repeat(s.difficulty)}
