@@ -107,14 +107,24 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
   const [nextReview, setNextReview] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
+  const [difficultyFilter, setDifficultyFilter] = useState('All');
+
   // Format snake_case/slug categories into display names
   const formatCategory = (cat: string) => cat
     .split(/[_-]/)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 
+  // Map text difficulty to numeric for stars
+  const difficultyToNum = (d: string | number): number => {
+    if (typeof d === 'number') return d;
+    const map: Record<string, number> = { beginner: 1, intermediate: 2, advanced: 3 };
+    return map[d?.toLowerCase()] || 1;
+  };
+
   // Derive category list dynamically from API data
   const dynamicCategories = ['All', ...Array.from(new Set(apiTechniques.map(t => t.category))).sort()];
+  const difficultyOptions = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
   useEffect(() => {
     const loadCards = async () => {
@@ -158,6 +168,7 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
 
   const filteredTechniques = apiTechniques
     .filter(t => filter === 'All' || t.category === filter)
+    .filter(t => difficultyFilter === 'All' || formatCategory(String(t.difficulty)) === difficultyFilter)
     .filter(t =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
@@ -239,20 +250,37 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full md:w-1/3 p-2 bg-gray-50 dark:bg-[#222222] rounded-lg border border-gray-200 dark:border-[#333333] focus:ring-2 focus:ring-[#D4A017]"
         />
-        <div className="flex-1 flex items-center space-x-2 overflow-x-auto">
-          {dynamicCategories.map(category => (
-            <button
-              key={category}
-              onClick={() => setFilter(category)}
-              className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors whitespace-nowrap
-                ${filter === category
-                  ? 'bg-[#D4A017] text-[#0A0A0A]'
-                  : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222]'}
-              `}
-            >
-              {formatCategory(category)}
-            </button>
-          ))}
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="flex items-center space-x-2 overflow-x-auto">
+            {dynamicCategories.map(category => (
+              <button
+                key={category}
+                onClick={() => setFilter(category)}
+                className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors whitespace-nowrap
+                  ${filter === category
+                    ? 'bg-[#D4A017] text-[#0A0A0A]'
+                    : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222]'}
+                `}
+              >
+                {formatCategory(category)}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center space-x-2">
+            {difficultyOptions.map(d => (
+              <button
+                key={d}
+                onClick={() => setDifficultyFilter(d)}
+                className={`px-3 py-1 text-xs rounded-full font-semibold transition-colors whitespace-nowrap
+                  ${difficultyFilter === d
+                    ? 'bg-[#D4A017]/20 text-[#D4A017] border border-[#D4A017]'
+                    : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222] border border-gray-200 dark:border-[#444]'}
+                `}
+              >
+                {d === 'All' ? 'All Levels' : d}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -309,7 +337,7 @@ function LibraryTab({ getHeaders }: { getHeaders: () => Promise<Record<string, s
                 </div>
                 <div className="flex">
                   {[...Array(3)].map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < technique.difficulty ? 'text-[#D4A017] fill-current' : 'text-gray-600'}`} />
+                    <Star key={i} className={`h-4 w-4 ${i < difficultyToNum(technique.difficulty) ? 'text-[#D4A017] fill-[#D4A017]' : 'text-gray-300 dark:text-gray-600'}`} />
                   ))}
                 </div>
               </div>
