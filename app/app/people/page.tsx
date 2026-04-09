@@ -146,7 +146,8 @@ export default function PeoplePage() {
         body: JSON.stringify({ name, relationshipType }),
       });
       if (res.ok) {
-        const newProfile = await res.json();
+        const data = await res.json();
+        const newProfile = data.profile;
         setProfiles((prev) => [newProfile, ...prev]);
         setIsAddModalOpen(false);
         router.push(`/app/people/${newProfile.id}`);
