@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DECODE_SYSTEM_PROMPT, RAG_ENFORCEMENT } from '@/lib/prompts';
 import { searchKnowledge } from '@/lib/rag';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 export const maxDuration = 60;
 
@@ -87,6 +89,9 @@ Important rules:
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     let textContent = '';
     let imageDataUrl: string | null = null;
     let isImage = false;
@@ -117,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     // RAG search using the actual content
     const ragContext = await searchKnowledge(textContent);
-    const enhancedPrompt = COMPREHENSIVE_SYSTEM_PROMPT + (ragContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n${ragContext}` : '');
+    const enhancedPrompt = COMPREHENSIVE_SYSTEM_PROMPT + (ragContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT KNOWLEDGE BASE CONTEXT:\n${ragContext}` : '') + voiceContext;
 
     // Build the analysis message
     const userContent: any[] = [];

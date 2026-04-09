@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledge, supabase } from '@/lib/rag';
 import { RAG_ENFORCEMENT, HANDLER_VOICE } from '@/lib/prompts';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 const STRATEGIC_CHAT_SYSTEM_PROMPT = `You are a Strategic Communication Coach specializing in influence, persuasion, and tactical conversation guidance. You provide specific, actionable advice focused on achieving concrete outcomes.
 
@@ -37,6 +39,9 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     const { messages, goal, goalTitle, session_id } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -85,7 +90,7 @@ export async function POST(req: NextRequest) {
     const contextualPrompt = `${HANDLER_VOICE}\n${STRATEGIC_CHAT_SYSTEM_PROMPT}
 
 CURRENT SESSION GOAL: "${goalTitle}" (${goal})
-Tailor all advice and tactics specifically to support this objective. Consider the unique challenges and opportunities associated with this goal type.${knowledgeContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT STRATEGIC TECHNIQUES FROM KNOWLEDGE BASE:\n${knowledgeContext}` : ''}`;
+Tailor all advice and tactics specifically to support this objective. Consider the unique challenges and opportunities associated with this goal type.${knowledgeContext ? `\n\n${RAG_ENFORCEMENT}\n\nRELEVANT STRATEGIC TECHNIQUES FROM KNOWLEDGE BASE:\n${knowledgeContext}` : ''}${voiceContext}`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',

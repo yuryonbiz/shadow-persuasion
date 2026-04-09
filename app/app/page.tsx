@@ -306,8 +306,15 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [onboardingComplete, setOnboardingComplete] = useState(true); // assume true until we know
   const [selectedGoal, setSelectedGoal] = useState<typeof ONBOARDING_GOALS[number] | null>(null);
-  const [onboardingStep, setOnboardingStep] = useState<'goals' | 'getStarted'>('goals');
+  const [onboardingStep, setOnboardingStep] = useState<'goals' | 'voice' | 'getStarted'>('goals');
   const [savingGoal, setSavingGoal] = useState(false);
+
+  // Voice profile state
+  const [voicePersonality, setVoicePersonality] = useState('');
+  const [voiceStyle, setVoiceStyle] = useState('');
+  const [voiceTones, setVoiceTones] = useState<string[]>([]);
+  const [voiceSampleTexts, setVoiceSampleTexts] = useState('');
+  const [savingVoice, setSavingVoice] = useState(false);
 
   // Today's mission
   const today = new Date().toISOString().split('T')[0];
@@ -401,8 +408,46 @@ export default function DashboardPage() {
       console.error('Failed to save goal:', err);
     } finally {
       setSavingGoal(false);
+      setOnboardingStep('voice');
+    }
+  };
+
+  const handleVoiceSave = async () => {
+    setSavingVoice(true);
+    try {
+      const token = await user?.getIdToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const sampleTexts = voiceSampleTexts
+        .split(/\n{2,}/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      await fetch('/api/user/voice-profile', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          personality: voicePersonality,
+          writingStyle: voiceStyle,
+          tone: voiceTones.join(', '),
+          sampleTexts,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save voice profile:', err);
+    } finally {
+      setSavingVoice(false);
       setOnboardingStep('getStarted');
     }
+  };
+
+  const TONE_OPTIONS = ['Professional', 'Casual', 'Friendly', 'Direct', 'Diplomatic', 'Assertive', 'Warm'];
+
+  const toggleTone = (tone: string) => {
+    setVoiceTones(prev =>
+      prev.includes(tone) ? prev.filter(t => t !== tone) : [...prev, tone]
+    );
   };
 
   /* ────────────────────────────────────────────
@@ -452,6 +497,110 @@ export default function DashboardPage() {
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          ) : onboardingStep === 'voice' ? (
+            /* Voice Profile Step */
+            <div className="space-y-6">
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/10 border border-[#D4A017]/30 text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  Voice Setup
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black font-mono tracking-wide">
+                  Teach Us <span className="text-[#D4A017]">Your Voice</span>
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+                  So every script, response, and recommendation sounds like YOU &mdash; not a robot.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Personality */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+                    Personality
+                  </label>
+                  <textarea
+                    value={voicePersonality}
+                    onChange={e => setVoicePersonality(e.target.value)}
+                    placeholder="e.g., Direct and confident, but empathetic. I don't like being pushy. I use humor to defuse tension."
+                    rows={2}
+                    className="w-full rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] px-4 py-3 text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] outline-none transition-all resize-none"
+                  />
+                </div>
+
+                {/* Communication Style */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+                    Communication Style
+                  </label>
+                  <textarea
+                    value={voiceStyle}
+                    onChange={e => setVoiceStyle(e.target.value)}
+                    placeholder="e.g., Short sentences, casual tone, I say 'honestly' and 'look' a lot. I avoid corporate jargon."
+                    rows={2}
+                    className="w-full rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] px-4 py-3 text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] outline-none transition-all resize-none"
+                  />
+                </div>
+
+                {/* Tone Pills */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+                    Tone <span className="normal-case tracking-normal">(select all that apply)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {TONE_OPTIONS.map(tone => (
+                      <button
+                        key={tone}
+                        type="button"
+                        onClick={() => toggleTone(tone)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition-all ${
+                          voiceTones.includes(tone)
+                            ? 'bg-[#D4A017]/20 border-[#D4A017] text-[#D4A017]'
+                            : 'bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#333] text-gray-500 dark:text-gray-400 hover:border-[#D4A017]/50'
+                        }`}
+                      >
+                        {tone}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sample Texts */}
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+                    Sample Texts
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mb-1.5">
+                    Paste 2-3 real messages or emails you&apos;ve written. This helps us match your natural voice. Separate each with a blank line.
+                  </p>
+                  <textarea
+                    value={voiceSampleTexts}
+                    onChange={e => setVoiceSampleTexts(e.target.value)}
+                    placeholder="Paste an email or message you've sent recently..."
+                    rows={5}
+                    className="w-full rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] px-4 py-3 text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col items-center gap-3 pt-2">
+                <button
+                  onClick={handleVoiceSave}
+                  disabled={savingVoice}
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#D4A017] text-black text-sm font-bold font-mono uppercase tracking-wider hover:bg-[#C4901A] transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  {savingVoice ? 'Saving...' : 'Continue'}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setOnboardingStep('getStarted')}
+                  className="text-xs font-mono text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors underline underline-offset-2"
+                >
+                  Skip for now
+                </button>
               </div>
             </div>
           ) : selectedGoal ? (

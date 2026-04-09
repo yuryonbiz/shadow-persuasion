@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { HANDLER_SYSTEM_PROMPT, RAG_ENFORCEMENT, HANDLER_VOICE } from '@/lib/prompts';
 import { searchKnowledge, getEmbedding, supabase } from '@/lib/rag';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 export const maxDuration = 60;
 
@@ -45,6 +47,9 @@ async function searchKnowledgeWithSources(query: string, limit: number = 5): Pro
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     const { messages, session_id } = await req.json();
     const recentMessages = messages.slice(-10);
     
@@ -63,6 +68,7 @@ export async function POST(req: NextRequest) {
       const ragContext = ragResult.context;
       systemContent += `\n\n${RAG_ENFORCEMENT}\n\n---\n\nRELEVANT KNOWLEDGE BASE EXCERPTS:\n${ragContext}`;
     }
+    systemContent += voiceContext;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',

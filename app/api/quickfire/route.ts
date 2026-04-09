@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledge } from '@/lib/rag';
 import { RAG_ENFORCEMENT, HANDLER_VOICE } from '@/lib/prompts';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 const SYSTEM_PROMPT = `${HANDLER_VOICE}
 You are a tactical influence advisor. The user is in a LIVE situation and needs an answer in seconds. Be direct, specific, give exact words. No preamble, no disclaimers.
@@ -22,6 +24,9 @@ export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     const { situation, context } = await req.json();
 
     if (!situation || typeof situation !== 'string') {
@@ -49,7 +54,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: 'openai/gpt-4o',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT + knowledgeContext },
+          { role: 'system', content: SYSTEM_PROMPT + knowledgeContext + voiceContext },
           { role: 'user', content: userContent },
         ],
         response_format: { type: 'json_object' },

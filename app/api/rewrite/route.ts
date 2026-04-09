@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledge } from '@/lib/rag';
 import { RAG_ENFORCEMENT } from '@/lib/prompts';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 const REWRITE_SYSTEM_PROMPT = `You are a message optimization expert specializing in psychological influence and persuasion. Your task is to transform weak, boring, or ineffective messages into psychologically optimized communications.
 
@@ -41,6 +43,9 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     const { message, goal } = await req.json();
 
     if (!message) {
@@ -60,7 +65,7 @@ export async function POST(req: NextRequest) {
     const goalInstruction = goal
       ? `\n\nIMPORTANT: The user's primary goal is "${goal}". Prioritize and emphasize this goal across ALL rewrite versions. Each version should be optimized to support "${goal}" while still applying its respective category strategy. The best version for achieving "${goal}" should be listed first.`
       : '';
-    const enhancedPrompt = REWRITE_SYSTEM_PROMPT + goalInstruction + knowledgeContext;
+    const enhancedPrompt = REWRITE_SYSTEM_PROMPT + goalInstruction + knowledgeContext + voiceContext;
 
     console.log('[REWRITE]', 'Calling OpenRouter');
     

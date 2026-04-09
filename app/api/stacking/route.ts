@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchKnowledge } from '@/lib/rag';
 import { RAG_ENFORCEMENT } from '@/lib/prompts';
+import { getUserFromRequest } from '@/lib/auth-api';
+import { getVoiceProfile } from '@/lib/voice-profile';
 
 const SYSTEM_PROMPT = `You are a tactical influence strategist. Given a goal, create technique stacking sequences that combine multiple persuasion/influence techniques in optimal order for maximum impact.
 
@@ -42,6 +44,9 @@ export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserFromRequest(req);
+    const voiceContext = await getVoiceProfile(userId);
+
     const { goal } = await req.json();
 
     if (!goal || typeof goal !== 'string') {
@@ -65,7 +70,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: 'openai/gpt-4o',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT + knowledgeContext },
+          { role: 'system', content: SYSTEM_PROMPT + knowledgeContext + voiceContext },
           {
             role: 'user',
             content: `Create technique stacking sequences for this goal: "${goal}"`,
