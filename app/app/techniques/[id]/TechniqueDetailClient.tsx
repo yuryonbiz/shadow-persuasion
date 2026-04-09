@@ -70,6 +70,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
   const [score, setScore] = useState(0);
   const [practiceScenarios, setPracticeScenarios] = useState<PracticeScenario[]>([]);
   const [practiceLoading, setPracticeLoading] = useState(false);
+  const [practiceError, setPracticeError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -129,7 +130,11 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
   const generateScenarios = async () => {
     if (!technique) return;
     setPracticeLoading(true);
+    setPracticeError(null);
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000); // 55s timeout
+
       const res = await fetch('/api/technique-practice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -138,12 +143,27 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
           techniqueName: technique.name,
           description: technique.chunks.overview?.[0]?.content?.slice(0, 200) || technique.name,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
+
       if (res.ok) {
         const data = await res.json();
-        setPracticeScenarios(data.scenarios || []);
+        if (data.scenarios?.length > 0) {
+          setPracticeScenarios(data.scenarios);
+        } else {
+          setPracticeError('No scenarios generated. Try again.');
+        }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setPracticeError(errData.error || `Failed to generate scenarios (${res.status})`);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        setPracticeError('Request timed out. The AI is taking too long — please try again.');
+      } else {
+        setPracticeError('Failed to connect. Please try again.');
+      }
       console.error('Failed to generate practice scenarios:', err);
     }
     setPracticeLoading(false);
@@ -216,17 +236,27 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
         <div className="max-w-4xl mx-auto text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A017] mx-auto" />
           <p className="mt-4 text-gray-500 dark:text-gray-400">Generating practice scenarios...</p>
+          <p className="mt-1 text-xs text-gray-400">This can take up to 30 seconds</p>
         </div>
       );
     }
 
-    if (practiceScenarios.length === 0) {
+    if (practiceError || practiceScenarios.length === 0) {
       return (
         <div className="max-w-4xl mx-auto text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No practice scenarios available yet.</p>
-          <button onClick={() => setMode('learn')} className="mt-4 px-6 py-2 bg-gray-200 dark:bg-[#333333] text-gray-900 dark:text-white rounded-lg">
-            Back to Learning
-          </button>
+          {practiceError ? (
+            <p className="text-red-400 text-sm mb-4">{practiceError}</p>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 mb-4">No practice scenarios available yet.</p>
+          )}
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={() => generateScenarios()} className="px-6 py-2 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B830] transition-colors">
+              Try Again
+            </button>
+            <button onClick={() => setMode('learn')} className="px-6 py-2 bg-gray-200 dark:bg-[#333333] text-gray-900 dark:text-white rounded-lg">
+              Back to Learning
+            </button>
+          </div>
         </div>
       );
     }
