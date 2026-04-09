@@ -35,9 +35,12 @@ interface PersonProfile {
     id: string;
     name: string;
     relationshipType?: string;
-    analysis_data?: any;
+    traits?: {
+        communication?: { sensoryPreference?: string; emotionalPattern?: string; receptivity?: number; summary?: string };
+        triggers?: { defensive?: string[] };
+        _lastAnalysis?: { threat_score?: number; power_dynamics?: any; detected_tactics?: any[]; techniques_identified?: string[] };
+    };
     keyTraitTags?: string[];
-    communicationStyle?: string;
     notes?: string;
 }
 
@@ -88,15 +91,16 @@ export function StrategicChat({ goal, onBack, resumeSessionId, initialMessages }
         scrollToBottom();
     }, [messages]);
 
-    // Initialize conversation with goal-specific introduction
+    // Initialize conversation with goal-specific introduction (only for NEW sessions)
     useEffect(() => {
+        if (initialMessages && initialMessages.length > 0) return; // Skip init for resumed sessions
         const initMessage: Message = {
             id: 'init',
             role: 'assistant',
             content: `I'm your Strategic Communication Coach, focused on: **${goal.title}**\n\nI'll provide specific tactics, exact scripts, and real-time guidance to help you achieve your objective.\n\n**To get started, describe your specific situation:**\n\n• Who are you dealing with?\n• What's the context?\n• What outcome do you want?\n• What challenges are you facing?\n\nThe more specific you are, the more targeted my tactical guidance will be.`
         };
         setMessages([initMessage]);
-    }, [goal]);
+    }, [goal]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSend = async (input: string, image?: { file: File; preview: string; base64: string }) => {
         // If image is attached, add a description for the AI
@@ -107,12 +111,32 @@ export function StrategicChat({ goal, onBack, resumeSessionId, initialMessages }
 
         // If a person is selected, prepend their profile context
         if (selectedPerson) {
-            const traits = selectedPerson.keyTraitTags?.join(', ') || 'unknown';
-            const commStyle = selectedPerson.communicationStyle || 'not profiled yet';
-            const analysisInfo = selectedPerson.analysis_data
-                ? `Threat score: ${selectedPerson.analysis_data.threat_score || 'N/A'}, Communication style: ${JSON.stringify(selectedPerson.analysis_data.communication_style || {})}`
-                : '';
-            enrichedInput = `[Context: I'm dealing with ${selectedPerson.name}. Their profile: traits=${traits}, communication style=${commStyle}. ${analysisInfo} ${selectedPerson.notes ? 'Notes: ' + selectedPerson.notes : ''}]\n\n${enrichedInput}`;
+            const comm = selectedPerson.traits?.communication;
+            const analysis = selectedPerson.traits?._lastAnalysis;
+            const triggers = selectedPerson.traits?.triggers?.defensive;
+            const traitTags = selectedPerson.keyTraitTags?.join(', ');
+
+            let profileContext = `[Context: I'm dealing with ${selectedPerson.name}`;
+            if (selectedPerson.relationshipType) profileContext += ` (${selectedPerson.relationshipType})`;
+            profileContext += '.';
+
+            if (comm) {
+                if (comm.emotionalPattern) profileContext += ` Emotional pattern: ${comm.emotionalPattern}.`;
+                if (comm.sensoryPreference) profileContext += ` Communication preference: ${comm.sensoryPreference}.`;
+                if (comm.receptivity) profileContext += ` Receptivity to influence: ${comm.receptivity}%.`;
+                if (comm.summary) profileContext += ` Summary: ${comm.summary}`;
+            }
+            if (triggers?.length) profileContext += ` Defensive triggers: ${triggers.join(', ')}.`;
+            if (traitTags) profileContext += ` Key traits: ${traitTags}.`;
+            if (analysis) {
+                if (analysis.threat_score != null) profileContext += ` Threat score: ${analysis.threat_score}/10.`;
+                if (analysis.power_dynamics) profileContext += ` Power dynamics: You ${analysis.power_dynamics.yourPower}/10, Them ${analysis.power_dynamics.theirPower}/10.`;
+                if (analysis.techniques_identified?.length) profileContext += ` Known techniques they use: ${analysis.techniques_identified.join(', ')}.`;
+            }
+            if (selectedPerson.notes) profileContext += ` Notes: ${selectedPerson.notes}`;
+            profileContext += ']\n\n';
+
+            enrichedInput = profileContext + enrichedInput;
         }
 
         const userMessage: Message = { id: Date.now().toString(), role: 'user', content: enrichedInput };

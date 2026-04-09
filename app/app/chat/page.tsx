@@ -575,7 +575,8 @@ export default function ChatListPage() {
                     const msgs = (data.messages || []).map((m: any) => ({
                       id: m.id,
                       role: m.role,
-                      content: m.content,
+                      // Strip [Context: ...] prefix from stored user messages for display
+                      content: m.role === 'user' ? m.content.replace(/^\[Context:[\s\S]*?\]\s*\n*/m, '') : m.content,
                       sources: m.metadata?.sources || undefined,
                     }));
                     setResumeSessionId(convo.id);
