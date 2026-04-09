@@ -145,15 +145,18 @@ export default function PeoplePage() {
         headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify({ name, relationshipType }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        const newProfile = data.profile;
-        setProfiles((prev) => [newProfile, ...prev]);
-        setIsAddModalOpen(false);
-        router.push(`/app/people/${newProfile.id}`);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to create profile');
+        return;
       }
+      const newProfile = data.profile;
+      setProfiles((prev) => [newProfile, ...prev]);
+      setIsAddModalOpen(false);
+      router.push(`/app/people/${newProfile.id}`);
     } catch (e) {
       console.error('Failed to create profile:', e);
+      alert('Failed to create profile. Please try again.');
     }
   };
 

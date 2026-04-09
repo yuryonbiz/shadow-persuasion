@@ -47,7 +47,13 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await supabase
       .from(TABLE)
-      .insert({ ...body, user_id: userId })
+      .insert({
+        name: body.name,
+        relationship_type: body.relationshipType,
+        user_id: userId,
+        traits: {},
+        interactions: [],
+      })
       .select()
       .single();
 
