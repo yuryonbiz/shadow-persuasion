@@ -260,12 +260,26 @@ export function StrategicChat({ goal, onBack, resumeSessionId, initialMessages }
                 }
             }
             
+            // Save assistant message to DB from frontend (backend flush is unreliable)
+            if (activeSessionId && fullContent) {
+                const cleanContent = fullContent.replace(/<!--GUIDANCE:[\s\S]*?-->/, '').trim();
+                fetch('/api/conversations/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: activeSessionId,
+                        role: 'assistant',
+                        content: cleanContent,
+                    }),
+                }).catch(e => console.error('Failed to save assistant message:', e));
+            }
+
         } catch (error) {
             console.error('Strategic chat error:', error);
-            setMessages(prev => [...prev, { 
-                id: 'error-' + Date.now(), 
-                role: 'assistant', 
-                content: 'Sorry, I encountered an error processing your request. Please try again.' 
+            setMessages(prev => [...prev, {
+                id: 'error-' + Date.now(),
+                role: 'assistant',
+                content: 'Sorry, I encountered an error processing your request. Please try again.'
             }]);
         } finally {
             setIsLoading(false);
