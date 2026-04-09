@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('analysis_history')
-    .select('id, input_text, input_type, threat_score, power_yours, power_theirs, tactics, person_id, created_at, full_result')
+    .select('id, input_text, input_type, threat_score, power_yours, power_theirs, tactics, person_id, created_at, full_result, overall_assessment, techniques_identified')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     full_result: row.full_result,
   }));
 
-  return NextResponse.json({ items });
+  return NextResponse.json({ analyses: items });
 }
 
 export async function POST(request: NextRequest) {

@@ -265,7 +265,7 @@ export default function AnalyzePage() {
       const res = await fetch('/api/analyze/history?limit=10', { headers });
       if (res.ok) {
         const data = await res.json();
-        setHistory(data.items || []);
+        setHistory(data.analyses || []);
       }
     } catch (e) {
       console.error('Failed to load history:', e);
