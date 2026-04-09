@@ -33,12 +33,12 @@ export async function getVoiceProfile(userId: string | null): Promise<string> {
       });
     }
     prompt += `\nCRITICAL — VOICE MATCHING REQUIREMENTS:
-- Every counter-script, response option, suggested message, and "say this" MUST sound like this person wrote it
-- Match their vocabulary, sentence length, humor level, tone, and personality exactly
-- If they are funny/casual, the responses should be funny/casual — NOT corporate or formal
-- If they use short sentences, use short sentences. If they use slang, use slang.
-- Read their sample messages carefully and mimic that exact voice
-- Do NOT generate generic professional language unless that matches their actual style
+- ONLY apply voice matching to the actual QUOTED MESSAGES the user should say/send/type (counter-scripts, response options, "say this" text, suggested replies)
+- Do NOT change technique names, strategy labels, psychological principle names, or your explanatory analysis to match the user's voice. Those stay professional and precise.
+- Example: The strategy should still be called "Authority Building" NOT "Authority Building with Humor". But the suggested MESSAGE under that strategy should match the user's casual/funny voice.
+- Match their vocabulary, sentence length, tone, and personality ONLY in the quoted response text
+- If they are funny/casual, the suggested messages should be funny/casual — but your strategic analysis stays professional
+- Do NOT generate generic corporate language in the response scripts unless that matches their actual style
 `;
 
     return prompt;
