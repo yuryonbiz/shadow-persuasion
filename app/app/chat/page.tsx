@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PlusCircle, ArrowLeft, Trash2, Zap } from 'lucide-react';
 import { GoalSelector } from '@/components/app/GoalSelector';
 import { StrategicChat } from '@/components/app/StrategicChat';
+import { formatDate } from '@/lib/format-date';
 
 interface Goal {
     id: string;
@@ -113,17 +114,6 @@ export default function ChatListPage() {
     }
   };
 
-  const formatTimestamp = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
 
   const handleSelectGoal = (goal: Goal) => {
     setSelectedGoal(goal);
@@ -500,7 +490,7 @@ export default function ChatListPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900 dark:text-white truncate">{item.situation}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatTimestamp(item.created_at)}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(item.created_at)}</span>
                       {item.classification && (
                         <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-[#D4A017]/10 text-[#D4A017] rounded">
                           {item.classification.replace(/_/g, ' ')}
@@ -585,7 +575,7 @@ export default function ChatListPage() {
                     {convo.lastMessage && (
                       <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">{convo.lastMessage}</p>
                     )}
-                    <p className="text-xs text-gray-500 mt-2">{formatTimestamp(convo.updated_at)}</p>
+                    <p className="text-xs text-gray-500 mt-2">{formatDate(convo.updated_at)}</p>
                   </div>
                   <button
                     onClick={(e) => handleDeleteSession(convo.id, e)}

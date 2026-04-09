@@ -8,6 +8,7 @@ import {
   Briefcase, Heart, DollarSign, Shield, Star, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { formatDate } from '@/lib/format-date';
 
 /* ────────────────────────────────────────────
    Types
@@ -100,17 +101,6 @@ function getDailyMission(pool: Mission[], dateStr: string): Mission | null {
   return pool[Math.abs(hash) % pool.length];
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return `${Math.floor(days / 7)}w ago`;
-}
 
 function getActivityIcon(type: string) {
   switch (type) {
@@ -896,7 +886,7 @@ export default function DashboardPage() {
                     {item.label}
                   </span>
                   <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
-                    {timeAgo(item.date)}
+                    {formatDate(item.date)}
                   </span>
                 </div>
               );
@@ -933,7 +923,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {timeAgo(session.updated_at)}
+                    {formatDate(session.updated_at)}
                   </span>
                   <span className="text-xs font-mono text-[#D4A017] opacity-0 group-hover:opacity-100 transition-opacity">
                     Resume →

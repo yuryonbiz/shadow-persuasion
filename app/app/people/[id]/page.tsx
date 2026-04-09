@@ -18,6 +18,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { formatDate } from '@/lib/format-date';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1422,17 +1423,6 @@ function AnalysesTab({ profileId, getHeaders }: { profileId: string; getHeaders:
     return 'High';
   };
 
-  const timeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    if (days < 7) return `${days}d ago`;
-    return new Date(dateStr).toLocaleDateString();
-  };
 
   if (loading) {
     return (
@@ -1469,7 +1459,7 @@ function AnalysesTab({ profileId, getHeaders }: { profileId: string; getHeaders:
                 Threat: {a.threat_score}/10 ({getThreatLabel(a.threat_score)}) · Power: You {a.power_yours} vs Them {a.power_theirs} · {a.tactics_count} tactic{a.tactics_count !== 1 ? 's' : ''}
               </p>
             </div>
-            <span className="text-xs text-gray-400 shrink-0">{timeAgo(a.created_at)}</span>
+            <span className="text-xs text-gray-400 shrink-0">{formatDate(a.created_at)}</span>
             <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${expanded === a.id ? 'rotate-90' : ''}`} />
           </button>
 

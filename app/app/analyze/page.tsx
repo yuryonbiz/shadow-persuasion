@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check, Clock, Trash2, ChevronDown, Send, MessageCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { formatDate } from '@/lib/format-date';
 
 // ─── History Types ──────────────────────────────────────────────────────────
 
@@ -19,20 +20,6 @@ interface HistoryItem {
   full_result: AnalysisResult;
 }
 
-function timeAgo(dateStr: string): string {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (seconds < 60) return 'just now';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Yesterday';
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
-}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -1420,7 +1407,7 @@ export default function AnalyzePage() {
                     {item.input_text && item.input_text.length > 80 ? '...' : ''}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(item.created_at)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(item.created_at)}</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {item.tactics_count} tactic{item.tactics_count !== 1 ? 's' : ''}
                     </span>

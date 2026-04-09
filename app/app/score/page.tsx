@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Trophy, TrendingUp, Flame, BookOpen, FileText, Swords, Target, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { formatDate } from '@/lib/format-date';
 
 /* ────────────────────────────────────────────
    Types
@@ -62,16 +63,6 @@ function clamp(v: number, min: number, max: number) {
 
 // Data is now fetched from /api/user/progress
 
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
 
 /* ────────────────────────────────────────────
    Circular Progress Ring
@@ -283,7 +274,7 @@ export default function ScorePage() {
                   <span className="text-sm font-mono font-bold text-[#D4A017]">+{entry.xp} XP</span>
                   <span className="text-sm text-gray-600 dark:text-gray-300">{entry.label}</span>
                 </div>
-                <span className="text-xs text-gray-600">{timeAgo(entry.ts)}</span>
+                <span className="text-xs text-gray-600">{formatDate(entry.ts)}</span>
               </div>
             ))}
           </div>
