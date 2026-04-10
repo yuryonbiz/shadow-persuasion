@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, BookOpen, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X } from 'lucide-react';
+import { Upload, BookOpen, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X, Plus, Power, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 const ADMIN_EMAILS = ['ybyalik@gmail.com'];
@@ -358,6 +358,108 @@ export default function AdminPage() {
     power_strategy: 'bg-amber-500/20 text-amber-300',
   };
 
+  // ===== Taxonomy state =====
+  type TaxCategory = {
+    id: string; name: string; emoji: string; description: string;
+    sort_order: number; is_active: boolean; useCases: TaxUseCase[];
+  };
+  type TaxUseCase = {
+    id: string; category_id: string; title: string;
+    sort_order: number; is_active: boolean;
+  };
+
+  const [taxCategories, setTaxCategories] = useState<TaxCategory[]>([]);
+  const [taxLoading, setTaxLoading] = useState(false);
+  const [taxExpanded, setTaxExpanded] = useState<string | null>(null);
+  const [taxEditingCat, setTaxEditingCat] = useState<string | null>(null);
+  const [taxEditCat, setTaxEditCat] = useState({ name: '', emoji: '', description: '' });
+  const [taxEditingUc, setTaxEditingUc] = useState<string | null>(null);
+  const [taxEditUcTitle, setTaxEditUcTitle] = useState('');
+  const [taxNewCat, setTaxNewCat] = useState(false);
+  const [taxNewCatForm, setTaxNewCatForm] = useState({ name: '', emoji: '', description: '' });
+  const [taxNewUcFor, setTaxNewUcFor] = useState<string | null>(null);
+  const [taxNewUcTitle, setTaxNewUcTitle] = useState('');
+  const [taxSaving, setTaxSaving] = useState(false);
+
+  const getAuthHeaders = async () => {
+    const token = await user?.getIdToken();
+    return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  };
+
+  const loadTaxonomy = async () => {
+    setTaxLoading(true);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/taxonomy/admin', { headers });
+      const data = await res.json();
+      if (data.categories) setTaxCategories(data.categories);
+    } catch {}
+    setTaxLoading(false);
+  };
+
+  useEffect(() => { if (user?.email && ADMIN_EMAILS.includes(user.email)) loadTaxonomy(); }, [user]);
+
+  const taxApi = async (method: string, body?: any, params?: string) => {
+    setTaxSaving(true);
+    try {
+      const headers = await getAuthHeaders();
+      const url = '/api/taxonomy/admin' + (params || '');
+      const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      if (!res.ok) { const d = await res.json(); console.error(d.error); }
+      await loadTaxonomy();
+    } catch (e) { console.error(e); }
+    setTaxSaving(false);
+  };
+
+  const handleAddCategory = () => {
+    if (!taxNewCatForm.name.trim()) return;
+    taxApi('POST', { type: 'category', ...taxNewCatForm });
+    setTaxNewCat(false);
+    setTaxNewCatForm({ name: '', emoji: '', description: '' });
+  };
+
+  const handleSaveCatEdit = (id: string) => {
+    taxApi('PUT', { type: 'category', id, ...taxEditCat });
+    setTaxEditingCat(null);
+  };
+
+  const handleToggleCat = (cat: TaxCategory) => {
+    taxApi('PUT', { type: 'category', id: cat.id, is_active: !cat.is_active });
+  };
+
+  const handleDeleteCat = (id: string, name: string) => {
+    if (!confirm(`Delete category "${name}" and all its use cases?`)) return;
+    taxApi('DELETE', undefined, `?type=category&id=${id}`);
+  };
+
+  const handleAddUseCase = (categoryId: string) => {
+    if (!taxNewUcTitle.trim()) return;
+    taxApi('POST', { type: 'use_case', category_id: categoryId, title: taxNewUcTitle });
+    setTaxNewUcFor(null);
+    setTaxNewUcTitle('');
+  };
+
+  const handleSaveUcEdit = (id: string) => {
+    taxApi('PUT', { type: 'use_case', id, title: taxEditUcTitle });
+    setTaxEditingUc(null);
+  };
+
+  const handleDeleteUc = (id: string, title: string) => {
+    if (!confirm(`Delete use case "${title}"?`)) return;
+    taxApi('DELETE', undefined, `?type=use_case&id=${id}`);
+  };
+
+  const handleMoveUc = (uc: TaxUseCase, direction: 'up' | 'down', siblings: TaxUseCase[]) => {
+    const sorted = [...siblings].sort((a, b) => a.sort_order - b.sort_order);
+    const idx = sorted.findIndex(s => s.id === uc.id);
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const other = sorted[swapIdx];
+    // Swap sort orders
+    taxApi('PUT', { type: 'use_case', id: uc.id, sort_order: other.sort_order });
+    taxApi('PUT', { type: 'use_case', id: other.id, sort_order: uc.sort_order });
+  };
+
   if (loading || !user?.email || !ADMIN_EMAILS.includes(user.email)) {
     return null;
   }
@@ -551,6 +653,171 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* ===== TAXONOMY SECTION ===== */}
+      <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-mono text-sm text-[#D4A017] uppercase tracking-wider">Categories &amp; Use Cases</h2>
+          <div className="flex items-center gap-2">
+            <button onClick={loadTaxonomy} className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#D4A017] flex items-center gap-1">
+              <RefreshCw className="h-3 w-3" /> Refresh
+            </button>
+            <button onClick={() => setTaxNewCat(true)}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 bg-[#D4A017] text-[#0A0A0A] font-mono font-bold rounded hover:bg-[#E8B030] transition-colors">
+              <Plus className="h-3 w-3" /> Add Category
+            </button>
+          </div>
+        </div>
+
+        {taxLoading && <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 text-[#D4A017] animate-spin" /></div>}
+
+        {/* New Category Form */}
+        {taxNewCat && (
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-[#222] rounded-lg border border-gray-200 dark:border-[#333] space-y-3">
+            <div className="grid grid-cols-[60px_1fr_1fr] gap-2">
+              <div>
+                <label className="block text-xs font-mono text-gray-500 uppercase mb-1">Emoji</label>
+                <input type="text" value={taxNewCatForm.emoji} onChange={e => setTaxNewCatForm(p => ({ ...p, emoji: e.target.value }))}
+                  placeholder="💼" maxLength={4}
+                  className="w-full p-2 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017] text-center" />
+              </div>
+              <div>
+                <label className="block text-xs font-mono text-gray-500 uppercase mb-1">Name</label>
+                <input type="text" value={taxNewCatForm.name} onChange={e => setTaxNewCatForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Category name"
+                  className="w-full p-2 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+              </div>
+              <div>
+                <label className="block text-xs font-mono text-gray-500 uppercase mb-1">Description</label>
+                <input type="text" value={taxNewCatForm.description} onChange={e => setTaxNewCatForm(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Short description"
+                  className="w-full p-2 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { setTaxNewCat(false); setTaxNewCatForm({ name: '', emoji: '', description: '' }); }}
+                className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300"><X className="h-3 w-3 inline mr-1" />Cancel</button>
+              <button onClick={handleAddCategory} disabled={taxSaving || !taxNewCatForm.name.trim()}
+                className="flex items-center gap-1 px-3 py-1.5 bg-[#D4A017] text-[#0A0A0A] text-xs font-mono font-bold rounded hover:bg-[#E8B030] disabled:opacity-50">
+                {taxSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Create
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Category List */}
+        <div className="space-y-2">
+          {taxCategories.map(cat => (
+            <div key={cat.id} className={`bg-gray-50 dark:bg-[#222] rounded-lg border border-gray-200 dark:border-[#333] ${!cat.is_active ? 'opacity-50' : ''}`}>
+              {/* Category Header */}
+              <div className="p-3 flex items-center justify-between">
+                {taxEditingCat === cat.id ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <input type="text" value={taxEditCat.emoji} onChange={e => setTaxEditCat(p => ({ ...p, emoji: e.target.value }))}
+                      className="w-12 p-1.5 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-center text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+                    <input type="text" value={taxEditCat.name} onChange={e => setTaxEditCat(p => ({ ...p, name: e.target.value }))}
+                      className="flex-1 p-1.5 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+                    <input type="text" value={taxEditCat.description} onChange={e => setTaxEditCat(p => ({ ...p, description: e.target.value }))}
+                      className="flex-1 p-1.5 bg-white dark:bg-[#1A1A1A] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+                    <button onClick={() => handleSaveCatEdit(cat.id)} disabled={taxSaving}
+                      className="p-1.5 text-green-400 hover:text-green-300"><Check className="h-4 w-4" /></button>
+                    <button onClick={() => setTaxEditingCat(null)}
+                      className="p-1.5 text-gray-500 hover:text-gray-300"><X className="h-4 w-4" /></button>
+                  </div>
+                ) : (
+                  <>
+                    <button onClick={() => setTaxExpanded(taxExpanded === cat.id ? null : cat.id)}
+                      className="flex items-center gap-2 flex-1 text-left">
+                      <span className="text-lg">{cat.emoji}</span>
+                      <div>
+                        <span className="text-gray-800 dark:text-[#E8E8E0] font-medium">{cat.name}</span>
+                        <span className="text-gray-500 text-xs ml-2">{cat.description}</span>
+                        <span className="text-gray-600 text-xs ml-2">({cat.useCases.length})</span>
+                      </div>
+                      {taxExpanded === cat.id ? <ChevronUp className="h-4 w-4 text-gray-500 ml-auto" /> : <ChevronDown className="h-4 w-4 text-gray-500 ml-auto" />}
+                    </button>
+                    <div className="flex items-center gap-1 ml-2">
+                      <button onClick={() => { setTaxEditingCat(cat.id); setTaxEditCat({ name: cat.name, emoji: cat.emoji || '', description: cat.description || '' }); }}
+                        className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-[#D4A017]" title="Edit"><Pencil className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => handleToggleCat(cat)}
+                        className={`p-1.5 ${cat.is_active ? 'text-green-400 hover:text-red-400' : 'text-red-400 hover:text-green-400'}`}
+                        title={cat.is_active ? 'Deactivate' : 'Activate'}><Power className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => handleDeleteCat(cat.id, cat.name)}
+                        className="p-1.5 text-gray-500 hover:text-red-400" title="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Expanded Use Cases */}
+              {taxExpanded === cat.id && (
+                <div className="px-3 pb-3 space-y-1">
+                  <div className="border-t border-gray-200 dark:border-[#333] pt-2 mb-2">
+                    <button onClick={() => { setTaxNewUcFor(cat.id); setTaxNewUcTitle(''); }}
+                      className="flex items-center gap-1 text-xs text-[#D4A017] hover:text-[#E8B030]">
+                      <Plus className="h-3 w-3" /> Add Use Case
+                    </button>
+                  </div>
+
+                  {/* Add Use Case Form */}
+                  {taxNewUcFor === cat.id && (
+                    <div className="flex items-center gap-2 p-2 bg-white dark:bg-[#1A1A1A] rounded border border-gray-200 dark:border-[#333]">
+                      <input type="text" value={taxNewUcTitle} onChange={e => setTaxNewUcTitle(e.target.value)}
+                        placeholder="Use case title" autoFocus
+                        onKeyDown={e => { if (e.key === 'Enter') handleAddUseCase(cat.id); if (e.key === 'Escape') setTaxNewUcFor(null); }}
+                        className="flex-1 p-1.5 bg-gray-50 dark:bg-[#222] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+                      <button onClick={() => handleAddUseCase(cat.id)} disabled={taxSaving || !taxNewUcTitle.trim()}
+                        className="p-1.5 text-green-400 hover:text-green-300 disabled:opacity-50"><Check className="h-4 w-4" /></button>
+                      <button onClick={() => setTaxNewUcFor(null)}
+                        className="p-1.5 text-gray-500 hover:text-gray-300"><X className="h-4 w-4" /></button>
+                    </div>
+                  )}
+
+                  {/* Use Case List */}
+                  {[...cat.useCases].sort((a, b) => a.sort_order - b.sort_order).map(uc => (
+                    <div key={uc.id} className="flex items-center gap-2 p-2 bg-white dark:bg-[#1A1A1A] rounded border border-gray-200 dark:border-[#333] group">
+                      {taxEditingUc === uc.id ? (
+                        <>
+                          <input type="text" value={taxEditUcTitle} onChange={e => setTaxEditUcTitle(e.target.value)}
+                            autoFocus
+                            onKeyDown={e => { if (e.key === 'Enter') handleSaveUcEdit(uc.id); if (e.key === 'Escape') setTaxEditingUc(null); }}
+                            className="flex-1 p-1.5 bg-gray-50 dark:bg-[#222] border border-gray-300 dark:border-[#444] rounded text-sm text-gray-800 dark:text-[#E8E8E0] focus:outline-none focus:border-[#D4A017]" />
+                          <button onClick={() => handleSaveUcEdit(uc.id)} disabled={taxSaving}
+                            className="p-1 text-green-400 hover:text-green-300"><Check className="h-3.5 w-3.5" /></button>
+                          <button onClick={() => setTaxEditingUc(null)}
+                            className="p-1 text-gray-500 hover:text-gray-300"><X className="h-3.5 w-3.5" /></button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{uc.title}</span>
+                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleMoveUc(uc, 'up', cat.useCases)}
+                              className="p-1 text-gray-500 hover:text-[#D4A017]" title="Move up"><ArrowUp className="h-3 w-3" /></button>
+                            <button onClick={() => handleMoveUc(uc, 'down', cat.useCases)}
+                              className="p-1 text-gray-500 hover:text-[#D4A017]" title="Move down"><ArrowDown className="h-3 w-3" /></button>
+                            <button onClick={() => { setTaxEditingUc(uc.id); setTaxEditUcTitle(uc.title); }}
+                              className="p-1 text-gray-500 hover:text-[#D4A017]" title="Edit"><Pencil className="h-3 w-3" /></button>
+                            <button onClick={() => handleDeleteUc(uc.id, uc.title)}
+                              className="p-1 text-gray-500 hover:text-red-400" title="Delete"><Trash2 className="h-3 w-3" /></button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+
+                  {cat.useCases.length === 0 && (
+                    <p className="text-gray-500 text-xs text-center py-2">No use cases yet</p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {!taxLoading && taxCategories.length === 0 && (
+          <p className="text-gray-500 text-center py-8">No categories yet. Run the migration first.</p>
         )}
       </div>
 
