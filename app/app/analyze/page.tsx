@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Copy, TrendingUp, AlertTriangle, Target, Zap, HelpCircle, Shield, UserPlus, X, Check, Clock, Trash2, ChevronDown, Send, MessageCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { formatDate } from '@/lib/format-date';
 
 // ─── History Types ──────────────────────────────────────────────────────────
@@ -174,6 +175,7 @@ interface PersonProfile {
 
 export default function AnalyzePage() {
   const { user } = useAuth();
+  const { categories: taxonomyCategories, loading: taxonomyLoading } = useTaxonomy();
   const [text, setText] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -203,6 +205,7 @@ export default function AnalyzePage() {
   const [ctxRole, setCtxRole] = useState<'sender' | 'receiver' | 'observer' | ''>('');
   const [ctxGoal, setCtxGoal] = useState('');
   const [ctxGoalCustom, setCtxGoalCustom] = useState('');
+  const [ctxGoalCategory, setCtxGoalCategory] = useState('');
   const [ctxPersonId, setCtxPersonId] = useState('');
   const [ctxPersonDesc, setCtxPersonDesc] = useState('');
   const [ctxBackground, setCtxBackground] = useState('');
@@ -443,7 +446,9 @@ export default function AnalyzePage() {
     try {
       let res: Response;
       const headers = await getHeaders();
-      const resolvedGoal = ctxGoal === 'other' ? ctxGoalCustom : ctxGoal;
+      const resolvedGoal = ctxGoalCategory === 'other'
+        ? ctxGoalCustom
+        : ctxGoal || (ctxGoalCategory ? (taxonomyCategories.find(c => c.id === ctxGoalCategory)?.name || '') : '');
 
       if (mode === 'image' && imageFiles.length > 0) {
         const formData = new FormData();
@@ -785,25 +790,53 @@ export default function AnalyzePage() {
                   </div>
                 </div>
 
-                {/* Goal */}
+                {/* Goal - two-level taxonomy picker */}
                 <div>
                   <label className="block text-xs font-mono uppercase tracking-wider text-[#D4A017] mb-2">What&apos;s your goal?</label>
                   <select
-                    value={ctxGoal}
-                    onChange={(e) => setCtxGoal(e.target.value)}
+                    value={ctxGoalCategory}
+                    onChange={(e) => {
+                      setCtxGoalCategory(e.target.value);
+                      setCtxGoal('');
+                      setCtxGoalCustom('');
+                    }}
                     className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-[#444] rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#D4A017] transition-colors"
                   >
-                    <option value="">Select a goal...</option>
-                    <option value="Get them to agree to something">Get them to agree to something</option>
-                    <option value="Set a boundary">Set a boundary</option>
-                    <option value="Detect if I'm being manipulated">Detect if I&apos;m being manipulated</option>
-                    <option value="Build rapport / strengthen relationship">Build rapport / strengthen relationship</option>
-                    <option value="Close a deal / negotiate">Close a deal / negotiate</option>
-                    <option value="Understand their psychology">Understand their psychology</option>
-                    <option value="Craft the perfect response">Craft the perfect response</option>
+                    <option value="">Select a category...</option>
+                    {taxonomyCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.emoji} {cat.name}</option>
+                    ))}
                     <option value="other">Other</option>
                   </select>
-                  {ctxGoal === 'other' && (
+
+                  {/* Use cases for selected category */}
+                  {ctxGoalCategory && ctxGoalCategory !== 'other' && (() => {
+                    const selectedCat = taxonomyCategories.find(c => c.id === ctxGoalCategory);
+                    if (!selectedCat || selectedCat.useCases.length === 0) return null;
+                    return (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Specific situation:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedCat.useCases.map((uc) => (
+                            <button
+                              key={uc.id}
+                              type="button"
+                              onClick={() => setCtxGoal(uc.title)}
+                              className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all ${
+                                ctxGoal === uc.title
+                                  ? 'bg-[#D4A017]/20 border-[#D4A017] text-[#D4A017]'
+                                  : 'bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-[#333] text-gray-600 dark:text-gray-300 hover:border-[#D4A017]/50'
+                              }`}
+                            >
+                              {uc.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {ctxGoalCategory === 'other' && (
                     <input
                       type="text"
                       value={ctxGoalCustom}
@@ -1324,8 +1357,9 @@ export default function AnalyzePage() {
                         chips.push('How do I press my advantage here?');
                       }
                       // Goal-specific
-                      if (ctxGoal && ctxGoal !== 'other') {
-                        chips.push(`What's the best next move to ${ctxGoal.toLowerCase()}?`);
+                      const chipGoal = ctxGoal || (ctxGoalCategory && ctxGoalCategory !== 'other' ? (taxonomyCategories.find(c => c.id === ctxGoalCategory)?.name || '') : '');
+                      if (chipGoal) {
+                        chips.push(`What's the best next move to ${chipGoal.toLowerCase()}?`);
                       }
                       // Response-based
                       if (result.responseOptions?.length > 0) {

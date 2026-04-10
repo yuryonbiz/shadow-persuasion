@@ -6,6 +6,7 @@ import { Clock, RotateCcw, CheckCircle2, Star, ChevronDown } from 'lucide-react'
 import { useTechniques, type APITechnique } from '@/lib/hooks/useTechniques';
 import { type SRCard } from '@/lib/spaced-repetition';
 import { useAuth } from '@/lib/auth-context';
+import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 
 // ── Library constants ──
 const categories = ['All', 'Influence', 'Negotiation', 'Rapport', 'Framing', 'Defense'];
@@ -34,13 +35,13 @@ interface SavedStack {
   savedAt: string;
 }
 
-const PRESET_GOALS = [
-  'Negotiate Salary',
-  'Close a Deal',
-  'Win Back Someone',
-  'Set Boundaries',
-  'Get Buy-In',
-  'Handle Conflict',
+// Featured use case IDs for "Recommended" section
+const FEATURED_USE_CASE_IDS = [
+  'negotiate-salary-raise',
+  'close-a-deal',
+  'set-boundaries-with-someone',
+  'handle-workplace-conflict',
+  'ask-for-a-promotion',
 ];
 
 function techniqueSlug(name: string): string {
@@ -367,8 +368,9 @@ function LibraryTab({ getHeaders, apiTechniques, techniquesLoading }: { getHeade
 // ══════════════════════════════════════════════════════════════════════
 
 function StackingTab({ getHeaders, apiTechniques }: { getHeaders: () => Promise<Record<string, string>>; apiTechniques: APITechnique[] }) {
+  const { categories: taxonomyCategories, loading: taxonomyLoading } = useTaxonomy();
   const [goal, setGoal] = useState('');
-  const [customGoal, setCustomGoal] = useState('');
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [primaryStack, setPrimaryStack] = useState<Stack | null>(null);
@@ -414,7 +416,7 @@ function StackingTab({ getHeaders, apiTechniques }: { getHeaders: () => Promise<
   }, [getHeaders]);
 
   const generateStack = async () => {
-    const finalGoal = goal === 'custom' ? customGoal.trim() : goal;
+    const finalGoal = goal.trim();
     if (!finalGoal) return;
 
     setIsLoading(true);
@@ -641,50 +643,18 @@ function StackingTab({ getHeaders, apiTechniques }: { getHeaders: () => Promise<
         </div>
       )}
 
-      {/* Goal Selector */}
+      {/* Goal Input */}
       <div className="space-y-4">
         <label className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold block">
           What are you trying to do?
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {PRESET_GOALS.map((g) => (
-            <button
-              key={g}
-              onClick={() => {
-                setGoal(g);
-                setCustomGoal('');
-              }}
-              className={`px-3 py-2.5 rounded-lg border transition-all text-sm ${
-                goal === g
-                  ? 'border-[#D4A017] bg-[#D4A017]/10 text-[#D4A017]'
-                  : 'border-gray-200 dark:border-[#333333] bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-[#555]'
-              }`}
-            >
-              {g}
-            </button>
-          ))}
-          <button
-            onClick={() => setGoal('custom')}
-            className={`px-3 py-2.5 rounded-lg border transition-all text-sm ${
-              goal === 'custom'
-                ? 'border-[#D4A017] bg-[#D4A017]/10 text-[#D4A017]'
-                : 'border-gray-200 dark:border-[#333333] bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-[#555]'
-            }`}
-          >
-            Custom...
-          </button>
-        </div>
-
-        {goal === 'custom' && (
-          <textarea
-            value={customGoal}
-            onChange={(e) => setCustomGoal(e.target.value)}
-            placeholder="Describe your situation: e.g., I need to convince my landlord to lower my rent. He's been unresponsive to my last two requests."
-            rows={3}
-            className="w-full bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-3 text-gray-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors resize-y"
-            autoFocus
-          />
-        )}
+        <textarea
+          value={goal}
+          onChange={(e) => setGoal(e.target.value)}
+          placeholder="Describe your situation: e.g., I need to convince my landlord to lower my rent. He's been unresponsive to my last two requests."
+          rows={3}
+          className="w-full bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333333] rounded-lg p-3 text-gray-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#D4A017] transition-colors resize-y"
+        />
 
         {/* Technique Pre-selection (Optional) */}
         <div className="border border-gray-200 dark:border-[#333333] rounded-lg overflow-hidden">
@@ -743,14 +713,93 @@ function StackingTab({ getHeaders, apiTechniques }: { getHeaders: () => Promise<
 
         <button
           onClick={generateStack}
-          disabled={
-            isLoading || (!goal || (goal === 'custom' && !customGoal.trim()))
-          }
+          id="generate-stack-btn"
+          disabled={isLoading || !goal.trim()}
           className="w-full py-3 bg-[#D4A017] text-[#0A0A0A] font-mono font-bold uppercase tracking-wider rounded-lg hover:bg-[#E8B830] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
           {isLoading ? 'Generating...' : 'Generate Stack'}
         </button>
       </div>
+
+      {/* Taxonomy-powered preset situations */}
+      {!taxonomyLoading && taxonomyCategories.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-[#333]" />
+            <span className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Or pick a situation</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-[#333]" />
+          </div>
+
+          {/* Recommended section */}
+          {(() => {
+            const allUseCases = taxonomyCategories.flatMap(c => c.useCases);
+            const featured = FEATURED_USE_CASE_IDS
+              .map(id => allUseCases.find(u => u.id === id))
+              .filter(Boolean);
+            // Fall back to first 5 use cases if featured IDs don't match
+            const recommended = featured.length >= 3 ? featured : allUseCases.slice(0, 5);
+            return recommended.length > 0 ? (
+              <div className="space-y-2">
+                <p className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">
+                  Recommended
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {recommended.map((uc) => uc && (
+                    <button
+                      key={uc.id}
+                      onClick={() => {
+                        setGoal(uc.title);
+                        setTimeout(() => document.getElementById('generate-stack-btn')?.focus(), 50);
+                      }}
+                      className="px-3 py-1.5 rounded-full border border-[#D4A017]/40 bg-[#D4A017]/5 text-[#D4A017] text-sm hover:bg-[#D4A017]/15 hover:border-[#D4A017] transition-all"
+                    >
+                      {uc.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Category accordions */}
+          <div className="space-y-1">
+            {taxonomyCategories.map((cat) => (
+              <div key={cat.id} className="border border-gray-200 dark:border-[#333333] rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#222] transition-colors"
+                >
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {cat.emoji} {cat.name}
+                    <span className="ml-1.5 text-gray-400 text-xs">({cat.useCases.length})</span>
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-gray-400 transition-transform ${expandedCategory === cat.id ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {expandedCategory === cat.id && (
+                  <div className="px-4 py-3 border-t border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#111]">
+                    <div className="flex flex-wrap gap-2">
+                      {cat.useCases.map((uc) => (
+                        <button
+                          key={uc.id}
+                          onClick={() => {
+                            setGoal(uc.title);
+                            setTimeout(() => document.getElementById('generate-stack-btn')?.focus(), 50);
+                          }}
+                          className="px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-[#333] bg-white dark:bg-[#1A1A1A] text-xs text-gray-600 dark:text-gray-300 hover:border-[#D4A017] hover:text-[#D4A017] transition-all"
+                        >
+                          {uc.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Loading */}
       {isLoading && (

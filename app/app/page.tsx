@@ -8,6 +8,7 @@ import {
   Briefcase, Heart, DollarSign, Shield, Star, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { useTaxonomy, TaxonomyCategory } from '@/lib/hooks/useTaxonomy';
 import { formatDate } from '@/lib/format-date';
 
 /* ────────────────────────────────────────────
@@ -194,74 +195,8 @@ function DashboardSkeleton() {
 }
 
 /* ────────────────────────────────────────────
-   Onboarding Goals
+   Onboarding Goals (fetched from taxonomy)
    ──────────────────────────────────────────── */
-
-const ONBOARDING_GOALS = [
-  {
-    id: 'career',
-    label: 'Dominate at Work',
-    description: 'Promotions, raises, politics, getting taken seriously',
-    icon: Briefcase,
-    coachPrompt: 'career advancement and workplace influence',
-    trainingLink: '/app/training/negotiate-raise',
-    techniqueCategory: 'Negotiation',
-  },
-  {
-    id: 'dating',
-    label: 'Attract & Connect',
-    description: 'Dating, attraction, chemistry, getting them hooked',
-    icon: Heart,
-    coachPrompt: 'dating, attraction, and romantic connection',
-    trainingLink: '/app/training/first-date',
-    techniqueCategory: 'Rapport',
-  },
-  {
-    id: 'business',
-    label: 'Close & Persuade',
-    description: 'Sales, clients, deals, getting people to say yes',
-    icon: DollarSign,
-    coachPrompt: 'sales, business persuasion, and closing deals',
-    trainingLink: '/app/training/close-client',
-    techniqueCategory: 'Influence',
-  },
-  {
-    id: 'social',
-    label: 'Command Any Room',
-    description: 'Social power, first impressions, respect, leadership',
-    icon: Star,
-    coachPrompt: 'social influence, leadership presence, and commanding respect',
-    trainingLink: '/app/training/command-room',
-    techniqueCategory: 'Framing',
-  },
-  {
-    id: 'defense',
-    label: 'Neutralize Toxic People',
-    description: 'Narcissists, manipulators, gaslighters, setting boundaries',
-    icon: Shield,
-    coachPrompt: 'handling toxic people, setting boundaries, and psychological defense',
-    trainingLink: '/app/training/counter-gaslighting',
-    techniqueCategory: 'Defense',
-  },
-  {
-    id: 'confidence',
-    label: 'Build Unshakable Confidence',
-    description: 'Stop seeking approval, own your presence, inner power',
-    icon: Zap,
-    coachPrompt: 'building confidence, self-assurance, and personal power',
-    trainingLink: '/app/training',
-    techniqueCategory: 'Rapport',
-  },
-  {
-    id: 'all',
-    label: 'Master It All',
-    description: 'I want the full arsenal — every tool, every edge',
-    icon: Target,
-    coachPrompt: 'comprehensive influence and persuasion mastery',
-    trainingLink: '/app/training',
-    techniqueCategory: 'Influence',
-  },
-] as const;
 
 /* ────────────────────────────────────────────
    Dashboard Page
@@ -269,6 +204,7 @@ const ONBOARDING_GOALS = [
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
+  const { categories: taxonomyCategories, loading: taxonomyLoading } = useTaxonomy();
 
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<ProgressData | null>(null);
@@ -276,8 +212,9 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [missionPool, setMissionPool] = useState<Mission[]>([]);
   const [onboardingComplete, setOnboardingComplete] = useState(true); // assume true until we know
-  const [selectedGoal, setSelectedGoal] = useState<typeof ONBOARDING_GOALS[number] | null>(null);
-  const [onboardingStep, setOnboardingStep] = useState<'goals' | 'voice' | 'getStarted'>('goals');
+  const [selectedGoals, setSelectedGoals] = useState<TaxonomyCategory[]>([]);
+  const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null);
+  const [onboardingStep, setOnboardingStep] = useState<'goals' | 'useCases' | 'voice' | 'getStarted'>('goals');
   const [savingGoal, setSavingGoal] = useState(false);
 
   // Voice profile state
@@ -371,8 +308,27 @@ export default function DashboardPage() {
   /* ────────────────────────────────────────────
      Onboarding: save goal handler
      ──────────────────────────────────────────── */
-  const handleGoalSelect = async (goal: typeof ONBOARDING_GOALS[number]) => {
-    setSelectedGoal(goal);
+  const handleToggleGoal = (category: TaxonomyCategory) => {
+    setSelectedGoals(prev =>
+      prev.find(g => g.id === category.id)
+        ? prev.filter(g => g.id !== category.id)
+        : [...prev, category]
+    );
+  };
+
+  const handleGoalsConfirm = () => {
+    // Collect top use cases from selected categories (up to 8)
+    const useCasesFromSelected = selectedGoals.flatMap(c => c.useCases).slice(0, 8);
+    if (useCasesFromSelected.length > 0) {
+      setOnboardingStep('useCases');
+    } else {
+      // Skip use-case step if none available
+      handleSaveGoals(null);
+    }
+  };
+
+  const handleSaveGoals = async (useCase: string | null) => {
+    setSelectedUseCase(useCase);
     setSavingGoal(true);
     try {
       const token = await user?.getIdToken();
@@ -381,7 +337,10 @@ export default function DashboardPage() {
       await fetch('/api/user', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ goals: [goal.id] }),
+        body: JSON.stringify({
+          goals: selectedGoals.map(g => g.id),
+          pressingUseCase: useCase,
+        }),
       });
     } catch (err) {
       console.error('Failed to save goal:', err);
@@ -448,43 +407,99 @@ export default function DashboardPage() {
                   Welcome to <span className="text-[#D4A017]">Shadow.Ops</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
-                  Your training begins now. Choose your primary objective and we&apos;ll build your personalized programme.
+                  Your training begins now. Choose your objectives and we&apos;ll build your personalized programme.
                 </p>
               </div>
 
-              {/* Goal Cards */}
+              {/* Goal Cards - multi-select from taxonomy */}
               <div>
                 <p className="text-center text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
-                  What brings you here?
+                  What brings you here? <span className="normal-case tracking-normal">(select all that apply)</span>
                 </p>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {ONBOARDING_GOALS.map(goal => {
-                    const Icon = goal.icon;
-                    const isMasterAll = goal.id === 'all';
-                    return (
-                      <button
-                        key={goal.id}
-                        onClick={() => handleGoalSelect(goal)}
-                        disabled={savingGoal}
-                        className={`group relative flex flex-col items-center justify-center p-5 rounded-xl bg-white dark:bg-[#1A1A1A] border transition-all hover:border-[#D4A017] hover:shadow-lg hover:shadow-[#D4A017]/10 text-center disabled:opacity-50 ${
-                          isMasterAll
-                            ? 'col-span-2 lg:col-span-1 border-[#D4A017]/50 bg-gradient-to-b from-[#D4A017]/5 to-transparent'
-                            : 'border-gray-200 dark:border-[#333]'
-                        }`}
-                      >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors ${
-                          isMasterAll
-                            ? 'bg-[#D4A017]/20 group-hover:bg-[#D4A017]/30'
-                            : 'bg-[#D4A017]/10 group-hover:bg-[#D4A017]/20'
-                        }`}>
-                          <Icon className={`h-6 w-6 ${isMasterAll ? 'text-[#D4A017]' : 'text-[#D4A017]'}`} />
-                        </div>
-                        <h3 className={`text-sm font-bold font-mono ${isMasterAll ? 'text-[#D4A017]' : ''}`}>{goal.label}</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{goal.description}</p>
-                      </button>
-                    );
-                  })}
+                {taxonomyLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4A017]"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    {taxonomyCategories.map(category => {
+                      const isSelected = selectedGoals.some(g => g.id === category.id);
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => handleToggleGoal(category)}
+                          disabled={savingGoal}
+                          className={`group relative flex flex-col items-center justify-center p-5 rounded-xl bg-white dark:bg-[#1A1A1A] border transition-all hover:border-[#D4A017] hover:shadow-lg hover:shadow-[#D4A017]/10 text-center disabled:opacity-50 ${
+                            isSelected
+                              ? 'border-[#D4A017] bg-[#D4A017]/5 dark:bg-[#D4A017]/10 ring-1 ring-[#D4A017]/50'
+                              : 'border-gray-200 dark:border-[#333]'
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="absolute top-2 right-2">
+                              <CheckCircle className="h-4 w-4 text-[#D4A017]" />
+                            </div>
+                          )}
+                          <div className="text-3xl mb-3">{category.emoji}</div>
+                          <h3 className="text-sm font-bold font-mono">{category.name}</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{category.description}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Continue Button */}
+              {selectedGoals.length > 0 && (
+                <div className="text-center">
+                  <button
+                    onClick={handleGoalsConfirm}
+                    className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#D4A017] text-black text-sm font-bold font-mono uppercase tracking-wider hover:bg-[#C4901A] transition-all hover:scale-105"
+                  >
+                    Continue ({selectedGoals.length} selected)
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
+              )}
+            </div>
+          ) : onboardingStep === 'useCases' ? (
+            /* Use Case Selection Step */
+            <div className="space-y-8">
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/10 border border-[#D4A017]/30 text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
+                  <Target className="h-3.5 w-3.5" />
+                  Focus Area
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black font-mono tracking-wide">
+                  What&apos;s <span className="text-[#D4A017]">Most Pressing</span>?
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+                  Pick the situation that matters most right now. This helps us prioritize your training.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 justify-center">
+                {selectedGoals.flatMap(c => c.useCases).slice(0, 8).map(uc => (
+                  <button
+                    key={uc.id}
+                    onClick={() => handleSaveGoals(uc.title)}
+                    disabled={savingGoal}
+                    className="px-4 py-2.5 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] text-sm font-medium hover:border-[#D4A017] hover:bg-[#D4A017]/5 transition-all disabled:opacity-50"
+                  >
+                    {uc.title}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-center">
+                <button
+                  onClick={() => handleSaveGoals(null)}
+                  disabled={savingGoal}
+                  className="text-xs font-mono text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors underline underline-offset-2"
+                >
+                  Skip &mdash; nothing specific right now
+                </button>
               </div>
             </div>
           ) : onboardingStep === 'voice' ? (
@@ -591,7 +606,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-          ) : selectedGoal ? (
+          ) : selectedGoals.length > 0 ? (
             /* Get Started Screen */
             <div className="space-y-8">
               <div className="text-center space-y-3">
@@ -610,7 +625,7 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 {/* Action 1: Strategic Coach */}
                 <Link
-                  href={`/app/chat?prompt=${encodeURIComponent(selectedGoal.coachPrompt)}`}
+                  href={`/app/chat?prompt=${encodeURIComponent(selectedUseCase || selectedGoals.map(g => g.name).join(', '))}`}
                   className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] hover:border-[#D4A017] transition-all group"
                 >
                   <div className="w-10 h-10 rounded-full bg-[#D4A017]/10 flex items-center justify-center shrink-0">
@@ -619,7 +634,7 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <p className="text-sm font-bold font-mono">Talk to Your Strategic Coach</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Get personalized advice on &quot;{selectedGoal.label}&quot;
+                      Get personalized advice on &quot;{selectedGoals.map(g => g.name).join(', ')}&quot;
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#D4A017] transition-colors" />
@@ -627,7 +642,7 @@ export default function DashboardPage() {
 
                 {/* Action 2: Training Scenario */}
                 <Link
-                  href={selectedGoal.trainingLink}
+                  href="/app/training"
                   className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] hover:border-[#D4A017] transition-all group"
                 >
                   <div className="w-10 h-10 rounded-full bg-[#D4A017]/10 flex items-center justify-center shrink-0">
@@ -636,7 +651,7 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <p className="text-sm font-bold font-mono">Run Your First Scenario</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Practice {selectedGoal.techniqueCategory.toLowerCase()} techniques in a realistic simulation
+                      Practice techniques in a realistic simulation
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#D4A017] transition-colors" />
@@ -644,16 +659,16 @@ export default function DashboardPage() {
 
                 {/* Action 3: Browse Techniques */}
                 <Link
-                  href={`/app/techniques?category=${encodeURIComponent(selectedGoal.techniqueCategory)}`}
+                  href="/app/techniques"
                   className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] hover:border-[#D4A017] transition-all group"
                 >
                   <div className="w-10 h-10 rounded-full bg-[#D4A017]/10 flex items-center justify-center shrink-0">
                     <BookOpen className="h-5 w-5 text-[#D4A017]" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold font-mono">Study {selectedGoal.techniqueCategory} Techniques</p>
+                    <p className="text-sm font-bold font-mono">Study Techniques</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Browse the playbook for {selectedGoal.description.toLowerCase()}
+                      Browse the playbook for {selectedGoals.map(g => g.description.toLowerCase()).join(', ')}
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#D4A017] transition-colors" />

@@ -4,6 +4,16 @@ import { useState, useEffect, useMemo } from 'react';
 import { ScenarioCard } from '@/components/app/ScenarioCard';
 import { Star, Loader2, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
+
+// Map old scenario category names to taxonomy category IDs
+const CATEGORY_TO_TAXONOMY: Record<string, string> = {
+  Career: 'career',
+  Sales: 'business',
+  Relationships: 'relationships',
+  Social: 'relationships',
+  Defense: 'defense',
+};
 
 const ADMIN_EMAILS = ['ybyalik@gmail.com'];
 
@@ -28,6 +38,7 @@ const difficultyLevels = [
 export default function TrainingArenaPage() {
   const { user } = useAuth();
   const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
+  const { categories: taxonomyCategories, loading: taxonomyLoading } = useTaxonomy();
 
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,14 +54,27 @@ export default function TrainingArenaPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Derive categories dynamically from fetched data
+  // Use taxonomy categories for filter tabs
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(scenarios.map(s => s.category))).sort();
-    return ['All', ...cats];
-  }, [scenarios]);
+    return ['All', ...taxonomyCategories.map(c => c.id)];
+  }, [taxonomyCategories]);
+
+  // Build display label map: category id -> "emoji name"
+  const categoryLabels = useMemo(() => {
+    const map: Record<string, string> = { All: 'All' };
+    for (const c of taxonomyCategories) {
+      map[c.id] = `${c.emoji} ${c.name}`;
+    }
+    return map;
+  }, [taxonomyCategories]);
 
   const filteredScenarios = scenarios.filter(s => {
-    const categoryMatch = filter === 'All' || s.category === filter;
+    if (filter === 'All') {
+      return difficulty === 0 || s.difficulty === difficulty;
+    }
+    // Map old scenario category to taxonomy ID, then compare
+    const scenarioTaxId = CATEGORY_TO_TAXONOMY[s.category] || s.category.toLowerCase();
+    const categoryMatch = scenarioTaxId === filter;
     const difficultyMatch = difficulty === 0 || s.difficulty === difficulty;
     return categoryMatch && difficultyMatch;
   });
@@ -84,7 +108,7 @@ export default function TrainingArenaPage() {
     }
   };
 
-  if (loading) {
+  if (loading || taxonomyLoading) {
     return (
       <div className="space-y-8">
         <header>
@@ -127,18 +151,18 @@ export default function TrainingArenaPage() {
         )}
       </header>
 
-      <div className="flex space-x-2 border-b border-gray-200 dark:border-[#333333] pb-2">
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-[#333333] pb-2 overflow-x-auto">
         {categories.map(category => (
           <button
             key={category}
             onClick={() => setFilter(category)}
-            className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors
+            className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors whitespace-nowrap
               ${filter === category
                 ? 'bg-[#D4A017] text-[#0A0A0A]'
                 : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222]'}
             `}
           >
-            {category}
+            {categoryLabels[category] || category}
           </button>
         ))}
       </div>
