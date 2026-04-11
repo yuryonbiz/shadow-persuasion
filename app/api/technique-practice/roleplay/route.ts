@@ -7,6 +7,7 @@ import { getVoiceProfile } from '@/lib/voice-profile';
 export const maxDuration = 60;
 
 const CONTEXT_CHARACTERS: Record<string, { role: string; setting: string }> = {
+  // Original 3
   work: {
     role: 'a colleague, manager, or direct report in a professional workplace',
     setting: 'a workplace situation such as a meeting, negotiation, performance review, or team conflict',
@@ -18,6 +19,51 @@ const CONTEXT_CHARACTERS: Record<string, { role: string; setting: string }> = {
   business: {
     role: 'a client, investor, vendor, or business counterpart',
     setting: 'a business situation such as a sales call, partnership negotiation, pitch meeting, or deal closing',
+  },
+  // Taxonomy categories
+  career: {
+    role: 'your manager at work',
+    setting: 'a career advancement situation',
+  },
+  leadership: {
+    role: 'a team member who reports to you',
+    setting: 'a leadership and management situation',
+  },
+  finance: {
+    role: 'a salesperson or service provider',
+    setting: 'a financial negotiation',
+  },
+  dating: {
+    role: 'someone you are romantically interested in',
+    setting: 'a dating situation',
+  },
+  relationships: {
+    role: 'a close friend or family member',
+    setting: 'a personal relationship situation',
+  },
+  parenting: {
+    role: 'your teenage child',
+    setting: 'a parenting situation',
+  },
+  personal_power: {
+    role: 'a stranger at a social event',
+    setting: 'a situation requiring confidence and presence',
+  },
+  high_stakes: {
+    role: 'a decision-maker with authority over your situation',
+    setting: 'a high-stakes critical moment',
+  },
+  texting: {
+    role: 'someone you are texting with',
+    setting: 'an online/text conversation',
+  },
+  influence: {
+    role: 'a potential follower or audience member',
+    setting: 'a content and influence situation',
+  },
+  defense: {
+    role: 'someone who is trying to manipulate or pressure you',
+    setting: 'a defensive situation against manipulation',
   },
 };
 
@@ -34,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     const ctxInfo = CONTEXT_CHARACTERS[context];
     if (!ctxInfo) {
-      return NextResponse.json({ error: 'Invalid context. Use: work, relationship, or business' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid context provided.' }, { status: 400 });
     }
 
     // RAG search for technique knowledge

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, MessageSquare, Edit, Users, Swords, ClipboardList, BookOpen, Trophy, Upload, LogOut, Sun, Moon, ChevronUp, Settings } from 'lucide-react';
+import { Home, Search, MessageSquare, Edit, Users, Swords, ClipboardList, BookOpen, Trophy, Upload, LogOut, Sun, Moon, ChevronUp, Settings, MoreHorizontal, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/lib/auth-context';
 
@@ -26,6 +26,7 @@ export function Sidebar() {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) => href === '/app' ? pathname === '/app' : pathname === href || pathname.startsWith(href + '/');
@@ -120,8 +121,40 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile Bottom Bar */}
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMoreOpen(false)} />
+          {/* Slide-up panel */}
+          <div className="absolute bottom-0 left-0 right-0 bg-[#F5F2EB] dark:bg-[#1A1A1A] border-t border-[#E5E2DB] dark:border-[#333333] rounded-t-2xl p-4 pb-8 animate-in slide-in-from-bottom">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400">More</span>
+              <button onClick={() => setMoreOpen(false)} className="p-1 rounded-full hover:bg-[#E5E2DB] dark:hover:bg-[#222]">
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <nav className="space-y-1">
+              {navItems.slice(3).map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMoreOpen(false)}
+                  className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-[#D4A017] text-[#0A0A0A]'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-[#E5E2DB] dark:hover:bg-[#222222]'
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-[#1A1A1A] border-t border-gray-200 dark:border-[#333333] flex justify-around p-2 z-50">
-        {navItems.slice(0, 5).map((item) => (
+        {navItems.slice(0, 3).map((item) => (
           <Link
             key={item.label}
             href={item.href}
@@ -133,6 +166,15 @@ export function Sidebar() {
             <span className="text-[10px] mt-0.5">{item.label.split(' ')[0]}</span>
           </Link>
         ))}
+        <button
+          onClick={() => setMoreOpen(!moreOpen)}
+          className={`flex flex-col items-center p-2 rounded-md ${
+            moreOpen || navItems.slice(3).some(item => isActive(item.href)) ? 'text-[#D4A017]' : 'text-gray-500'
+          }`}
+        >
+          <MoreHorizontal className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5">More</span>
+        </button>
       </nav>
     </>
   );

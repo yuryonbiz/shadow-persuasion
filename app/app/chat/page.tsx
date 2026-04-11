@@ -19,6 +19,7 @@ interface Goal {
 interface ChatSession {
   id: string;
   title: string;
+  goal: string | null;
   goal_title: string | null;
   session_type: string;
   created_at: string;

@@ -190,14 +190,44 @@ export default function ScorePage() {
       setTotalXP(data.totalXP ?? 0);
       setScore(data.score ?? 0);
       setSubScores(data.subScores ?? { rapport: 0, negotiation: 0, persuasion: 0, conflict: 0, defense: 0, reading: 0 });
-      setActivityFeed(data.activityFeed ?? []);
+
+      // API returns recentActivity with { type, label, date } — map to ActivityEntry shape
+      const rawActivity = data.recentActivity ?? [];
+      const XP_BY_TYPE: Record<string, number> = { mission: 10, practice: 5, journal: 10, analysis: 5, feedback: 3 };
+      const mappedActivity: ActivityEntry[] = rawActivity.map((item: any) => ({
+        label: item.label,
+        xp: XP_BY_TYPE[item.type] ?? 5,
+        ts: new Date(item.date).getTime(),
+      }));
+      setActivityFeed(mappedActivity);
+
       setStats(data.stats ?? { totalXP: 0, streak: 0, techniquesMastered: 0, fieldReports: 0, sparringSessions: 0, missionsCompleted: 0 });
-      setMonthlyReport(data.monthlyReport ?? {
-        thisMonthXP: 0,
-        lastMonthXP: 0,
-        strongestTechnique: 'None yet',
-        weakestArea: 'None yet',
-        recommendation: 'Complete your first activity to get personalized recommendations.',
+
+      // Compute monthly report client-side from activity data
+      const now = new Date();
+      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+      let thisMonthXP = 0;
+      let lastMonthXP = 0;
+      for (const a of mappedActivity) {
+        if (a.ts >= thisMonthStart) thisMonthXP += a.xp;
+        else if (a.ts >= lastMonthStart) lastMonthXP += a.xp;
+      }
+
+      // Find strongest/weakest from subScores
+      const subs = data.subScores ?? {};
+      const subEntries = Object.entries(subs).filter(([, v]) => typeof v === 'number') as [string, number][];
+      const strongest = subEntries.length > 0 ? subEntries.reduce((a, b) => b[1] > a[1] ? b : a) : null;
+      const weakest = subEntries.length > 0 ? subEntries.reduce((a, b) => b[1] < a[1] ? b : a) : null;
+
+      setMonthlyReport({
+        thisMonthXP,
+        lastMonthXP,
+        strongestTechnique: strongest && strongest[1] > 0 ? strongest[0].charAt(0).toUpperCase() + strongest[0].slice(1) : 'None yet',
+        weakestArea: weakest && weakest[1] > 0 ? weakest[0].charAt(0).toUpperCase() + weakest[0].slice(1) : 'None yet',
+        recommendation: mappedActivity.length > 0
+          ? `Focus on improving your ${weakest ? weakest[0] : 'skills'} through targeted practice sessions.`
+          : 'Complete your first activity to get personalized recommendations.',
       });
     } catch (e) {
       console.error('Failed to load progress:', e);

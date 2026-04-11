@@ -678,19 +678,21 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-          ) : selectedGoals.length > 0 ? (
+          ) : (
             /* Get Started Screen */
             <div className="space-y-8">
               <div className="text-center space-y-3">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A017]/10 border border-[#D4A017]/30 text-[#D4A017] text-xs font-mono uppercase tracking-widest mb-2">
                   <Target className="h-3.5 w-3.5" />
-                  Objective Set
+                  {selectedGoals.length > 0 ? 'Objective Set' : 'Ready to Start'}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black font-mono tracking-wide">
                   Your <span className="text-[#D4A017]">Mission Briefing</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
-                  Here are your first three assignments, {displayName}. Complete them to begin building your Persuasion Score.
+                  {selectedGoals.length > 0
+                    ? `Here are your first three assignments, ${displayName}. Complete them to begin building your Persuasion Score.`
+                    : `Here are some quick actions to get started, ${displayName}. You can always set specific goals later.`}
                 </p>
               </div>
 
@@ -712,7 +714,9 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <p className="text-sm font-bold font-mono">Talk to Your Strategic Coach</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Get personalized advice on &quot;{selectedGoals.map(g => g.name).join(', ')}&quot;
+                      {selectedGoals.length > 0
+                        ? <>Get personalized advice on &quot;{selectedGoals.map(g => g.name).join(', ')}&quot;</>
+                        : 'Get personalized strategic advice'}
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#D4A017] transition-colors" />
@@ -758,7 +762,9 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <p className="text-sm font-bold font-mono">Study Techniques</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Browse the playbook for {selectedGoals.map(g => g.description.toLowerCase()).join(', ')}
+                      {selectedGoals.length > 0
+                        ? `Browse the playbook for ${selectedGoals.map(g => g.description.toLowerCase()).join(', ')}`
+                        : 'Browse the full technique playbook'}
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#D4A017] transition-colors" />
@@ -776,7 +782,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     );

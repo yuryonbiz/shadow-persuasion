@@ -12,8 +12,18 @@ interface ChatMessageProps {
   sources?: Source[];
 }
 
-function parseMarkdown(text: string): string {
+function escapeHtml(text: string): string {
   return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function parseMarkdown(text: string): string {
+  const escaped = escapeHtml(text);
+  return escaped
     .replace(/^### (.*$)/gm, '<h3 class="text-base font-bold text-gray-800 dark:text-[#E8E8E0] mt-4 mb-1">$1</h3>')
     .replace(/^## (.*$)/gm, '<h2 class="text-lg font-bold text-gray-800 dark:text-[#E8E8E0] mt-4 mb-1">$1</h2>')
     .replace(/^# (.*$)/gm, '<h1 class="text-xl font-bold text-[#D4A017] mt-4 mb-2">$1</h1>')
@@ -22,7 +32,7 @@ function parseMarkdown(text: string): string {
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/^(\d+)\. (.*$)/gm, '<div class="flex gap-2 ml-2 my-0.5"><span class="text-[#D4A017] font-mono text-sm">$1.</span><span class="text-gray-600 dark:text-[#ccc]">$2</span></div>')
     .replace(/^[-•] (.*$)/gm, '<div class="flex gap-2 ml-2 my-0.5"><span class="text-[#D4A017]">→</span><span class="text-gray-600 dark:text-[#ccc]">$1</span></div>')
-    .replace(/\(Source: "(.*?)" by (.*?)\)/g, '<span class="inline-flex items-center gap-1 text-xs bg-blue-500/15 text-blue-300 px-2 py-0.5 rounded-full cursor-help" title="From: $1 by $2">📚 $1</span>')
+    .replace(/\(Source: &quot;(.*?)&quot; by (.*?)\)/g, '<span class="inline-flex items-center gap-1 text-xs bg-blue-500/15 text-blue-300 px-2 py-0.5 rounded-full cursor-help" title="From: $1 by $2">📚 $1</span>')
     .replace(/\n\n/g, '<div class="h-3"></div>')
     .replace(/\n/g, '<br/>');
 }
