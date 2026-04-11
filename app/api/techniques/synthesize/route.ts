@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
             whenToUse: cached.when_to_use,
             whenNotToUse: cached.when_not_to_use,
             examples: cached.examples,
+            conversationExamples: cached.conversation_examples || [],
           },
         });
       }
@@ -74,11 +75,30 @@ You MUST respond with valid JSON matching this exact schema:
   "whenNotToUse": "A paragraph describing situations to avoid using this technique",
   "examples": [
     { "scenario": "Real-world scenario title", "description": "2-3 sentence description of how the technique applies" }
+  ],
+  "conversationExamples": [
+    {
+      "context": "Workplace",
+      "title": "Short descriptive title of the scenario",
+      "script": [
+        { "speaker": "You", "line": "What you say", "annotation": "[TECHNIQUE: Name] Brief explanation of the technique being used" },
+        { "speaker": "Other Person", "line": "Their response" },
+        { "speaker": "You", "line": "Your follow-up", "annotation": "[TECHNIQUE: Name] Brief explanation" }
+      ],
+      "result": "What outcome was achieved",
+      "whyItWorked": "2-3 sentences explaining the psychology behind why these techniques worked in this conversation"
+    }
   ]
 }
 
 The howTo should be 3-5 numbered actionable steps.
 The examples should be 2-3 real-world scenarios drawn from the book content provided.
+The conversationExamples should be exactly 3 realistic conversation scripts across different contexts:
+  1. A Workplace scenario (negotiation, conflict, leadership)
+  2. A Personal/Dating scenario (relationship dynamics, boundaries, attraction)
+  3. A Business/Social scenario (sales, networking, deal-making)
+Each script should have 4-6 exchanges with annotations on the "You" lines showing which technique is applied.
+Scripts should feel natural and conversational, not robotic.
 Be specific and tactical, not generic.`;
 
     const userMessage = `Synthesize a structured technique profile for "${techniqueName}" using these knowledge chunks:
@@ -127,6 +147,7 @@ ${chunkText}`;
         when_to_use: profile.whenToUse,
         when_not_to_use: profile.whenNotToUse,
         examples: profile.examples,
+        conversation_examples: profile.conversationExamples || [],
         generated_at: new Date().toISOString(),
       }, { onConflict: 'technique_id' });
 
@@ -138,7 +159,10 @@ ${chunkText}`;
       techniqueId,
       techniqueName,
       cached: false,
-      profile,
+      profile: {
+        ...profile,
+        conversationExamples: profile.conversationExamples || [],
+      },
     });
   } catch (err) {
     console.error('Synthesize error:', err);

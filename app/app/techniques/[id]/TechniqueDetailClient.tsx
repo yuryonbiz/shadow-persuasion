@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Play, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { useRef } from 'react';
+import { ArrowLeft, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2, RefreshCw, ChevronDown, ChevronUp, Send, Briefcase, Heart, DollarSign, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
@@ -37,25 +38,49 @@ interface TechniqueDetail {
   riskLevel: string;
 }
 
+interface ConversationScriptLine {
+  speaker: string;
+  line: string;
+  annotation?: string;
+}
+
+interface ConversationExample {
+  context: string;
+  title: string;
+  script: ConversationScriptLine[];
+  result: string;
+  whyItWorked: string;
+}
+
 interface SynthesizedProfile {
   description: string;
   howTo: string[];
   whenToUse: string;
   whenNotToUse: string;
   examples: { scenario: string; description: string }[];
+  conversationExamples?: ConversationExample[];
 }
 
-interface PracticeScenario {
-  id: string;
-  situation: string;
-  yourMessage: string;
-  options: {
-    text: string;
-    isCorrect: boolean;
-    explanation: string;
+interface RoleplayMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  coaching?: {
+    score: number;
+    feedback: string;
+    idealResponse: string;
     techniqueApplication: string;
-  }[];
+    turnNumber: number;
+    maxTurns: number;
+    summary?: {
+      overallScore: number;
+      strengths: string[];
+      improvements: string[];
+      keyTakeaway: string;
+    };
+  };
 }
+
+type PracticeContext = 'work' | 'relationship' | 'business';
 
 export default function TechniqueDetailClient({ techniqueId }: { techniqueId: string }) {
   const [technique, setTechnique] = useState<TechniqueDetail | null>(null);
@@ -66,13 +91,18 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
   const [synthesized, setSynthesized] = useState<SynthesizedProfile | null>(null);
   const [synthesizing, setSynthesizing] = useState(false);
 
-  const [currentScenario, setCurrentScenario] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [score, setScore] = useState(0);
-  const [practiceScenarios, setPracticeScenarios] = useState<PracticeScenario[]>([]);
-  const [practiceLoading, setPracticeLoading] = useState(false);
-  const [practiceError, setPracticeError] = useState<string | null>(null);
+  // Roleplay practice state
+  const [practiceContext, setPracticeContext] = useState<PracticeContext | null>(null);
+  const [roleplayMessages, setRoleplayMessages] = useState<RoleplayMessage[]>([]);
+  const [roleplayInput, setRoleplayInput] = useState('');
+  const [roleplayLoading, setRoleplayLoading] = useState(false);
+  const [roleplayError, setRoleplayError] = useState<string | null>(null);
+  const [roleplayEnded, setRoleplayEnded] = useState(false);
+  const [expandedCoaching, setExpandedCoaching] = useState<Record<number, boolean>>({});
+  const roleplayEndRef = useRef<HTMLDivElement>(null);
+
+  // Examples tab state
+  const [showBreakdown, setShowBreakdown] = useState<Record<number, boolean>>({});
 
   const router = useRouter();
   const { user } = useAuth();
@@ -139,77 +169,175 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
 
   const [chunksExpanded, setChunksExpanded] = useState(false);
 
-  // Practice
-  const generateScenarios = async () => {
-    if (!technique) return;
-    setPracticeLoading(true);
-    setPracticeError(null);
+  // Parse coaching data from AI response
+  const parseCoaching = (text: string): { cleanText: string; coaching?: RoleplayMessage['coaching'] } => {
+    const coachingMatch = text.match(/<!--COACHING:([\s\S]*?)-->/);
+    if (!coachingMatch) return { cleanText: text };
+    try {
+      const coaching = JSON.parse(coachingMatch[1]);
+      const cleanText = text.replace(/<!--COACHING:[\s\S]*?-->/, '').trim();
+      return { cleanText, coaching };
+    } catch {
+      return { cleanText: text.replace(/<!--COACHING:[\s\S]*?-->/, '').trim() };
+    }
+  };
+
+  // Send roleplay message (handles both initial scenario generation and subsequent messages)
+  const sendRoleplayMessage = async (userMessage?: string) => {
+    if (!technique || !practiceContext) return;
+    setRoleplayLoading(true);
+    setRoleplayError(null);
+
+    // Build messages array for the API
+    const apiMessages = userMessage
+      ? [...roleplayMessages.map(m => ({ role: m.role, content: m.content })), { role: 'user' as const, content: userMessage }]
+      : [];
+
+    // Add user message to local state immediately
+    if (userMessage) {
+      setRoleplayMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    }
+
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 55000); // 55s timeout
+      const timeout = setTimeout(() => controller.abort(), 55000);
 
-      const res = await fetch('/api/technique-practice', {
+      const res = await fetch('/api/technique-practice/roleplay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           techniqueId: technique.id,
           techniqueName: technique.name,
-          description: technique.chunks.overview?.[0]?.content?.slice(0, 200) || technique.name,
+          context: practiceContext,
+          messages: apiMessages,
         }),
         signal: controller.signal,
       });
       clearTimeout(timeout);
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.scenarios?.length > 0) {
-          setPracticeScenarios(data.scenarios);
-        } else {
-          setPracticeError('No scenarios generated. Try again.');
-        }
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        setPracticeError(errData.error || `Failed to generate scenarios (${res.status})`);
+      if (!res.ok) {
+        setRoleplayError('Failed to get AI response. Please try again.');
+        setRoleplayLoading(false);
+        return;
       }
+
+      // Parse SSE stream
+      const reader = res.body?.getReader();
+      if (!reader) { setRoleplayLoading(false); return; }
+
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          const data = trimmed.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content;
+            if (content) fullContent += content;
+          } catch {}
+        }
+      }
+
+      const { cleanText, coaching } = parseCoaching(fullContent);
+      const assistantMsg: RoleplayMessage = { role: 'assistant', content: cleanText, coaching };
+      setRoleplayMessages(prev => [...prev, assistantMsg]);
+
+      // Check if practice should end
+      if (coaching?.summary || (coaching?.turnNumber && coaching.turnNumber >= coaching.maxTurns)) {
+        setRoleplayEnded(true);
+      }
+
+      setTimeout(() => roleplayEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        setPracticeError('Request timed out. The AI is taking too long — please try again.');
+        setRoleplayError('Request timed out. Please try again.');
       } else {
-        setPracticeError('Failed to connect. Please try again.');
+        setRoleplayError('Failed to connect. Please try again.');
       }
-      console.error('Failed to generate practice scenarios:', err);
     }
-    setPracticeLoading(false);
+    setRoleplayLoading(false);
   };
 
-  const handleOptionSelect = (optionIndex: number) => {
-    if (showFeedback) return;
-    setSelectedOption(optionIndex);
-    setShowFeedback(true);
-    if (practiceScenarios[currentScenario]?.options[optionIndex]?.isCorrect) {
-      setScore(s => s + 1);
-    }
-  };
-
-  const nextScenario = () => {
-    if (currentScenario < practiceScenarios.length - 1) {
-      setCurrentScenario(c => c + 1);
-      setSelectedOption(null);
-      setShowFeedback(false);
-    } else {
-      setMode('learn');
-    }
-  };
-
-  const startPractice = async () => {
+  const startPractice = () => {
     setMode('practice');
-    setCurrentScenario(0);
-    setScore(0);
-    setSelectedOption(null);
-    setShowFeedback(false);
-    if (practiceScenarios.length === 0) {
-      await generateScenarios();
+    setPracticeContext(null);
+    setRoleplayMessages([]);
+    setRoleplayInput('');
+    setRoleplayEnded(false);
+    setRoleplayError(null);
+    setExpandedCoaching({});
+  };
+
+  const selectPracticeContext = async (ctx: PracticeContext) => {
+    setPracticeContext(ctx);
+    // Trigger initial scenario generation
+    setRoleplayLoading(true);
+    setRoleplayError(null);
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000);
+      const res = await fetch('/api/technique-practice/roleplay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          techniqueId: technique!.id,
+          techniqueName: technique!.name,
+          context: ctx,
+          messages: [],
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        setRoleplayError('Failed to generate scenario. Please try again.');
+        setRoleplayLoading(false);
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) { setRoleplayLoading(false); return; }
+      const decoder = new TextDecoder();
+      let fullContent = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          const data = trimmed.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content;
+            if (content) fullContent += content;
+          } catch {}
+        }
+      }
+
+      const { cleanText, coaching } = parseCoaching(fullContent);
+      setRoleplayMessages([{ role: 'assistant', content: cleanText, coaching }]);
+    } catch (err: any) {
+      setRoleplayError(err.name === 'AbortError' ? 'Request timed out.' : 'Failed to connect.');
     }
+    setRoleplayLoading(false);
+  };
+
+  const handleRoleplaySend = () => {
+    if (!roleplayInput.trim() || roleplayLoading || roleplayEnded) return;
+    const msg = roleplayInput.trim();
+    setRoleplayInput('');
+    sendRoleplayMessage(msg);
   };
 
   // ── Loading state ──
@@ -242,111 +370,242 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
     );
   }
 
-  // ── Practice mode ──
+  // ── Practice mode (Role-play) ──
   if (mode === 'practice') {
-    if (practiceLoading) {
+    // Context selection screen
+    if (!practiceContext) {
+      return (
+        <div className="max-w-4xl mx-auto space-y-6">
+          <button onClick={() => setMode('learn')} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            Back to {technique.name}
+          </button>
+
+          <div className="text-center mb-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Practice {technique.name}</h2>
+            <p className="text-gray-500 dark:text-gray-400">Choose a context for your role-play simulation</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {([
+              { key: 'work' as PracticeContext, icon: Briefcase, label: 'At Work', desc: 'Workplace negotiations, meetings, team dynamics' },
+              { key: 'relationship' as PracticeContext, icon: Heart, label: 'In a Relationship', desc: 'Personal conversations, boundaries, emotional situations' },
+              { key: 'business' as PracticeContext, icon: DollarSign, label: 'In Business', desc: 'Sales calls, deal-making, client negotiations' },
+            ]).map(({ key, icon: Icon, label, desc }) => (
+              <button
+                key={key}
+                onClick={() => selectPracticeContext(key)}
+                className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] hover:border-[#D4A017] transition-all group text-left"
+              >
+                <Icon className="h-8 w-8 text-[#D4A017] mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{label}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Loading initial scenario
+    if (roleplayLoading && roleplayMessages.length === 0) {
       return (
         <div className="max-w-4xl mx-auto text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A017] mx-auto" />
-          <p className="mt-4 text-gray-500 dark:text-gray-400">Generating practice scenarios...</p>
+          <p className="mt-4 text-gray-500 dark:text-gray-400">Setting up your role-play scenario...</p>
           <p className="mt-1 text-xs text-gray-400">This can take up to 30 seconds</p>
         </div>
       );
     }
 
-    if (practiceError || practiceScenarios.length === 0) {
+    if (roleplayError && roleplayMessages.length === 0) {
       return (
         <div className="max-w-4xl mx-auto text-center py-12">
-          {practiceError ? (
-            <p className="text-red-400 text-sm mb-4">{practiceError}</p>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400 mb-4">No practice scenarios available yet.</p>
-          )}
+          <p className="text-red-400 text-sm mb-4">{roleplayError}</p>
           <div className="flex items-center justify-center gap-3">
-            <button onClick={() => generateScenarios()} className="px-6 py-2 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B830] transition-colors">
+            <button onClick={() => selectPracticeContext(practiceContext)} className="px-6 py-2 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B830] transition-colors">
               Try Again
             </button>
-            <button onClick={() => setMode('learn')} className="px-6 py-2 bg-gray-200 dark:bg-[#333333] text-gray-900 dark:text-white rounded-lg">
-              Back to Learning
+            <button onClick={() => setPracticeContext(null)} className="px-6 py-2 bg-gray-200 dark:bg-[#333333] text-gray-900 dark:text-white rounded-lg">
+              Pick Different Context
             </button>
           </div>
         </div>
       );
     }
 
-    const scenario = practiceScenarios[currentScenario];
+    // Get the final summary if practice ended
+    const finalSummary = roleplayMessages.find(m => m.coaching?.summary)?.coaching?.summary;
 
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <button onClick={() => setMode('learn')} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Back to {technique.name}
           </button>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Question {currentScenario + 1} of {practiceScenarios.length} | Score: {score}/{practiceScenarios.length}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono text-[#D4A017] uppercase bg-[#D4A017]/10 px-2 py-1 rounded">
+              {practiceContext === 'work' ? 'Workplace' : practiceContext === 'relationship' ? 'Personal' : 'Business'}
+            </span>
+            {!roleplayEnded && (
+              <button
+                onClick={() => setRoleplayEnded(true)}
+                className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+              >
+                End Practice
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-lg border border-gray-200 dark:border-[#333333]">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-5 w-5 text-[#D4A017]" />
-            <h2 className="font-mono uppercase text-[#D4A017]">Practice Scenario</h2>
-          </div>
+        {/* Chat messages */}
+        <div className="bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] p-4 space-y-4 min-h-[300px] max-h-[60vh] overflow-y-auto">
+          {roleplayMessages.map((msg, i) => (
+            <div key={i}>
+              {/* Message bubble */}
+              <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-3 rounded-lg text-sm whitespace-pre-line ${
+                  msg.role === 'user'
+                    ? 'bg-[#D4A017]/20 text-gray-900 dark:text-white border border-[#D4A017]/30 rounded-br-none'
+                    : 'bg-gray-100 dark:bg-[#222222] text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-[#333333] rounded-bl-none'
+                }`}>
+                  {msg.content}
+                </div>
+              </div>
 
-          <div className="bg-[#FAFAF8] dark:bg-[#0A0A0A] p-4 rounded-lg mb-4">
-            <p className="text-gray-600 dark:text-gray-300">{scenario.situation}</p>
-          </div>
+              {/* Coaching feedback (shown after assistant messages that follow a user message) */}
+              {msg.role === 'assistant' && msg.coaching && msg.coaching.score > 0 && (
+                <div className="mt-2 ml-0">
+                  <button
+                    onClick={() => setExpandedCoaching(prev => ({ ...prev, [i]: !prev[i] }))}
+                    className="inline-flex items-center gap-2 text-xs text-[#D4A017] hover:text-[#E8B830] transition-colors"
+                  >
+                    <Lightbulb className="h-3 w-3" />
+                    Coaching Feedback (Score: {msg.coaching.score}/10)
+                    {expandedCoaching[i] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </button>
 
-          <p className="text-gray-900 dark:text-white font-medium mb-4">{scenario.yourMessage}</p>
-
-          <div className="space-y-3">
-            {scenario.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleOptionSelect(index)}
-                disabled={showFeedback}
-                className={`w-full p-4 text-left rounded-lg border transition-all ${
-                  selectedOption === index
-                    ? showFeedback
-                      ? option.isCorrect ? 'border-green-500 bg-green-900/20' : 'border-red-500 bg-red-900/20'
-                      : 'border-[#D4A017] bg-[#2A2520]'
-                    : 'border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#222222] hover:border-[#444444]'
-                } ${showFeedback ? 'cursor-default' : 'cursor-pointer'}`}
-              >
-                <div className="flex items-start gap-3">
-                  {showFeedback && (
-                    <div className="flex-shrink-0 mt-0.5">
-                      {option.isCorrect ? <CheckCircle className="h-5 w-5 text-green-400" /> : selectedOption === index ? <XCircle className="h-5 w-5 text-red-400" /> : null}
+                  {expandedCoaching[i] && (
+                    <div className="mt-2 p-3 bg-[#D4A017]/5 border border-[#D4A017]/20 rounded-lg text-sm space-y-2">
+                      <p className="text-gray-700 dark:text-gray-300">{msg.coaching.feedback}</p>
+                      {msg.coaching.idealResponse && (
+                        <div>
+                          <p className="text-xs font-mono text-[#D4A017] uppercase mb-1">Ideal Response</p>
+                          <p className="text-gray-600 dark:text-gray-400 text-xs italic">&quot;{msg.coaching.idealResponse}&quot;</p>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="font-mono text-[#D4A017]">TECHNIQUE:</span> {msg.coaching.techniqueApplication}
+                      </p>
                     </div>
                   )}
-                  <div className="flex-1">
-                    <p className="text-gray-900 dark:text-white">{option.text}</p>
-                    {showFeedback && (selectedOption === index || option.isCorrect) && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#333333] space-y-2">
-                        <div className="flex items-start gap-2">
-                          <Lightbulb className="h-4 w-4 text-[#D4A017] mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">{option.explanation}</p>
-                            <p className="text-xs text-[#D4A017] mt-1 font-mono uppercase">Technique Application: {option.techniqueApplication}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
-              </button>
-            ))}
-          </div>
+              )}
+            </div>
+          ))}
 
-          {showFeedback && (
-            <div className="mt-6 text-center">
-              <button onClick={nextScenario} className="px-6 py-2 bg-[#D4A017] text-[#0A0A0A] rounded-lg font-semibold hover:bg-[#F4D03F] transition-colors">
-                {currentScenario < practiceScenarios.length - 1 ? 'Next Scenario' : 'Complete Practice'}
-              </button>
+          {roleplayLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 dark:bg-[#222222] p-3 rounded-lg border border-gray-200 dark:border-[#333333] rounded-bl-none">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
             </div>
           )}
+
+          {roleplayError && roleplayMessages.length > 0 && (
+            <p className="text-red-400 text-xs text-center">{roleplayError}</p>
+          )}
+
+          <div ref={roleplayEndRef} />
         </div>
+
+        {/* Summary card */}
+        {roleplayEnded && finalSummary && (
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-lg border border-[#D4A017]/30 p-6 space-y-4">
+            <h3 className="font-mono text-lg text-[#D4A017] uppercase flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Practice Summary
+            </h3>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full border-4 border-[#D4A017] flex items-center justify-center">
+                <span className="text-2xl font-bold text-[#D4A017]">{finalSummary.overallScore}</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Overall Score</p>
+                <p className="text-gray-900 dark:text-white font-medium">{finalSummary.keyTakeaway}</p>
+              </div>
+            </div>
+            {finalSummary.strengths.length > 0 && (
+              <div>
+                <h4 className="text-sm font-mono text-green-400 uppercase mb-2">Strengths</h4>
+                <ul className="space-y-1">
+                  {finalSummary.strengths.map((s, i) => (
+                    <li key={i} className="text-sm text-gray-600 dark:text-gray-300 flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {finalSummary.improvements.length > 0 && (
+              <div>
+                <h4 className="text-sm font-mono text-yellow-400 uppercase mb-2">Areas for Improvement</h4>
+                <ul className="space-y-1">
+                  {finalSummary.improvements.map((s, i) => (
+                    <li key={i} className="text-sm text-gray-600 dark:text-gray-300 flex items-start gap-2">
+                      <Lightbulb className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Input area or end buttons */}
+        {roleplayEnded ? (
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => startPractice()}
+              className="px-6 py-2.5 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B830] transition-colors"
+            >
+              Try Another Context
+            </button>
+            <button
+              onClick={() => setMode('learn')}
+              className="px-6 py-2.5 bg-gray-200 dark:bg-[#333333] text-gray-900 dark:text-white rounded-lg"
+            >
+              Back to Learning
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={roleplayInput}
+              onChange={e => setRoleplayInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleRoleplaySend(); } }}
+              placeholder="Type your response..."
+              disabled={roleplayLoading}
+              className="flex-1 px-4 py-3 bg-white dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:border-[#D4A017] focus:outline-none disabled:opacity-50"
+            />
+            <button
+              onClick={handleRoleplaySend}
+              disabled={roleplayLoading || !roleplayInput.trim()}
+              className="p-3 bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B830] transition-colors disabled:opacity-50"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -403,7 +662,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
           Learn
         </button>
         <button
-          onClick={startPractice}
+          onClick={() => startPractice()}
           className={`flex-1 py-2.5 px-5 rounded-lg text-sm font-medium transition-colors ${
             mode === 'practice'
               ? 'bg-[#D4A017] text-[#0A0A0A] font-bold'
@@ -653,36 +912,117 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
         <div className="space-y-6">
           <h2 className="font-mono text-lg text-[#D4A017] uppercase flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            Real-World Examples
+            Conversation Scripts
           </h2>
 
-          {/* Example chunks from the knowledge base */}
-          {technique.chunks.example.length > 0 ? (
-            technique.chunks.example.map((chunk) => (
-              <div key={chunk.id} className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-mono uppercase">Example</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{chunk.bookTitle}</span>
+          {/* AI-generated conversation scripts */}
+          {synthesized?.conversationExamples && synthesized.conversationExamples.length > 0 ? (
+            <>
+              {synthesized.conversationExamples.map((example, exIdx) => {
+                const contextIcon = example.context?.toLowerCase().includes('work') ? '\uD83D\uDCBC'
+                  : example.context?.toLowerCase().includes('personal') || example.context?.toLowerCase().includes('dating') || example.context?.toLowerCase().includes('relationship') ? '\u2764\uFE0F'
+                  : '\uD83D\uDCB0';
+                const isBreakdownVisible = showBreakdown[exIdx] ?? false;
+
+                return (
+                  <div key={exIdx} className="bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] overflow-hidden">
+                    {/* Card header */}
+                    <div className="p-4 border-b border-gray-200 dark:border-[#333333] flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{contextIcon}</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-mono uppercase">{example.context}</span>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{example.title}</h3>
+                      </div>
+                      <button
+                        onClick={() => setShowBreakdown(prev => ({ ...prev, [exIdx]: !prev[exIdx] }))}
+                        className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#D4A017] transition-colors"
+                      >
+                        {isBreakdownVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {isBreakdownVisible ? 'Hide' : 'Show'} Breakdown
+                      </button>
+                    </div>
+
+                    {/* Script as chat bubbles */}
+                    <div className="p-4 space-y-3">
+                      {example.script.map((line, lineIdx) => {
+                        const isYou = line.speaker === 'You';
+                        return (
+                          <div key={lineIdx}>
+                            <div className={`flex ${isYou ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[75%] space-y-1`}>
+                                <p className={`text-[10px] font-mono uppercase ${isYou ? 'text-right text-[#D4A017]' : 'text-left text-gray-400'}`}>
+                                  {line.speaker}
+                                </p>
+                                <div className={`p-3 rounded-lg text-sm ${
+                                  isYou
+                                    ? 'bg-[#D4A017]/15 text-gray-900 dark:text-white border border-[#D4A017]/25 rounded-br-none'
+                                    : 'bg-gray-100 dark:bg-[#222222] text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-[#333333] rounded-bl-none'
+                                }`}>
+                                  {line.line}
+                                </div>
+                                {/* Annotation badge */}
+                                {isBreakdownVisible && line.annotation && (
+                                  <div className={`flex ${isYou ? 'justify-end' : 'justify-start'}`}>
+                                    <span className="inline-block px-2 py-1 bg-[#D4A017]/10 border border-[#D4A017]/20 rounded text-[11px] text-[#D4A017] font-mono">
+                                      {line.annotation}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Result + Why It Worked */}
+                    <div className="border-t border-gray-200 dark:border-[#333333]">
+                      {example.result && (
+                        <div className="px-4 py-3 bg-green-50 dark:bg-green-900/10 border-b border-gray-200 dark:border-[#333333]">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-mono text-green-600 dark:text-green-400 uppercase mb-0.5">Result</p>
+                              <p className="text-sm text-green-800 dark:text-green-300">{example.result}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {example.whyItWorked && (
+                        <div className="px-4 py-3">
+                          <p className="text-xs font-mono text-[#D4A017] uppercase mb-1">Why It Worked</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{example.whyItWorked}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Regenerate — admin only */}
+              {isAdmin && (
+                <div className="text-right">
+                  <button
+                    onClick={() => fetchSynthesized(true)}
+                    disabled={synthesizing}
+                    className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#D4A017] transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${synthesizing ? 'animate-spin' : ''}`} />
+                    Regenerate
+                  </button>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line">{chunk.content}</p>
-                <p className="text-xs text-gray-500 italic">Source: {chunk.bookTitle} by {chunk.author}</p>
-              </div>
-            ))
-          ) : synthesized?.examples ? (
-            synthesized.examples.map((ex, i) => (
-              <div key={i} className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-mono uppercase">Scenario {i + 1}</span>
-                </div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">{ex.scenario}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{ex.description}</p>
-              </div>
-            ))
+              )}
+            </>
+          ) : synthesizing ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A017] mx-auto" />
+              <p className="mt-4 text-gray-500 dark:text-gray-400">Generating conversation scripts...</p>
+            </div>
           ) : (
             <div className="text-center py-8 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333]">
-              <p className="text-gray-500 dark:text-gray-400 mb-3">No example chunks available.</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-3">No conversation scripts available yet.</p>
               <button
-                onClick={fetchSynthesized}
+                onClick={() => fetchSynthesized(true)}
                 disabled={synthesizing}
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg text-sm uppercase tracking-wider hover:bg-[#E8B030] transition-all disabled:opacity-50"
               >
@@ -694,7 +1034,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Generate Examples with AI
+                    Generate Conversation Scripts
                   </>
                 )}
               </button>
