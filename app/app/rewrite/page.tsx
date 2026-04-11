@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Copy, Lightbulb, Zap } from 'lucide-react';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 
@@ -25,6 +25,35 @@ export default function RewritePage() {
     const [error, setError] = useState<string | null>(null);
 
     const { categories: taxonomyCategories } = useTaxonomy();
+    const [goalFocused, setGoalFocused] = useState(false);
+    const goalRef = useRef<HTMLDivElement>(null);
+
+    // Flatten all use cases for autocomplete
+    const allUseCases = useMemo(() =>
+      taxonomyCategories.flatMap(cat =>
+        cat.useCases.map(uc => ({ ...uc, categoryName: cat.name, emoji: cat.emoji }))
+      ), [taxonomyCategories]);
+
+    // Filter suggestions based on input
+    const suggestions = useMemo(() => {
+      if (!goal.trim()) return allUseCases.slice(0, 6); // show 6 popular when empty
+      const lower = goal.toLowerCase();
+      return allUseCases.filter(uc =>
+        uc.title.toLowerCase().includes(lower) ||
+        uc.categoryName.toLowerCase().includes(lower)
+      ).slice(0, 6);
+    }, [goal, allUseCases]);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+      const handler = (e: MouseEvent) => {
+        if (goalRef.current && !goalRef.current.contains(e.target as Node)) {
+          setGoalFocused(false);
+        }
+      };
+      document.addEventListener('mousedown', handler);
+      return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     const handleRewrite = async () => {
         if (!originalMessage.trim()) return;
@@ -97,24 +126,32 @@ export default function RewritePage() {
                     />
                 </div>
 
-                <div>
+                <div ref={goalRef} className="relative">
                     <label className="block text-sm font-mono uppercase text-[#D4A017] mb-2">
                         Goal (Optional)
                     </label>
-                    <select
+                    <input
+                        type="text"
                         value={goal}
-                        onChange={(e) => setGoal(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-md p-3 text-gray-900 dark:text-white focus:outline-none focus:border-[#D4A017]"
-                    >
-                        <option value="">Select your objective...</option>
-                        {taxonomyCategories.map((cat) => (
-                            <optgroup key={cat.id} label={`${cat.emoji} ${cat.name}`}>
-                                {cat.useCases.map((uc) => (
-                                    <option key={uc.id} value={uc.title}>{uc.title}</option>
-                                ))}
-                            </optgroup>
-                        ))}
-                    </select>
+                        onChange={(e) => { setGoal(e.target.value); setGoalFocused(true); }}
+                        onFocus={() => setGoalFocused(true)}
+                        placeholder="What are you trying to achieve? e.g., get a raise, close a deal..."
+                        className="w-full bg-gray-50 dark:bg-[#222222] border border-gray-200 dark:border-[#333333] rounded-md p-3 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#D4A017]"
+                    />
+                    {goalFocused && suggestions.length > 0 && (
+                        <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white dark:bg-[#222] border border-gray-200 dark:border-[#444] rounded-lg shadow-lg overflow-hidden max-h-64 overflow-y-auto">
+                            {suggestions.map((uc) => (
+                                <button
+                                    key={uc.id}
+                                    onClick={() => { setGoal(uc.title); setGoalFocused(false); }}
+                                    className="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-[#333] transition-colors flex items-center gap-3"
+                                >
+                                    <span className="text-sm text-gray-900 dark:text-white">{uc.title}</span>
+                                    <span className="text-[10px] text-gray-400 ml-auto whitespace-nowrap">{uc.emoji} {uc.categoryName}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <button
