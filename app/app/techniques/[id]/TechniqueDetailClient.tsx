@@ -5,6 +5,8 @@ import { useRef } from 'react';
 import { ArrowLeft, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2, RefreshCw, ChevronDown, ChevronUp, Send, Briefcase, Heart, DollarSign, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
+import { getCategoryIcon } from '@/lib/category-icons';
 
 const ADMIN_EMAILS = ['ybyalik@gmail.com'];
 const formatLabel = (s: string) => s.split(/[_-]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -80,7 +82,7 @@ interface RoleplayMessage {
   };
 }
 
-type PracticeContext = 'work' | 'relationship' | 'business';
+type PracticeContext = string; // taxonomy category ID or custom context
 
 export default function TechniqueDetailClient({ techniqueId }: { techniqueId: string }) {
   const [technique, setTechnique] = useState<TechniqueDetail | null>(null);
@@ -106,6 +108,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
 
   const router = useRouter();
   const { user } = useAuth();
+  const { categories: taxonomyCategories } = useTaxonomy();
   const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   // Fetch technique data
@@ -386,22 +389,20 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
             <p className="text-gray-500 dark:text-gray-400">Choose a context for your role-play simulation</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {([
-              { key: 'work' as PracticeContext, icon: Briefcase, label: 'At Work', desc: 'Workplace negotiations, meetings, team dynamics' },
-              { key: 'relationship' as PracticeContext, icon: Heart, label: 'In a Relationship', desc: 'Personal conversations, boundaries, emotional situations' },
-              { key: 'business' as PracticeContext, icon: DollarSign, label: 'In Business', desc: 'Sales calls, deal-making, client negotiations' },
-            ]).map(({ key, icon: Icon, label, desc }) => (
-              <button
-                key={key}
-                onClick={() => selectPracticeContext(key)}
-                className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] hover:border-[#D4A017] transition-all group text-left"
-              >
-                <Icon className="h-8 w-8 text-[#D4A017] mb-3 group-hover:scale-110 transition-transform" />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{label}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
-              </button>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {taxonomyCategories.map((cat) => {
+              const Icon = getCategoryIcon(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => selectPracticeContext(cat.id)}
+                  className="p-4 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] hover:border-[#D4A017] transition-all group text-left"
+                >
+                  <Icon className="h-6 w-6 text-[#D4A017] mb-2 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{cat.name}</h3>
+                </button>
+              );
+            })}
           </div>
         </div>
       );
@@ -447,7 +448,7 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
           </button>
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono text-[#D4A017] uppercase bg-[#D4A017]/10 px-2 py-1 rounded">
-              {practiceContext === 'work' ? 'Workplace' : practiceContext === 'relationship' ? 'Personal' : 'Business'}
+              {taxonomyCategories.find(c => c.id === practiceContext)?.name || practiceContext}
             </span>
             {!roleplayEnded && (
               <button
@@ -471,7 +472,11 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
                     ? 'bg-[#D4A017]/20 text-gray-900 dark:text-white border border-[#D4A017]/30 rounded-br-none'
                     : 'bg-gray-100 dark:bg-[#222222] text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-[#333333] rounded-bl-none'
                 }`}>
-                  {msg.content}
+                  <span dangerouslySetInnerHTML={{ __html: msg.content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br/>')
+                  }} />
                 </div>
               </div>
 
@@ -489,11 +494,11 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
 
                   {expandedCoaching[i] && (
                     <div className="mt-2 p-3 bg-[#D4A017]/5 border border-[#D4A017]/20 rounded-lg text-sm space-y-2">
-                      <p className="text-gray-700 dark:text-gray-300">{msg.coaching.feedback}</p>
+                      <p className="text-gray-700 dark:text-gray-300" dangerouslySetInnerHTML={{ __html: msg.coaching.feedback.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>') }} />
                       {msg.coaching.idealResponse && (
                         <div>
                           <p className="text-xs font-mono text-[#D4A017] uppercase mb-1">Ideal Response</p>
-                          <p className="text-gray-600 dark:text-gray-400 text-xs italic">&quot;{msg.coaching.idealResponse}&quot;</p>
+                          <p className="text-gray-600 dark:text-gray-400 text-xs italic">{msg.coaching.idealResponse.replace(/^["']+|["']+$/g, '')}</p>
                         </div>
                       )}
                       <p className="text-xs text-gray-500 dark:text-gray-400">
