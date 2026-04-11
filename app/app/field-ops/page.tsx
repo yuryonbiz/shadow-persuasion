@@ -99,15 +99,22 @@ function getDefaultMissionsData(): MissionsData {
   };
 }
 
-function getDailyMission(pool: Mission[], dateStr?: string): Mission {
+function getDailyMission(pool: Mission[], dateStr?: string, completedIds?: Set<number>): Mission {
   if (pool.length === 0) return FALLBACK_MISSIONS[0];
+  let availablePool = pool;
+  if (completedIds && completedIds.size > 0) {
+    const filtered = pool.filter(m => !completedIds.has(m.id));
+    if (filtered.length > 0) availablePool = filtered;
+    // If all completed, fall back to full pool
+  }
+  if (availablePool.length === 0) return FALLBACK_MISSIONS[0];
   const today = dateStr || new Date().toISOString().split('T')[0];
   let seed = 0;
   for (let i = 0; i < today.length; i++) {
     seed = (seed * 31 + today.charCodeAt(i)) >>> 0;
   }
-  const index = seed % pool.length;
-  return pool[index];
+  const index = seed % availablePool.length;
+  return availablePool[index];
 }
 
 function getDateString(date: Date = new Date()): string {
@@ -768,12 +775,40 @@ export default function FieldOpsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [missionPool, setMissionPool] = useState<Mission[]>([]);
   const [poolLoading, setPoolLoading] = useState(true);
+  const [userGoals, setUserGoals] = useState<string[]>([]);
+  const [lowPoolWarning, setLowPoolWarning] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
-  // Fetch mission pool from API
+  const ADMIN_EMAILS = ['ybyalik@gmail.com'];
+  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
+
+  // Fetch user profile for goals, then mission pool with category filter
   useEffect(() => {
     async function fetchMissionPool() {
       try {
-        const res = await fetch('/api/missions/pool');
+        // Fetch user goals first
+        const token = await user?.getIdToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        let goals: string[] = [];
+        if (user) {
+          try {
+            const profileRes = await fetch('/api/user', { headers });
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              goals = profileData.profile?.goals || [];
+              setUserGoals(goals);
+            }
+          } catch (err) {
+            console.error('Failed to fetch user profile:', err);
+          }
+        }
+
+        const url = goals.length > 0
+          ? `/api/missions/pool?categories=${goals.join(',')}`
+          : '/api/missions/pool';
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           setMissionPool(data.missions || []);
@@ -785,11 +820,37 @@ export default function FieldOpsPage() {
       }
     }
     fetchMissionPool();
-  }, []);
+  }, [user]);
+
+  // Completed mission IDs
+  const completedIds = useMemo(() => {
+    return new Set(missionsData.completions.map(c => c.missionId));
+  }, [missionsData.completions]);
+
+  // Difficulty progression
+  const completionCount = missionsData.completions.length;
+  const difficultyFilter: Difficulty[] = useMemo(() => {
+    if (completionCount < 6) return ['Beginner'];
+    if (completionCount < 16) return ['Beginner', 'Intermediate'];
+    return ['Beginner', 'Intermediate', 'Advanced'];
+  }, [completionCount]);
+
+  // Filtered pool: difficulty -> check low pool -> daily pick excludes completed
+  const filteredPool = useMemo(() => {
+    const diffFiltered = missionPool.filter(m => difficultyFilter.includes(m.difficulty));
+    return diffFiltered;
+  }, [missionPool, difficultyFilter]);
+
+  // Check low pool warning
+  useEffect(() => {
+    if (filteredPool.length === 0) return;
+    const availableAfterCompleted = filteredPool.filter(m => !completedIds.has(m.id));
+    setLowPoolWarning(availableAfterCompleted.length < 3);
+  }, [filteredPool, completedIds]);
 
   // Today's mission
   const todayStr = getDateString();
-  const todayMission = useMemo(() => getDailyMission(missionPool, todayStr), [missionPool, todayStr]);
+  const todayMission = useMemo(() => getDailyMission(filteredPool, todayStr, completedIds), [filteredPool, todayStr, completedIds]);
   const todayCompleted = missionsData.completions.some((c) => c.date === todayStr);
 
   // Streak
@@ -801,12 +862,12 @@ export default function FieldOpsPage() {
     for (let i = 1; i <= 7; i++) {
       const date = new Date(Date.now() - i * 86400000);
       const dateStr = getDateString(date);
-      const mission = getDailyMission(missionPool, dateStr);
+      const mission = getDailyMission(filteredPool, dateStr, completedIds);
       const completion = missionsData.completions.find((c) => c.date === dateStr);
       missions.push({ date: dateStr, mission, completion });
     }
     return missions;
-  }, [missionPool, missionsData.completions]);
+  }, [filteredPool, missionsData.completions, completedIds]);
 
   // Timer
   const [timeLeft, setTimeLeft] = useState('');
@@ -1241,6 +1302,58 @@ export default function FieldOpsPage() {
           )}
         </div>
       </div>
+
+      {/* ── Low Pool Warning ── */}
+      {lowPoolWarning && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 flex items-center gap-3">
+          <Target className="h-5 w-5 text-yellow-400 shrink-0" />
+          <p className="text-sm text-yellow-300 flex-1">
+            Running low on missions for your focus areas. New missions will be generated from your knowledge base.
+          </p>
+        </div>
+      )}
+
+      {/* ── Admin: Generate Missions ── */}
+      {isAdmin && (
+        <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-mono text-gray-500 uppercase tracking-wider">Admin</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Pool: {filteredPool.length} missions after filters ({missionPool.length} total)
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              setGenerating(true);
+              try {
+                const authHeaders = await getHeaders();
+                const res = await fetch('/api/missions/pool', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders },
+                  body: JSON.stringify({ count: 5 }),
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  setMissionPool(prev => [...prev, ...(data.generated || [])]);
+                }
+              } catch (err) {
+                console.error('Failed to generate missions:', err);
+              } finally {
+                setGenerating(false);
+              }
+            }}
+            disabled={generating}
+            className="flex items-center gap-2 px-4 py-2 bg-[#D4A017]/20 text-[#D4A017] border border-[#D4A017]/40 rounded-lg text-sm font-medium hover:bg-[#D4A017]/30 transition-colors disabled:opacity-50"
+          >
+            {generating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            Generate More Missions
+          </button>
+        </div>
+      )}
 
       {/* ── Section 2: Field Reports ── */}
       <div className="space-y-4">

@@ -9,8 +9,29 @@ const supabase = createClient(
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY!;
 
+// Mapping from mission category to taxonomy category IDs
+const CATEGORY_TO_TAXONOMY: Record<string, string[]> = {
+  Negotiation: ['career', 'business', 'finance'],
+  Rapport: ['dating', 'relationships', 'parenting'],
+  Influence: ['business', 'influence', 'career', 'leadership'],
+  Framing: ['career', 'leadership', 'personal_power'],
+  Defense: ['defense', 'relationships'],
+};
+
+// Reverse: given taxonomy IDs, which mission categories match?
+function getMissionCategoriesForTaxonomy(taxonomyIds: string[]): Set<string> {
+  const result = new Set<string>();
+  for (const [missionCat, taxIds] of Object.entries(CATEGORY_TO_TAXONOMY)) {
+    if (taxIds.some((t) => taxonomyIds.includes(t))) {
+      result.add(missionCat);
+    }
+  }
+  return result;
+}
+
 // GET: Returns all missions from the missions table
-export async function GET() {
+// Optional query param: ?categories=career,dating,defense (taxonomy category IDs)
+export async function GET(req: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('missions')
@@ -23,7 +44,7 @@ export async function GET() {
     }
 
     // Map DB columns to camelCase for frontend compatibility
-    const missions = (data || []).map((m) => ({
+    let missions = (data || []).map((m) => ({
       id: m.id,
       title: m.title,
       description: m.description,
@@ -35,6 +56,18 @@ export async function GET() {
       isGenerated: m.is_generated,
       sourceBooks: m.source_books,
     }));
+
+    // Filter by taxonomy categories if provided
+    const categoriesParam = req.nextUrl.searchParams.get('categories');
+    if (categoriesParam) {
+      const taxonomyIds = categoriesParam.split(',').map((s) => s.trim()).filter(Boolean);
+      if (taxonomyIds.length > 0) {
+        const allowedCategories = getMissionCategoriesForTaxonomy(taxonomyIds);
+        if (allowedCategories.size > 0) {
+          missions = missions.filter((m) => allowedCategories.has(m.category));
+        }
+      }
+    }
 
     return NextResponse.json({ missions });
   } catch (error) {

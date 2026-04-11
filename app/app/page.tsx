@@ -93,14 +93,21 @@ function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
 }
 
-function getDailyMission(pool: Mission[], dateStr: string): Mission | null {
+function getDailyMission(pool: Mission[], dateStr: string, completedIds?: Set<number>): Mission | null {
   if (pool.length === 0) return null;
+  let availablePool = pool;
+  if (completedIds && completedIds.size > 0) {
+    const filtered = pool.filter(m => !completedIds.has(m.id));
+    if (filtered.length > 0) availablePool = filtered;
+    // If all completed, fall back to full pool
+  }
+  if (availablePool.length === 0) return null;
   let hash = 0;
   for (let i = 0; i < dateStr.length; i++) {
     hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
     hash |= 0;
   }
-  return pool[Math.abs(hash) % pool.length];
+  return availablePool[Math.abs(hash) % availablePool.length];
 }
 
 
@@ -212,6 +219,8 @@ export default function DashboardPage() {
   const [completions, setCompletions] = useState<MissionCompletion[]>([]);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [missionPool, setMissionPool] = useState<Mission[]>([]);
+  const [userGoals, setUserGoals] = useState<string[]>([]);
+  const [lowPoolWarning, setLowPoolWarning] = useState(false);
   const [onboardingComplete, setOnboardingComplete] = useState(true); // assume true until we know
   const [selectedGoals, setSelectedGoals] = useState<TaxonomyCategory[]>([]);
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null);
@@ -225,9 +234,26 @@ export default function DashboardPage() {
   const [voiceSampleTexts, setVoiceSampleTexts] = useState('');
   const [savingVoice, setSavingVoice] = useState(false);
 
+  // Completed mission IDs
+  const completedIds = new Set(completions.map(c => c.missionId).filter((id): id is number => id !== undefined));
+
+  // Difficulty progression
+  const completionCount = completions.length;
+  const difficultyFilter: Difficulty[] =
+    completionCount < 6 ? ['Beginner'] :
+    completionCount < 16 ? ['Beginner', 'Intermediate'] :
+    ['Beginner', 'Intermediate', 'Advanced'];
+
+  // Filtered pool: difficulty filter
+  const filteredPool = missionPool.filter(m => difficultyFilter.includes(m.difficulty));
+
   // Today's mission
   const today = new Date().toISOString().split('T')[0];
-  const dailyMission = getDailyMission(missionPool, today);
+  const dailyMission = getDailyMission(filteredPool, today, completedIds);
+
+  // Check low pool
+  const availableAfterCompleted = filteredPool.filter(m => !completedIds.has(m.id));
+  const showLowPool = lowPoolWarning || availableAfterCompleted.length < 3;
 
   // Check if today's mission is completed
   const todayCompletion = dailyMission ? completions.find(c => {
@@ -262,11 +288,30 @@ export default function DashboardPage() {
         const headers: Record<string, string> = {};
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
+        // Fetch user profile for goals
+        let goals: string[] = [];
+        if (user) {
+          try {
+            const profileRes = await fetch('/api/user', { headers });
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              goals = profileData.profile?.goals || [];
+              setUserGoals(goals);
+            }
+          } catch (err) {
+            console.error('Failed to fetch user profile:', err);
+          }
+        }
+
+        const poolUrl = goals.length > 0
+          ? `/api/missions/pool?categories=${goals.join(',')}`
+          : '/api/missions/pool';
+
         const [progressRes, completionsRes, conversationsRes, poolRes] = await Promise.all([
           fetch('/api/user/progress', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch('/api/missions/completions', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
           fetch('/api/conversations', { headers }).then(r => r.ok ? r.json() : null).catch(() => null),
-          fetch('/api/missions/pool').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(poolUrl).then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
 
         if (progressRes) setProgress(progressRes);
@@ -781,6 +826,12 @@ export default function DashboardPage() {
                   </Link>
                 )}
               </div>
+
+              {showLowPool && (
+                <p className="mt-3 text-xs text-yellow-400/80 italic">
+                  Running low on missions for your focus areas. New missions will be generated from your knowledge base.
+                </p>
+              )}
             </>
           ) : (
             <div className="flex items-center gap-2 text-gray-500">
