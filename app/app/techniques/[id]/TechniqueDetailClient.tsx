@@ -920,31 +920,55 @@ export default function TechniqueDetailClient({ techniqueId }: { techniqueId: st
             Conversation Scripts
           </h2>
 
+          {/* Breakdown toggle — global for all examples */}
+          {synthesized?.conversationExamples && synthesized.conversationExamples.length > 0 && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {synthesized.conversationExamples.length} scenario{synthesized.conversationExamples.length !== 1 ? 's' : ''} showing this technique in action
+              </p>
+              <button
+                onClick={() => {
+                  const allVisible = Object.values(showBreakdown).filter(Boolean).length === synthesized.conversationExamples.length;
+                  const newState: Record<number, boolean> = {};
+                  synthesized.conversationExamples.forEach((_, i) => { newState[i] = !allVisible; });
+                  setShowBreakdown(newState);
+                }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-mono uppercase rounded-lg border border-[#D4A017]/30 text-[#D4A017] hover:bg-[#D4A017]/10 transition-colors"
+              >
+                {Object.values(showBreakdown).filter(Boolean).length === synthesized.conversationExamples.length ? (
+                  <><EyeOff className="h-3.5 w-3.5" /> Hide Technique Breakdown</>
+                ) : (
+                  <><Eye className="h-3.5 w-3.5" /> Show Technique Breakdown</>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* AI-generated conversation scripts */}
           {synthesized?.conversationExamples && synthesized.conversationExamples.length > 0 ? (
             <>
               {synthesized.conversationExamples.map((example, exIdx) => {
-                const contextIcon = example.context?.toLowerCase().includes('work') ? '\uD83D\uDCBC'
-                  : example.context?.toLowerCase().includes('personal') || example.context?.toLowerCase().includes('dating') || example.context?.toLowerCase().includes('relationship') ? '\u2764\uFE0F'
-                  : '\uD83D\uDCB0';
+                const contextSlug = example.context?.toLowerCase().includes('work') || example.context?.toLowerCase().includes('career') ? 'career'
+                  : example.context?.toLowerCase().includes('personal') || example.context?.toLowerCase().includes('dating') || example.context?.toLowerCase().includes('relationship') ? 'dating'
+                  : example.context?.toLowerCase().includes('business') || example.context?.toLowerCase().includes('sales') ? 'business'
+                  : 'career';
+                const ContextIcon = getCategoryIcon(contextSlug);
                 const isBreakdownVisible = showBreakdown[exIdx] ?? false;
 
                 return (
-                  <div key={exIdx} className="bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333] overflow-hidden">
-                    {/* Card header */}
-                    <div className="p-4 border-b border-gray-200 dark:border-[#333333] flex items-center justify-between">
+                  <div key={exIdx} className="bg-white dark:bg-[#1A1A1A] rounded-xl border-2 border-gray-200 dark:border-[#333333] overflow-hidden shadow-sm">
+                    {/* Card header — prominent with colored left accent */}
+                    <div className="p-4 border-b border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#222222] flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">{contextIcon}</span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-mono uppercase">{example.context}</span>
-                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{example.title}</h3>
+                        <div className="w-8 h-8 rounded-lg bg-[#D4A017]/10 flex items-center justify-center">
+                          <ContextIcon className="h-4 w-4 text-[#D4A017]" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono uppercase text-gray-400 block">Scenario {exIdx + 1} of {synthesized.conversationExamples.length}</span>
+                          <h3 className="text-sm font-bold text-gray-900 dark:text-white">{example.title}</h3>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#D4A017]/10 text-[#D4A017] text-xs font-mono uppercase ml-2">{example.context}</span>
                       </div>
-                      <button
-                        onClick={() => setShowBreakdown(prev => ({ ...prev, [exIdx]: !prev[exIdx] }))}
-                        className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#D4A017] transition-colors"
-                      >
-                        {isBreakdownVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        {isBreakdownVisible ? 'Hide' : 'Show'} Breakdown
-                      </button>
                     </div>
 
                     {/* Script as chat bubbles */}
