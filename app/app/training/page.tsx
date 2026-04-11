@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ScenarioCard } from '@/components/app/ScenarioCard';
-import { Star, Loader2, Plus } from 'lucide-react';
+import { Star, Loader2, Plus, X, Check, CheckSquare, Square, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
+import { useTaxonomy, TaxonomyCategory } from '@/lib/hooks/useTaxonomy';
 import { getCategoryIcon } from '@/lib/category-icons';
 
 // Map old scenario category names to taxonomy category IDs
@@ -45,7 +45,23 @@ export default function TrainingArenaPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [difficulty, setDifficulty] = useState(0);
-  const [generating, setGenerating] = useState(false);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<'config' | 'loading' | 'preview'>('config');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [generateCount, setGenerateCount] = useState(5);
+  const [generatedScenarios, setGeneratedScenarios] = useState<Scenario[]>([]);
+  const [checkedScenarios, setCheckedScenarios] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const refreshScenarios = useCallback(() => {
+    fetch('/api/scenarios/list')
+      .then(res => res.json())
+      .then(data => setScenarios(data.scenarios || []))
+      .catch(err => console.error('Failed to fetch scenarios:', err));
+  }, []);
 
   useEffect(() => {
     fetch('/api/scenarios/list')
@@ -80,34 +96,108 @@ export default function TrainingArenaPage() {
     return categoryMatch && difficultyMatch;
   });
 
+  const openModal = () => {
+    // Pre-check the current filter category, or all if on "All"
+    if (filter === 'All') {
+      setSelectedCategories(taxonomyCategories.map(c => c.id));
+    } else {
+      setSelectedCategories([filter]);
+    }
+    setGenerateCount(5);
+    setGeneratedScenarios([]);
+    setCheckedScenarios(new Set());
+    setModalStep('config');
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAllCategories = () => {
+    if (selectedCategories.length === taxonomyCategories.length) {
+      setSelectedCategories([]);
+    } else {
+      setSelectedCategories(taxonomyCategories.map(c => c.id));
+    }
+  };
+
   const handleGenerate = async () => {
-    setGenerating(true);
+    setModalStep('loading');
     try {
       const res = await fetch('/api/scenarios/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: filter !== 'All' ? filter : undefined,
-          count: 3,
+          categories: selectedCategories,
+          count: generateCount,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        const newScenarios = data.scenarios || [];
-        setScenarios(prev => {
-          const existingIds = new Set(prev.map(s => s.id));
-          const unique = newScenarios.filter((s: Scenario) => !existingIds.has(s.id));
-          return [...prev, ...unique];
-        });
+        const newScenarios: Scenario[] = data.scenarios || [];
+        setGeneratedScenarios(newScenarios);
+        setCheckedScenarios(new Set(newScenarios.map(s => s.id)));
+        setModalStep('preview');
       } else {
-        console.error('Failed to generate scenarios');
+        const data = await res.json().catch(() => ({}));
+        console.error('Failed to generate scenarios:', data.error);
+        setModalStep('config');
       }
     } catch (err) {
       console.error('Error generating scenarios:', err);
-    } finally {
-      setGenerating(false);
+      setModalStep('config');
     }
   };
+
+  const toggleScenarioCheck = (id: string) => {
+    setCheckedScenarios(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSaveSelected = async () => {
+    const toSave = generatedScenarios.filter(s => checkedScenarios.has(s.id));
+    if (toSave.length === 0) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/scenarios/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', scenarios: toSave }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const savedScenarios: Scenario[] = data.scenarios || toSave;
+        setScenarios(prev => {
+          const existingIds = new Set(prev.map(s => s.id));
+          const unique = savedScenarios.filter(s => !existingIds.has(s.id));
+          return [...prev, ...unique];
+        });
+        setSuccessMessage(`${savedScenarios.length} scenario${savedScenarios.length > 1 ? 's' : ''} saved successfully!`);
+        setTimeout(() => setSuccessMessage(null), 4000);
+        closeModal();
+      } else {
+        console.error('Failed to save scenarios');
+      }
+    } catch (err) {
+      console.error('Error saving scenarios:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const difficultyLabel = (d: number) =>
+    d === 1 ? 'Beginner' : d === 2 ? 'Intermediate' : d === 3 ? 'Advanced' : 'Unknown';
 
   if (loading || taxonomyLoading) {
     return (
@@ -138,26 +228,21 @@ export default function TrainingArenaPage() {
         </div>
         {isAdmin && (
           <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-mono uppercase bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B030] transition-colors disabled:opacity-50"
+            onClick={openModal}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-mono uppercase bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B030] transition-colors"
           >
-            {generating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-            {generating ? 'Generating...' : 'Generate New Scenarios'}
+            <Plus className="h-4 w-4" />
+            Generate New Scenarios
           </button>
         )}
       </header>
 
-      <div className="flex space-x-2 border-b border-gray-200 dark:border-[#333333] pb-2 overflow-x-auto">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-[#333333] pb-2">
         {categories.map(category => (
           <button
             key={category}
             onClick={() => setFilter(category)}
-            className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors whitespace-nowrap
+            className={`px-3 py-1 text-sm rounded-full font-semibold transition-colors
               ${filter === category
                 ? 'bg-[#D4A017] text-[#0A0A0A]'
                 : 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#222222]'}
@@ -202,6 +287,193 @@ export default function TrainingArenaPage() {
       {filteredScenarios.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 dark:text-gray-400">No scenarios found for this filter.</p>
+        </div>
+      )}
+
+      {/* Success toast */}
+      {successMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg font-semibold text-sm animate-in slide-in-from-bottom-4">
+          <Check className="h-4 w-4" />
+          {successMessage}
+        </div>
+      )}
+
+      {/* Generate Scenarios Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
+
+          {/* Modal */}
+          <div className="relative bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#333333] rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
+            {/* Close button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Config step */}
+            {modalStep === 'config' && (
+              <div className="p-6 space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold font-mono uppercase tracking-wider">
+                    Generate New Training Scenarios
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    AI will create practice scenarios based on your knowledge base
+                  </p>
+                </div>
+
+                {/* Category checkboxes */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-mono uppercase text-gray-500 dark:text-gray-400">Categories</span>
+                    <button
+                      onClick={toggleAllCategories}
+                      className="text-xs font-semibold text-[#D4A017] hover:text-[#E8B030] transition-colors"
+                    >
+                      {selectedCategories.length === taxonomyCategories.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {taxonomyCategories.map(cat => {
+                      const Icon = getCategoryIcon(cat.id);
+                      const checked = selectedCategories.includes(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => toggleCategory(cat.id)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border
+                            ${checked
+                              ? 'border-[#D4A017] bg-[#D4A017]/10 text-[#D4A017]'
+                              : 'border-gray-200 dark:border-[#333333] text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-[#555555]'}
+                          `}
+                        >
+                          {checked ? <CheckSquare className="h-4 w-4 shrink-0" /> : <Square className="h-4 w-4 shrink-0" />}
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {cat.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Count selector */}
+                <div className="space-y-3">
+                  <span className="text-sm font-mono uppercase text-gray-500 dark:text-gray-400">How many scenarios?</span>
+                  <div className="flex gap-2">
+                    {[3, 5, 10].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => setGenerateCount(n)}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-colors
+                          ${generateCount === n
+                            ? 'bg-[#D4A017] text-[#0A0A0A]'
+                            : 'border border-gray-200 dark:border-[#333333] text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-[#555555]'}
+                        `}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Generate button */}
+                <button
+                  onClick={handleGenerate}
+                  disabled={selectedCategories.length === 0}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono uppercase font-bold bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B030] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Plus className="h-4 w-4" />
+                  Generate {generateCount} Scenarios
+                </button>
+              </div>
+            )}
+
+            {/* Loading step */}
+            {modalStep === 'loading' && (
+              <div className="p-6 flex flex-col items-center justify-center py-16 space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-[#D4A017]" />
+                <p className="text-gray-400 text-sm font-mono">
+                  Generating scenarios from your knowledge base...
+                </p>
+              </div>
+            )}
+
+            {/* Preview step */}
+            {modalStep === 'preview' && (
+              <div className="p-6 space-y-4">
+                <div>
+                  <h2 className="text-xl font-bold font-mono uppercase tracking-wider">
+                    Preview Generated Scenarios
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    {generatedScenarios.length} scenario{generatedScenarios.length !== 1 ? 's' : ''} generated.
+                    Select which to save.
+                  </p>
+                </div>
+
+                <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+                  {generatedScenarios.map(s => {
+                    const checked = checkedScenarios.has(s.id);
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => toggleScenarioCheck(s.id)}
+                        className={`cursor-pointer rounded-xl border p-4 transition-colors
+                          ${checked
+                            ? 'border-[#D4A017] bg-[#D4A017]/5'
+                            : 'border-gray-200 dark:border-[#333333] opacity-60'}
+                        `}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5">
+                            {checked
+                              ? <CheckSquare className="h-5 w-5 text-[#D4A017]" />
+                              : <Square className="h-5 w-5 text-gray-400" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm">{s.title}</span>
+                              <span className="px-2 py-0.5 text-xs rounded-full bg-[#D4A017]/20 text-[#D4A017] font-semibold">
+                                {s.category}
+                              </span>
+                              <span className="flex items-center gap-0.5">
+                                {[...Array(3)].map((_, i) => (
+                                  <Star key={i} className={`h-3 w-3 ${i < s.difficulty ? 'text-[#D4A017] fill-current' : 'text-gray-600'}`} />
+                                ))}
+                              </span>
+                            </div>
+                            <p className="text-gray-400 text-xs mt-1 line-clamp-2">{s.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleSaveSelected}
+                    disabled={checkedScenarios.size === 0 || saving}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono uppercase font-bold bg-[#D4A017] text-[#0A0A0A] rounded-lg hover:bg-[#E8B030] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    {saving ? 'Saving...' : `Save Selected (${checkedScenarios.size})`}
+                  </button>
+                  <button
+                    onClick={closeModal}
+                    className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono uppercase font-bold border border-gray-200 dark:border-[#333333] text-gray-400 rounded-lg hover:border-red-500 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Discard All
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

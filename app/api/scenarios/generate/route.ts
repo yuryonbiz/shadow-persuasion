@@ -8,11 +8,47 @@ const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY!;
 
 export async function POST(req: NextRequest) {
   try {
-    const { category, count = 3 } = await req.json();
+    const body = await req.json();
 
-    // Search knowledge base for techniques in the given category
-    const searchQuery = category
-      ? `${category} persuasion influence techniques scenarios practice`
+    // Action: save — insert previewed scenarios into the database
+    if (body.action === 'save') {
+      const { scenarios } = body;
+      if (!Array.isArray(scenarios) || scenarios.length === 0) {
+        return NextResponse.json({ error: 'No scenarios to save.' }, { status: 400 });
+      }
+
+      const toInsert = scenarios.map((s: any) => ({
+        id: s.id,
+        title: s.title,
+        category: s.category,
+        difficulty: s.difficulty || 1,
+        description: s.description,
+        objective: s.objective,
+        techniques: s.techniques || [],
+        is_generated: true,
+        source_books: s.source_books || [],
+      }));
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('scenarios')
+        .upsert(toInsert, { onConflict: 'id' })
+        .select();
+
+      if (insertError) {
+        console.error('[SCENARIOS/SAVE]', 'Insert error:', insertError);
+        return NextResponse.json({ error: 'Failed to save scenarios.' }, { status: 500 });
+      }
+
+      return NextResponse.json({ scenarios: inserted || toInsert });
+    }
+
+    // Default action: generate — return scenarios WITHOUT saving
+    const { categories, count = 5 } = body;
+
+    // Build search query from categories
+    const categoryList = Array.isArray(categories) && categories.length > 0 ? categories : [];
+    const searchQuery = categoryList.length > 0
+      ? `${categoryList.join(' ')} persuasion influence techniques scenarios practice`
       : 'persuasion influence negotiation rapport social dynamics techniques';
 
     const ragContext = await searchKnowledge(searchQuery, { count: 10 });
@@ -31,6 +67,11 @@ export async function POST(req: NextRequest) {
 
     const existingTitles = (existingScenarios || []).map((s: any) => s.title);
 
+    const effectiveCount = Math.min(count, 10);
+    const categoryInstruction = categoryList.length > 0
+      ? ` distributed across these categories: ${categoryList.join(', ')}`
+      : '';
+
     const generatePrompt = `${RAG_ENFORCEMENT}
 
 You are generating realistic practice scenarios for a persuasion/influence training platform.
@@ -41,7 +82,7 @@ ${ragContext}
 EXISTING SCENARIOS (do NOT duplicate these):
 ${existingTitles.join(', ')}
 
-Generate exactly ${Math.min(count, 5)} NEW unique practice scenarios${category ? ` in the "${category}" category` : ''}.
+Generate exactly ${effectiveCount} NEW unique practice scenarios${categoryInstruction}.
 
 Each scenario must:
 1. Be grounded in real techniques from the knowledge base excerpts above
@@ -56,7 +97,7 @@ Return a JSON object with this exact structure:
     {
       "id": "kebab-case-unique-id",
       "title": "Short Descriptive Title",
-      "category": "${category || 'Career|Relationships|Sales|Social|Defense'}",
+      "category": "Career|Relationships|Sales|Social|Defense",
       "difficulty": 1,
       "description": "Vivid 1-2 sentence scenario setup that puts the user in a specific situation.",
       "objective": "Clear goal the user should achieve through influence techniques.",
@@ -81,7 +122,7 @@ Use actual technique names and book titles from the knowledge base excerpts.`;
         model: 'openai/gpt-4o',
         messages: [
           { role: 'system', content: generatePrompt },
-          { role: 'user', content: `Generate ${count} new training scenarios${category ? ` for the ${category} category` : ''}.` },
+          { role: 'user', content: `Generate ${effectiveCount} new training scenarios${categoryInstruction}.` },
         ],
         response_format: { type: 'json_object' },
       }),
@@ -112,8 +153,8 @@ Use actual technique names and book titles from the knowledge base excerpts.`;
       return NextResponse.json({ error: 'Invalid scenario format from AI' }, { status: 502 });
     }
 
-    // Insert into Supabase
-    const toInsert = parsed.scenarios.map((s: any) => ({
+    // Return scenarios WITHOUT inserting — the frontend will preview them first
+    const generated = parsed.scenarios.map((s: any) => ({
       id: s.id,
       title: s.title,
       category: s.category,
@@ -125,17 +166,7 @@ Use actual technique names and book titles from the knowledge base excerpts.`;
       source_books: s.source_books || [],
     }));
 
-    const { data: inserted, error: insertError } = await supabase
-      .from('scenarios')
-      .upsert(toInsert, { onConflict: 'id' })
-      .select();
-
-    if (insertError) {
-      console.error('[SCENARIOS/GENERATE]', 'Insert error:', insertError);
-      return NextResponse.json({ error: 'Failed to save scenarios.' }, { status: 500 });
-    }
-
-    return NextResponse.json({ scenarios: inserted || toInsert });
+    return NextResponse.json({ scenarios: generated });
   } catch (err) {
     console.error('[SCENARIOS/GENERATE]', err);
     return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
