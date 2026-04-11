@@ -114,6 +114,7 @@ export default function PeoplePage() {
   const [filterType, setFilterType] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [analysisCounts, setAnalysisCounts] = useState<Record<string, number>>({});
 
   const getHeaders = useCallback(async () => {
     const token = await user?.getIdToken();
@@ -124,10 +125,23 @@ export default function PeoplePage() {
     const loadProfiles = async () => {
       try {
         const headers = await getHeaders();
-        const res = await fetch('/api/profiler/people', { headers });
-        if (res.ok) {
-          const data = await res.json();
+        const [profilesRes, analysesRes] = await Promise.all([
+          fetch('/api/profiler/people', { headers }),
+          fetch('/api/analyze/history?limit=1000', { headers }),
+        ]);
+        if (profilesRes.ok) {
+          const data = await profilesRes.json();
           setProfiles(data.profiles || []);
+        }
+        if (analysesRes.ok) {
+          const data = await analysesRes.json();
+          const counts: Record<string, number> = {};
+          for (const a of (data.analyses || [])) {
+            if (a.person_id) {
+              counts[a.person_id] = (counts[a.person_id] || 0) + 1;
+            }
+          }
+          setAnalysisCounts(counts);
         }
       } catch (e) {
         console.error('Failed to load profiler data:', e);
@@ -170,7 +184,7 @@ export default function PeoplePage() {
   });
 
   // Stats
-  const totalInteractions = profiles.reduce((sum, p) => sum + p.interactions.length, 0);
+  const totalInteractions = profiles.reduce((sum, p) => sum + (p.interactions?.length || 0), 0) + Object.values(analysisCounts).reduce((a, b) => a + b, 0);
   const avgConfidence = profiles.length > 0
     ? Math.round(profiles.reduce((sum, p) => sum + (p.confidenceScore || 0), 0) / profiles.length)
     : 0;
@@ -274,8 +288,11 @@ export default function PeoplePage() {
       {filteredProfiles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProfiles.map((profile) => {
+            const noteCount = profile.interactions?.length || 0;
+            const analysisCount = analysisCounts[profile.id] || 0;
+            const totalActivity = noteCount + analysisCount;
             const lastInteraction =
-              profile.interactions.length > 0
+              noteCount > 0
                 ? profile.interactions[profile.interactions.length - 1]
                 : null;
             return (
@@ -345,12 +362,16 @@ export default function PeoplePage() {
                 {/* Bottom stats */}
                 <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200 dark:border-[#333333]">
                   <span className="font-mono">
-                    {profile.interactions.length} interaction{profile.interactions.length !== 1 ? 's' : ''}
+                    {totalActivity > 0 ? (
+                      <>{analysisCount > 0 && `${analysisCount} analysis${analysisCount !== 1 ? 'es' : ''}`}{analysisCount > 0 && noteCount > 0 && ' · '}{noteCount > 0 && `${noteCount} note${noteCount !== 1 ? 's' : ''}`}</>
+                    ) : (
+                      'No activity yet'
+                    )}
                   </span>
                   <span>
                     {lastInteraction
-                      ? `Last: ${new Date(lastInteraction.date).toLocaleDateString()}`
-                      : 'No interactions yet'}
+                      ? `Last note: ${new Date(lastInteraction.date).toLocaleDateString()}`
+                      : profile.updatedAt ? `Updated: ${new Date(profile.updatedAt).toLocaleDateString()}` : ''}
                   </span>
                 </div>
               </button>
