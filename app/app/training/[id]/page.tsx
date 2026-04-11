@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Send, ChevronDown, ChevronUp, Award, Target, AlertTriangle, Lightbulb, TrendingUp, StopCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { useTechniques } from '@/lib/hooks/useTechniques';
 
 type Scenario = {
   id: string;
@@ -240,6 +241,7 @@ export default function TrainingScenarioPage() {
   const params = useParams();
   const id = params.id as string;
   const { user } = useAuth();
+  const { techniques: apiTechniques } = useTechniques();
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [scenarioLoading, setScenarioLoading] = useState(true);
@@ -461,11 +463,19 @@ export default function TrainingScenarioPage() {
           <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-lg border border-gray-200 dark:border-[#333333]">
             <h2 className="font-mono text-lg text-[#D4A017] uppercase mb-2">Key Techniques</h2>
             <ul className="space-y-2">
-              {scenario.techniques.map(name => (
-                <li key={name}>
-                  <span className="text-base text-gray-800 dark:text-[#E8E8E0]">{name}</span>
-                </li>
-              ))}
+              {scenario.techniques.map(name => {
+                const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const match = apiTechniques.find(t => t.id === slug || t.name.toLowerCase() === name.toLowerCase());
+                return (
+                  <li key={name}>
+                    {match ? (
+                      <Link href={`/app/techniques/${match.id}`} className="text-base text-[#D4A017] hover:underline">{name}</Link>
+                    ) : (
+                      <span className="text-base text-gray-800 dark:text-[#E8E8E0]">{name}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

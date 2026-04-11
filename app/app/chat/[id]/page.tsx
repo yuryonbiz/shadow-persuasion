@@ -2,6 +2,7 @@
 
 
 import { useEffect, useRef, useState } from 'react';
+import { Send } from 'lucide-react';
 import { ChatInput } from '@/components/app/ChatInput';
 import { ChatMessage } from '@/components/app/ChatMessage';
 
@@ -186,10 +187,32 @@ export default function ChatPage({ params }: { params: { id: string } }) {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && !isLoading && (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="w-16 h-16 rounded-full bg-[#D4A017]/10 flex items-center justify-center mb-4">
+              <Send className="h-7 w-7 text-[#D4A017]" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Start a Conversation</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+              Describe your situation and get tactical advice with specific scripts, techniques, and strategies — all grounded in expert psychology.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+              {['How do I negotiate a raise?', 'Help me handle a difficult coworker', 'I need to close a hesitant client'].map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => handleSend(prompt)}
+                  className="text-xs px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] rounded-full text-gray-600 dark:text-gray-400 hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {messages.map((msg) => (
           <ChatMessage key={msg.id} role={msg.role} content={msg.content} sources={msg.sources} />
         ))}
-        {isLoading && messages[messages.length-1].role === 'user' && (
+        {isLoading && messages.length > 0 && messages[messages.length-1].role === 'user' && (
              <ChatMessage role="assistant" content="Thinking..." isLoading={true} />
         )}
         <div ref={messagesEndRef} />
