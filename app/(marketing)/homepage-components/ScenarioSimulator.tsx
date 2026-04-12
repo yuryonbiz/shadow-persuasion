@@ -13,7 +13,7 @@ const scenario = {
   with: {
     title: 'Protocol-Enhanced Response',
     response:
-      "I've been approached by a competitor with an offer that reflects my current market value. I value my role here and wanted to give you the opportunity to match that before I proceed. I'd much prefer to continue driving results with our team.",
+      "I appreciate the transparency. I want to make sure we're aligned — based on my research, the market rate for this role with my track record is in the $95-110K range. I'm not looking to leave, but I do need my compensation to reflect the value I'm delivering. What would need to happen for us to close that gap this quarter?",
   },
 };
 

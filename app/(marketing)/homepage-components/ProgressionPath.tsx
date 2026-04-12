@@ -6,32 +6,32 @@ import { useInView } from 'react-intersection-observer';
 
 const levels = [
   {
-    name: 'RECRUIT',
-    description: 'Basic influence awareness, pattern recognition fundamentals',
+    name: 'BEGINNER',
+    description: 'Learn the fundamentals of strategic communication and influence awareness',
     classification: 'CLEARANCE: LEVEL 1',
     fileNum: 'PRS-001',
   },
   {
-    name: 'INITIATE',
-    description: 'Core frameworks mastered, AI console access granted',
+    name: 'PRACTITIONER',
+    description: 'Core frameworks mastered. Consistent application in real conversations.',
     classification: 'CLEARANCE: LEVEL 2',
     fileNum: 'PRS-002',
   },
   {
-    name: 'OPERATOR',
-    description: 'Advanced deployment, real-time scenario handling',
+    name: 'STRATEGIST',
+    description: 'Advanced technique deployment. Real-time scenario handling.',
     classification: 'CLEARANCE: LEVEL 3',
     fileNum: 'PRS-003',
   },
   {
-    name: 'SHADOW OPERATIVE',
-    description: 'Multi-layered influence architecture, target profiling',
+    name: 'SPECIALIST',
+    description: 'Multi-technique stacking. Personalized influence strategies.',
     classification: 'CLEARANCE: LEVEL 4',
     fileNum: 'PRS-004',
   },
   {
-    name: 'ARCHITECT',
-    description: 'System design, framework creation, teaching capability',
+    name: 'MASTER',
+    description: 'Full command of all frameworks. Teaching-level understanding.',
     classification: 'CLEARANCE: LEVEL 5',
     fileNum: 'PRS-005',
   },

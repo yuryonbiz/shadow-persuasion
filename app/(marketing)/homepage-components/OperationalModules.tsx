@@ -7,39 +7,63 @@ import { useInView } from 'react-intersection-observer';
 const modules = [
     {
         id: 'MODULE-001',
-        title: 'Negotiation Warfare',
-        description: 'AI-powered negotiation coaching with real-time script generation.',
-        classification: 'RESTRICTED',
+        title: 'Conversation Analyzer',
+        description: 'Upload screenshots of any conversation. Get instant analysis of power dynamics, manipulation detection, and strategic response scripts.',
+        classification: 'ACTIVE',
     },
     {
         id: 'MODULE-002',
-        title: 'Frame Control Lab',
-        description: 'Practice frame control techniques with AI-simulated scenarios.',
-        classification: 'SENSITIVE',
+        title: 'Strategic Coach',
+        description: 'AI coaching chat for any situation. Describe what you\'re facing — salary talks, a tough breakup, a client negotiation — get tactical guidance immediately.',
+        classification: 'ACTIVE',
     },
     {
         id: 'MODULE-003',
-        title: 'Persuasion Scripts',
-        description: 'Library of proven scripts for sales, dating, leadership, conflict.',
-        classification: 'RESTRICTED',
+        title: 'Quick-Fire Mode',
+        description: 'Need a response RIGHT NOW? Get 3 strategic approaches with follow-up scenarios in under 30 seconds.',
+        classification: 'ACTIVE',
     },
     {
         id: 'MODULE-004',
-        title: 'Body Language Decoder',
-        description: 'Upload photos for AI analysis of micro-expressions and power signals.',
-        classification: 'SENSITIVE',
+        title: 'Message Optimizer',
+        description: 'Paste your draft message. Get psychologically optimized rewrites that land the way you intend.',
+        classification: 'ACTIVE',
     },
     {
         id: 'MODULE-005',
-        title: 'Psychological Profiling',
-        description: 'Build detailed profiles of targets using behavioral data.',
-        classification: 'RESTRICTED',
+        title: 'People Profiles',
+        description: 'Build communication profiles for key people in your life — your boss, partner, clients. Track interactions and get personalized strategies.',
+        classification: 'ACTIVE',
     },
     {
         id: 'MODULE-006',
-        title: 'Dark Pattern Library',
-        description: '50+ influence patterns with AI deployment guidance.',
-        classification: 'SENSITIVE',
+        title: 'Training Arena',
+        description: 'Practice any scenario with AI role-play. Get real-time coaching annotations and post-session debriefs.',
+        classification: 'ACTIVE',
+    },
+    {
+        id: 'MODULE-007',
+        title: 'Field Ops',
+        description: 'Daily missions to practice techniques in real conversations. Submit field reports and get AI grading on your execution.',
+        classification: 'ACTIVE',
+    },
+    {
+        id: 'MODULE-008',
+        title: 'Technique Library',
+        description: '50+ influence techniques with summaries, practice scenarios, annotated examples, and technique stacking for multi-step strategies.',
+        classification: 'ACTIVE',
+    },
+    {
+        id: 'MODULE-009',
+        title: 'Persuasion Score',
+        description: 'Gamified progress tracking with XP, streaks, skill breakdowns, and level progression.',
+        classification: 'ACTIVE',
+    },
+    {
+        id: 'MODULE-010',
+        title: 'Voice Profile',
+        description: 'The AI learns YOUR writing style and adapts all scripts and responses to sound like you — not a robot.',
+        classification: 'ACTIVE',
     },
 ];
 
@@ -49,7 +73,7 @@ const cardVariants = {
 };
 
 const ClassificationStamp = ({ text }: { text: string }) => {
-    const color = text === 'RESTRICTED' ? 'border-yellow-600 text-yellow-700' : 'border-orange-600 text-orange-700';
+    const color = 'border-green-600 text-green-700';
     return (
         <div className={`absolute bottom-2 right-2 -rotate-6 border ${color} px-1 text-xs font-mono tracking-wider opacity-80`}>
             {text}
@@ -67,7 +91,7 @@ export const OperationalModules = () => {
         <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
             <div className="text-left mb-12">
                 <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">Appendix A</h2>
-                <p className="font-special-elite text-3xl text-black mt-2">Operational Module Index</p>
+                <p className="font-special-elite text-3xl text-black mt-2">Everything Inside Your Membership</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {modules.map((module, index) => (

@@ -3,6 +3,7 @@
 import { Special_Elite } from 'next/font/google';
 import CoverPage from './homepage-components/CoverPage';
 import ExecutiveSummary from './homepage-components/ExecutiveSummary';
+import HowItWorks from './homepage-components/HowItWorks';
 import { SystemCapabilities } from './homepage-components/SystemCapabilities';
 import AppPreview from './homepage-components/AppPreview';
 import { SystemPreview } from './homepage-components/SystemPreview';
@@ -37,76 +38,75 @@ export default function HomePage() {
         <ExecutiveSummary />
       </div>
 
-      {/* 3. SectionDivider */}
-      <SectionDivider text="// STRATEGIC COMMUNICATION TRAINING — PUBLIC ACCESS //" />
+      {/* 3. HowItWorks */}
+      <HowItWorks />
 
-      {/* 4. SystemCapabilities */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
-        <SystemCapabilities />
-      </div>
+      {/* 4. ScenarioSimulator */}
+      <ScenarioSimulator />
 
       {/* 5. AppPreview */}
       <AppPreview />
 
-      {/* 6. SystemPreview (Exhibit B) */}
-      <SystemPreview />
+      {/* 6. SectionDivider */}
+      <SectionDivider text="// SEE WHAT THE SYSTEM ACTUALLY DOES //" />
 
-      {/* 7. InfluenceDecoder (Exhibit D) */}
+      {/* 7. SystemCapabilities */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
-        <InfluenceDecoder />
+        <SystemCapabilities />
       </div>
 
       {/* 8. LiveAnalysisDemo */}
       <LiveAnalysisDemo />
 
-      {/* 9. DossierAnalysis */}
-      <DossierAnalysis />
+      {/* 9. SystemPreview */}
+      <SystemPreview />
 
-      {/* 10. ConversationBreakdown (Evidence C-1) */}
+      {/* 10. ConversationBreakdown */}
       <ConversationBreakdown />
 
-      {/* 11. CaseFileBrowser (Archived Operations) */}
-      <CaseFileBrowser />
-
-      {/* 12. ScenarioSimulator */}
-      <ScenarioSimulator />
-
-      {/* 13. SectionDivider */}
-      <SectionDivider text="// SUCCESS METRICS — VERIFIED RESULTS //" />
-
-      {/* 14. OperationalModules (Appendix A) */}
+      {/* 11. OperationalModules */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <OperationalModules />
       </div>
 
-      {/* 15. Evidence */}
+      {/* 12. SectionDivider */}
+      <SectionDivider text="// THE RESULTS SPEAK FOR THEMSELVES //" />
+
+      {/* 13. Evidence */}
       <Evidence />
 
-      {/* 16-18. MeasuredImpact, ProgressionPath, DarkPatternRolodex */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
-        <MeasuredImpact />
-        <ProgressionPath />
-        <DarkPatternRolodex />
-      </div>
-
-      {/* 19. Statements (Personnel Files / Testimonials) */}
+      {/* 14. Statements */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <Statements />
       </div>
 
-      {/* 21. ClassifiedComparison (Document Comparison) */}
+      {/* 15-17. ProgressionPath, DarkPatternRolodex */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+        <ProgressionPath />
+        <DarkPatternRolodex />
+      </div>
+
+      {/* 18. ClassifiedComparison */}
       <ClassifiedComparison />
 
-      {/* 22. FAQ */}
+      {/* 19. FAQ */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
         <FAQ />
       </div>
 
-      {/* 23. AccessRequest (Form SP-2026) */}
+      {/* 20. AccessRequest */}
       <AccessRequest />
 
-      {/* 24. Footer */}
+      {/* 21. Footer */}
       <Footer />
+
+      {/* ══ REDUNDANT SECTIONS (kept for reference) ══ */}
+      {false && <>
+        <DossierAnalysis />
+        <InfluenceDecoder />
+        <CaseFileBrowser />
+        <MeasuredImpact />
+      </>}
     </main>
   );
 }

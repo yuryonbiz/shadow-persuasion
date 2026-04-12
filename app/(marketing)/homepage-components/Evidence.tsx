@@ -35,12 +35,12 @@ type RowData = {
 };
 
 const rows: RowData[] = [
-  { metric: 'Negotiation Win Rate', before: '28%', after: '74%', changeValue: 164, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Info. Extraction Yield', before: '1.2 u/hr', after: '7.8 u/hr', changeValue: 550, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Subject Compliance Rate', before: '41%', after: '92%', changeValue: 124, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Time-to-Conversion', before: '14.2 days', after: '3.1 days', changeValue: 78, changePrefix: '-', changeSuffix: '%' },
-  { metric: 'Operator Confidence', before: '5.6/10', after: '9.8/10', changeValue: 75, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Deception Detection', before: '18% acc.', after: '89% acc.', changeValue: 394, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Salary Negotiation Success', before: '1 in 4', after: '3 in 4', changeValue: 200, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Confidence in High-Stakes Conversations', before: '5.6/10', after: '9.2/10', changeValue: 64, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Ability to Detect Manipulation', before: '18%', after: '89%', changeValue: 394, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Time to Craft the Right Response', before: '2+ hours', after: '< 3 min', changeValue: 97, changePrefix: '-', changeSuffix: '%' },
+  { metric: 'Relationship Conflict Resolution', before: '41%', after: '84%', changeValue: 105, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Deal Close Rate (Business)', before: '28%', after: '67%', changeValue: 139, changePrefix: '+', changeSuffix: '%' },
 ];
 
 const Evidence = () => {
@@ -51,7 +51,7 @@ const Evidence = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-wider text-white">
-            Exhibit A: Operational Effectiveness
+            Before &amp; After: What Changes When You Have the System
           </h2>
           <div className="w-24 h-1 bg-[#D4A017] mt-4 mx-auto" />
         </div>
@@ -91,7 +91,7 @@ const Evidence = () => {
           </table>
         </div>
         <p className="text-center mt-8 text-sm text-amber-500/50 font-mono">
-          Note: Data collected across 20,847 active operators over 18-month period.
+          Based on self-reported member data. Individual results vary.
         </p>
       </div>
     </section>

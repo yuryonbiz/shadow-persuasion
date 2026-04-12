@@ -9,15 +9,15 @@ const titleWords = ['PROJECT:', 'SHADOW', 'PERSUASION'];
 const categories = [
   {
     label: 'CAREER ADVANCEMENT',
-    desc: 'Salary negotiations, promotions, leadership presence',
+    desc: '"I got a $34K raise using one conversation framework"',
   },
   {
     label: 'RELATIONSHIP SUCCESS',
-    desc: 'Dating, marriage, family communication',
+    desc: '"I finally understood what people actually mean vs. what they say"',
   },
   {
     label: 'BUSINESS GROWTH',
-    desc: 'Sales, networking, client relationships',
+    desc: '"Closed my first six-figure deal after 3 weeks of training"',
   },
 ];
 
@@ -93,7 +93,7 @@ const CoverPage = () => {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          DOC-SC-2026-001 // PUBLIC ACCESS
+          DOC-SP-2026 // AUTHORIZED ACCESS
         </motion.p>
 
         {/* Staggered title — PROJECT: on one line, SHADOW PERSUASION below */}
@@ -123,8 +123,7 @@ const CoverPage = () => {
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 1.1 }}
         >
-          Advanced Strategic Communication Training for Career Success, Better
-          Relationships &amp; Personal Growth
+          You&apos;re Leaving Money, Relationships, and Respect on the Table — Because Nobody Taught You How Influence Actually Works
         </motion.p>
 
         {/* Category cards */}
@@ -161,33 +160,8 @@ const CoverPage = () => {
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 1.8 }}
         >
-          <p>CLASSIFICATION: Strategic Communication Psychology</p>
-          <p>PURPOSE: Ethical Influence for Positive Outcomes</p>
-        </motion.div>
-
-        {/* Ethics checkbox */}
-        <motion.div
-          className="flex items-center justify-center space-x-3 mt-8"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 2.0 }}
-        >
-          <div className="w-6 h-6 border-2 border-[#5C3A1E] flex items-center justify-center text-2xl font-bold text-[#5C3A1E]">
-            &#10003;
-          </div>
-          <span className="text-[#5C3A1E]">
-            I commit to using these techniques ethically and responsibly
-          </span>
-        </motion.div>
-
-        {/* Ethical note — matching v5 styling */}
-        <motion.div
-          className="mt-6 ml-8 text-blue-700 italic transform -rotate-2 relative"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 2.1 }}
-        >
-          <p className="text-lg">↳ Note: Ethical influence creates win-win outcomes for all parties involved.</p>
+          <p>CLASSIFICATION: AI-Powered Influence Psychology Training</p>
+          <p>STATUS: Now Accepting New Members</p>
         </motion.div>
 
         {/* CTA button */}
@@ -199,7 +173,7 @@ const CoverPage = () => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
-          BEGIN TRAINING PROGRAM <ArrowRight className="ml-2" />
+          START YOUR TRAINING — $99/MONTH <ArrowRight className="ml-2" />
         </motion.button>
 
         {/* Footer text */}
@@ -210,9 +184,7 @@ const CoverPage = () => {
           transition={{ duration: 0.6, delay: 2.4 }}
         >
           <p>
-            Master the psychology of persuasion for career advancement, stronger
-            relationships, and personal success. Ethical influence training based
-            on proven psychological principles.
+            Used by sales professionals, founders, executives, and anyone tired of being outmaneuvered in conversations that matter. Cancel anytime.
           </p>
         </motion.div>
       </div>

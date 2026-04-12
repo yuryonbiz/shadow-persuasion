@@ -16,40 +16,40 @@ const ConversationBreakdown = () => {
   const conversations: ConversationRow[] = [
     {
       original: '"I\'m just not looking for anything serious right now"',
-      breakdown: 'Shield response masking fear of vulnerability. Translation: "I\'m attracted but protecting myself from potential emotional risk."',
+      breakdown: 'Protective response that signals interest but fear of vulnerability. They\'re attracted but guarding against emotional risk.',
       response: '"That\'s perfect. I\'m focused on my own goals anyway. Let\'s just see where this goes naturally."',
-      patterns: ['DEFLECTION', 'EMOTIONAL_GUARD']
+      patterns: ['PROTECTIVE SHIELD', 'INTEREST SIGNAL']
     },
     {
-      original: '"Maybe we should slow things down a bit"',
-      breakdown: 'Pace control attempt. Feeling overwhelmed by intimacy speed. Seeking to regain agency in the dynamic.',
-      response: '"I respect that completely. Good relationships develop at their own pace anyway."',
-      patterns: ['PRESSURE_VALVE', 'CONTROL_SEEKING']
+      original: '"We don\'t have the budget for a raise right now"',
+      breakdown: 'Deflection tactic using organizational constraints as a shield. Often means "I haven\'t been given a compelling enough reason to fight for your raise."',
+      response: '"I understand. What specific milestones would need to be hit for us to revisit compensation in Q3?"',
+      patterns: ['BUDGET SHIELD', 'DEFLECTION']
+    },
+    {
+      original: '"We\'re still evaluating other vendors"',
+      breakdown: 'Leverage play to maintain negotiating power. May be genuine, but often used to pressure price concessions.',
+      response: '"Of course. While you evaluate, I\'ll send over the ROI analysis from our last three clients in your space. Happy to connect you directly with them."',
+      patterns: ['LEVERAGE PLAY', 'PRICE PRESSURE']
     },
     {
       original: '"I need some time to think about us"',
-      breakdown: 'Decision paralysis combined with external validation seeking. Internal conflict between desire and fear.',
+      breakdown: 'Processing pause — usually about feeling overwhelmed, not losing interest.',
       response: '"Take all the time you need. I\'m confident in what we have when you\'re ready."',
-      patterns: ['ANALYSIS_PARALYSIS', 'VALIDATION_FISHING']
-    },
-    {
-      original: '"I don\'t want to ruin our friendship"',
-      breakdown: 'Risk aversion disguised as care. Fear of losing safe connection while wanting more. Classic approach-avoidance.',
-      response: '"Our connection is strong enough to handle whatever direction it takes."',
-      patterns: ['RISK_AVERSION', 'APPROACH_AVOIDANCE']
+      patterns: ['PROCESSING PAUSE', 'SPACE REQUEST']
     }
   ];
 
   const getPatternColor = (pattern: string) => {
-    const colors = {
-      'DEFLECTION': 'bg-red-900 text-red-200 border-red-700',
-      'EMOTIONAL_GUARD': 'bg-orange-900 text-orange-200 border-orange-700',
-      'PRESSURE_VALVE': 'bg-yellow-900 text-yellow-200 border-yellow-700',
-      'CONTROL_SEEKING': 'bg-purple-900 text-purple-200 border-purple-700',
-      'ANALYSIS_PARALYSIS': 'bg-blue-900 text-blue-200 border-blue-700',
-      'VALIDATION_FISHING': 'bg-indigo-900 text-indigo-200 border-indigo-700',
-      'RISK_AVERSION': 'bg-pink-900 text-pink-200 border-pink-700',
-      'APPROACH_AVOIDANCE': 'bg-teal-900 text-teal-200 border-teal-700'
+    const colors: Record<string, string> = {
+      'PROTECTIVE SHIELD': 'bg-red-900 text-red-200 border-red-700',
+      'INTEREST SIGNAL': 'bg-orange-900 text-orange-200 border-orange-700',
+      'BUDGET SHIELD': 'bg-yellow-900 text-yellow-200 border-yellow-700',
+      'DEFLECTION': 'bg-purple-900 text-purple-200 border-purple-700',
+      'LEVERAGE PLAY': 'bg-blue-900 text-blue-200 border-blue-700',
+      'PRICE PRESSURE': 'bg-indigo-900 text-indigo-200 border-indigo-700',
+      'PROCESSING PAUSE': 'bg-pink-900 text-pink-200 border-pink-700',
+      'SPACE REQUEST': 'bg-teal-900 text-teal-200 border-teal-700'
     };
     return colors[pattern] || 'bg-gray-900 text-gray-200 border-gray-700';
   };
@@ -224,7 +224,7 @@ const ConversationBreakdown = () => {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           <div className="flex justify-between items-center text-xs font-mono text-gray-600">
-            <span>CLASSIFICATION: RESTRICTED ACCESS</span>
+            <span>CLASSIFICATION: SAMPLE ANALYSES</span>
             <span>FILE: CONV_BREAKDOWN_C1.DOC</span>
             <span>PAGE 1 OF 247</span>
           </div>

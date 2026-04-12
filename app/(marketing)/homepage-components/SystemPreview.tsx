@@ -5,20 +5,20 @@ import { useInView } from 'react-intersection-observer';
 
 const conversation = [
   {
-    speaker: 'OPERATOR',
+    speaker: 'MEMBER',
     text: 'My boss just rejected my raise request. How do I reframe this?',
   },
   {
-    speaker: 'SYSTEM',
-    text: "Deploy the Scarcity Frame. Here's your script: 'I've been approached by [competitor] about a role that better reflects my market value. I wanted to give you the chance to match it before I make a decision. I'd prefer to stay — but I need to be realistic.' Then go silent. Let the void do the work.",
+    speaker: 'COACH',
+    text: "Here's your strategy. First, don't react emotionally — that's what they expect. Use Frame Control: reposition the conversation from \"asking for a raise\" to \"discussing your market value.\" Try this: \"I've been looking at what my role pays elsewhere, and I want to make sure we're aligned. Can we talk about how my compensation reflects the value I'm delivering?\" Then pause. Let them respond first.",
   },
   {
-    speaker: 'OPERATOR',
+    speaker: 'MEMBER',
     text: 'What if they push back?',
   },
   {
-    speaker: 'SYSTEM',
-    text: 'Activate the Void Pull. Go silent for 72 hours...',
+    speaker: 'COACH',
+    text: 'Use Strategic Silence. After making your case, don\'t fill the silence. Let them sit with it. If they bring up budget constraints, respond with: "I understand. What would need to happen for us to revisit this in 90 days?" This keeps the door open and puts the ball in their court.',
   },
 ];
 
@@ -43,15 +43,15 @@ export const SystemPreview = () => {
     <section ref={ref} className="relative bg-[#EAE3D2] py-16 sm:py-24 px-6 sm:px-8 border-b-2 border-dashed border-gray-400">
         <div className="text-left mb-8">
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
-            Exhibit B
+            Sample Session
           </h2>
           <p className="font-special-elite text-3xl text-black mt-2">
-            Intercepted System Communication
+            Sample Coaching Session
           </p>
         </div>
 
         <div className="relative bg-[#F4ECD8] p-6 sm:p-8 border-2 border-gray-400 shadow-lg">
-           <div className="absolute top-2 right-2 font-mono text-xs text-gray-500">HANDLING: EYES ONLY</div>
+           <div className="absolute top-2 right-2 font-mono text-xs text-gray-500"></div>
           <h3 className="font-mono text-center text-sm uppercase tracking-widest text-black mb-6 border-b border-dashed border-gray-400 pb-4">
             Transcript of AI Console Session — Intercepted ██/██/2026
           </h3>
@@ -82,7 +82,7 @@ export const SystemPreview = () => {
                </motion.div>
             ))}
           </div>
-          <Stamp text="AUTHENTIC — VERIFIED" color="border-red-600 text-red-600" className="-bottom-5 -right-5" />
+          {/* stamp removed */}
         </div>
     </section>
   );

@@ -139,7 +139,7 @@ const LiveAnalysisDemo = () => {
           >
             <div>
               <label className="block font-mono text-sm text-gray-400 mb-2 uppercase tracking-wider">
-                INTERCEPTED COMMUNICATION
+                PASTE A MESSAGE YOU&apos;VE RECEIVED
               </label>
               <textarea
                 value={inputText}
@@ -157,11 +157,11 @@ const LiveAnalysisDemo = () => {
                   transition={{ duration: 1, repeat: Infinity }}
                 />
                 <span className="font-mono text-sm text-green-400 uppercase tracking-wider">
-                  READY_FOR_DECRYPTION
+                  ANALYSIS ENGINE READY
                 </span>
               </div>
               <div className="font-mono text-xs text-gray-500">
-                INBOUND: ACTIVE | PARSING: 1.2MS | ENGINE: V.4.0
+                AI-POWERED | INSTANT RESULTS | BEHAVIORAL ANALYSIS V.4.0
               </div>
             </div>
 
@@ -178,7 +178,7 @@ const LiveAnalysisDemo = () => {
                   <span className="ml-2">ANALYZING...</span>
                 </div>
               ) : (
-                'START INTELLIGENCE SWEEP'
+                'ANALYZE THIS MESSAGE'
               )}
             </button>
           </motion.div>

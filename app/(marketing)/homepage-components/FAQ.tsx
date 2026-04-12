@@ -59,23 +59,23 @@ const FAQ = () => {
 
         {/* Accordion container styled as dossier */}
         <div className="bg-[#efe5cc] border border-[#D4A017]/30 rounded-lg shadow-sm overflow-hidden">
-          <AccordionItem question="Is this just manipulation?">
-            <p>This is a tool for influence. Like any tool, its morality is determined by the operator. We provide the means to achieve desired outcomes; your objectives determine the label. The principles are derived from <Redacted>advanced neuro-linguistic programming</Redacted> and behavioral psychology, focusing on alignment rather than deception.</p>
+          <AccordionItem question="Is this manipulation?">
+            <p>Strategic communication isn&apos;t manipulation — it&apos;s understanding how people actually make decisions and communicating more effectively. Every negotiation course, sales training, and leadership program teaches these same principles. The difference is that Shadow Persuasion gives you an AI coach that applies them to YOUR specific situations in real time. We focus on creating outcomes where both parties benefit.</p>
           </AccordionItem>
-          <AccordionItem question="Will this work on experienced negotiators?">
-            <p>Yes. The system is designed to bypass conscious resistance and target subconscious triggers. Experienced negotiators rely on established patterns and tactics, all of which are cataloged in our Dark Psychology Engine. The AI provides counter-maneuvers that are often <Redacted>outside the standard playbook</Redacted>, giving you an asymmetric advantage.</p>
-          </AccordionItem>
-          <AccordionItem question="What separates persuasion from coercion?">
-            <p>Coercion involves threats and the removal of choice. Effective persuasion, as taught by this system, is the art of making your desired outcome feel like the other party&apos;s best option — an idea they arrived at themselves. We focus on <Redacted>frame control and value alignment</Redacted>, not force.</p>
+          <AccordionItem question="Will this work against experienced negotiators?">
+            <p>Yes. Experienced negotiators rely on established patterns — and those patterns are cataloged in our technique library. The AI identifies which tactics are being used against you and provides counter-strategies. Members consistently report outperforming people with decades more experience.</p>
           </AccordionItem>
           <AccordionItem question="How quickly will I see results?">
-            <p>Operators typically report a noticeable shift in their interactional success within the first 72 hours. The system is designed for immediate application. Mastery, however, is an ongoing process of refinement, supported by the AI&apos;s continuous feedback loop.</p>
+            <p>Most members report a noticeable shift within the first week. The Conversation Analyzer gives you immediate insight into conversations you&apos;re already having. The Strategic Coach gives you scripts you can use today. Full mastery of the technique library typically takes 60-90 days of consistent practice.</p>
           </AccordionItem>
-          <AccordionItem question="Is this legal?">
-            <p>The tools and principles themselves are legal. Their application depends on the laws and regulations of your operational jurisdiction. It is the operator&apos;s responsibility to ensure their actions are compliant with all applicable laws. Shadow Persuasion is a tool for influence, not a license for <Redacted>unlawful activity</Redacted>.</p>
+          <AccordionItem question="What if I'm a complete beginner?">
+            <p>The system meets you where you are. Beginners start with foundational techniques and guided practice scenarios. The AI adapts its coaching to your current skill level and progressively introduces more advanced frameworks as you improve.</p>
           </AccordionItem>
-          <AccordionItem question="What's included in the $99/month?">
-            <p>Your monthly access fee grants you a license for the full suite: the AI Operator Console, Visual Intelligence Module, Dark Psychology Engine, Negotiation Warfare System, Persuasion Script Library, and Psychological Profiling Unit. You also receive continuous updates to the core AI models and access to a restricted operator community for <Redacted>field report sharing</Redacted>.</p>
+          <AccordionItem question="Is $99/month worth it?">
+            <p>One successful salary negotiation typically yields $5,000-$50,000+ in additional income. One better business deal can be worth multiples of that. Members consistently report that a single win in their first month more than pays for a full year of membership. And unlike a one-time course, the AI coach is available 24/7 for every new situation you face.</p>
+          </AccordionItem>
+          <AccordionItem question="Can I cancel anytime?">
+            <p>Yes. No contracts, no cancellation fees, no questions asked. We keep members because the system delivers results, not because of fine print.</p>
           </AccordionItem>
         </div>
       </div>

@@ -2,15 +2,27 @@
 
 import styles from './ClassifiedComparison.module.css';
 
-const features = [
-    { name: "Basic Influence Guide", civilian: true, operator: true },
-    { name: "AI Operator Console", civilian: false, operator: true },
-    { name: "Visual Intelligence", civilian: false, operator: true },
-    { name: "50+ Dark Patterns", civilian: false, operator: true },
-    { name: "Negotiation Simulator", civilian: false, operator: true },
-    { name: "Script Generator", civilian: false, operator: true },
-    { name: "Psychological Profiling", civilian: false, operator: true },
-    { name: "Private Community", civilian: false, operator: true },
+const leftFeatures = [
+    "Google searches and YouTube videos",
+    "Reading psychology books",
+    "Trial and error in real conversations",
+    "No feedback on what went wrong",
+    "No personalized scripts",
+    "No practice environment",
+    "Months or years to improve",
+];
+
+const rightFeatures = [
+    "AI Strategic Coach (24/7)",
+    "Conversation Analysis Engine",
+    "50+ Influence Techniques with Practice Mode",
+    "Message Optimizer",
+    "People Profiles & Strategies",
+    "Training Arena (AI Role-Play)",
+    "Daily Field Missions with AI Grading",
+    "Persuasion Score & Progress Tracking",
+    "Voice Profile (AI matches YOUR style)",
+    "Quick-Fire Instant Response Mode",
 ];
 
 const Checkmark = () => <span className="text-green-600 font-bold">&#10003;</span>;
@@ -22,44 +34,43 @@ const ClassifiedComparison = () => {
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         <div className="text-center mb-12">
             <h2 className="font-mono text-sm uppercase tracking-widest text-gray-400">
-                DOCUMENT COMPARISON
+                COMPARISON
             </h2>
-            <p className="text-3xl mt-2 text-white">Access Levels</p>
+            <p className="text-3xl mt-2 text-white">Why Shadow Persuasion</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-2 border-gray-400 bg-[#F4ECD8] shadow-lg p-6 sm:p-8">
-            {/* Civilian Access */}
+            {/* Trying Alone */}
             <div className="border border-dashed border-gray-400 p-6">
-                <h3 className="text-2xl text-center font-bold">CIVILIAN ACCESS</h3>
-                <p className="text-center font-mono text-lg text-gray-600 mb-6">FREE</p>
+                <h3 className="text-2xl text-center font-bold">TRYING TO FIGURE IT OUT ALONE</h3>
+                <p className="text-center font-mono text-lg text-gray-600 mb-6">&nbsp;</p>
                 <ul className="space-y-4">
-                    {features.map(f => (
-                        <li key={f.name} className="flex justify-between items-center text-lg">
-                            <span>{f.name}</span>
-                            {f.civilian ? <Checkmark/> : <div className={styles.redacted}><Redacted/></div>}
+                    {leftFeatures.map(f => (
+                        <li key={f} className="flex justify-between items-center text-lg">
+                            <span>{f}</span>
+                            <span className="text-red-500 font-bold text-xl">&mdash;</span>
                         </li>
                     ))}
                 </ul>
             </div>
 
-            {/* Operator Access */}
+            {/* Shadow Persuasion Member */}
             <div className="border-2 border-amber-500 p-6 bg-[#fffef7] shadow-2xl relative">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black font-mono text-xs uppercase px-2 py-1 font-bold">RECOMMENDED</div>
-                <h3 className="text-2xl text-center font-bold text-amber-900">OPERATOR ACCESS</h3>
+                <h3 className="text-2xl text-center font-bold text-amber-900">SHADOW PERSUASION MEMBER</h3>
                 <p className="text-center font-mono text-lg mb-6">
-                    <span className="line-through text-gray-500">$197</span>
-                    <span className="text-amber-700 font-bold"> $99/MO</span>
+                    <span className="text-amber-700 font-bold">$99/MO</span>
                 </p>
                 <ul className="space-y-4">
-                    {features.map(f => (
-                        <li key={f.name} className="flex justify-between items-center text-lg">
-                            <span>{f.name}</span>
-                            {f.operator ? <Checkmark/> : <Redacted/>}
+                    {rightFeatures.map(f => (
+                        <li key={f} className="flex justify-between items-center text-lg">
+                            <span>{f}</span>
+                            <Checkmark/>
                         </li>
                     ))}
                 </ul>
                  <button className='w-full mt-8 bg-black text-white font-mono uppercase px-4 py-3 text-lg hover:bg-amber-700 transition-colors duration-300'>
-                      Activate Operator Access
+                      START TRAINING NOW
                  </button>
             </div>
         </div>

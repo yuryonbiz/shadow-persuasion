@@ -315,10 +315,10 @@ export default function AppPreview() {
         {/* Section header */}
         <div className="text-center mb-10">
           <div className="text-xs tracking-[0.3em] text-[#8B7355] uppercase mb-3">[ Section VII ]</div>
-          <h2 className="text-3xl md:text-4xl text-[#1A1A1A] mb-4">YOUR OPERATOR CONSOLE</h2>
+          <h2 className="text-3xl md:text-4xl text-[#1A1A1A] mb-4">YOUR STRATEGIC COMMAND CENTER</h2>
           <div className="w-24 h-px bg-[#D4A017] mx-auto mb-4" />
           <p className="text-sm md:text-base text-[#5C4A32] max-w-2xl mx-auto leading-relaxed">
-            Every conversation decoded. Every interaction optimized. Every advantage tracked.
+            Real-time AI analysis. Personalized scripts. Technique mastery tracking. All in one place.
           </p>
         </div>
 
@@ -377,7 +377,7 @@ export default function AppPreview() {
               {/* Logo */}
               <div className="px-3 mb-3">
                 <div className="text-[11px] font-bold text-[#D4A017] tracking-wider">SHADOW PERSUASION</div>
-                <div className="text-[7px] text-gray-600 uppercase tracking-widest">Operator v2.4</div>
+                <div className="text-[7px] text-gray-600 uppercase tracking-widest"></div>
               </div>
 
               {/* Nav items */}

@@ -23,63 +23,42 @@ const stats = [
   {
     icon: BookOpen,
     value: '50+',
-    label: 'Influence Techniques Catalogued',
+    label: 'Influence Techniques You Can Practice & Deploy',
   },
   {
     icon: Brain,
-    value: '12',
-    label: 'Psychology Frameworks Integrated',
+    value: '10',
+    label: 'AI-Powered Training Modules',
   },
   {
     icon: Layers,
-    value: '5',
-    label: 'Operational Modules',
+    value: '24/7',
+    label: 'AI Strategic Coach Access',
   },
   {
     icon: Activity,
-    value: 'Live',
-    label: 'Real-Time Strategic Analysis',
+    value: '<3 min',
+    label: 'From Screenshot to Counter-Script',
   },
 ];
 
 const paragraphs = [
   (
     <>
-      Project SHADOW PERSUASION is a comprehensive strategic communication
-      training system designed to empower individuals with advanced psychological
-      influence techniques for{' '}
-      <Highlight>positive personal and professional outcomes</Highlight>. This
-      document outlines an AI-powered platform that provides students with the
-      communication skills traditionally reserved for executives, negotiators,
-      and influence professionals.
+      Every day, you walk into conversations where the other person has more leverage than you. Your boss controls your salary. Your clients control the deal. Even in personal relationships, the person who understands psychology better holds the cards.{' '}
+      <Highlight>Shadow Persuasion changes that equation permanently.</Highlight>
     </>
   ),
   (
     <>
-      The core of the system is the Strategic Communication Console, an
-      intelligent interface that provides real-time coaching and analysis. Users
-      can <Redacted>upload conversation screenshots</Redacted> for psychological
-      analysis, practice scenarios in risk-free environments, and receive
-      personalized guidance for their specific goals. The system leverages proven
-      psychology principles from{' '}
-      <Highlight>
-        behavioral science, negotiation theory, and interpersonal communication
-        research
-      </Highlight>
-      .
+      This is an AI-powered strategic communication system that gives you an unfair advantage in every conversation that matters. Upload a screenshot of a text exchange and get instant analysis of power dynamics, hidden intentions, and manipulation tactics — plus word-for-word scripts to respond. Get real-time coaching for negotiations, difficult conversations, and high-stakes meetings. Practice with AI role-play before the real thing.
     </>
   ),
   (
     <>
-      The objective is to democratize advanced communication skills for
-      legitimate purposes: career advancement, relationship building, business
-      success, and personal growth. Beta testing shows participants achieve{' '}
-      <Highlight>
-        measurable improvements in salary negotiations, relationship
-        satisfaction, and professional influence
-      </Highlight>{' '}
-      within 90 days. The system is designed for ethical application, with
-      built-in guidance to ensure win-win outcomes in all interactions.
+      Members report significant salary increases after their first negotiation using the system.{' '}
+      <Highlight>Relationship satisfaction scores improve within 30 days.</Highlight>{' '}
+      The difference isn&apos;t talent — it&apos;s having an AI that decodes what people really mean and tells you exactly what to say back.
     </>
   ),
 ];

@@ -6,20 +6,20 @@ import { useInView } from 'react-intersection-observer';
 const capabilities = [
   {
     icon: '[>_]',
-    title: 'Strategic Communication Coach',
-    description: 'AI-powered guidance for salary negotiations, difficult conversations, and high-stakes meetings. Input your situation. Get tactical strategies.',
+    title: 'AI Strategic Coach',
+    description: 'Describe any situation — a salary negotiation, a difficult breakup conversation, a sales call gone sideways. Get a tactical game plan with word-for-word scripts in under 60 seconds.',
     classified: false,
   },
   {
     icon: '[◉]',
-    title: 'Conversation Intelligence',
-    description: 'Upload conversation screenshots for psychological analysis. Decode communication styles, power dynamics, and influence receptivity to respond more effectively.',
+    title: 'Conversation Analysis Engine',
+    description: 'Screenshot any text conversation. The AI identifies manipulation tactics, power imbalances, and hidden intentions — then gives you the exact words to shift the dynamic in your favor.',
     classified: true,
   },
   {
     icon: '[◆]',
-    title: 'Influence Psychology Engine',
-    description: '50+ proven persuasion principles from behavioral science. Authority building, reciprocity, rapport techniques. Learn the psychology. Apply ethically.',
+    title: 'Influence Technique Library',
+    description: '50+ proven persuasion frameworks from behavioral science. Each one comes with practice scenarios, annotated examples, and AI coaching to help you deploy them naturally.',
     classified: false,
   },
 ];
@@ -44,18 +44,13 @@ export const SystemCapabilities = () => {
 
   return (
     <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
-        <div className="absolute top-8 right-8 -rotate-12 opacity-70">
-            <div className="border-2 border-green-600 text-green-600 font-bold uppercase tracking-wider p-2 text-sm">
-                Ethical Training
-            </div>
-        </div>
         <div className="text-left mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-black">
-            Training System Overview
+            What You Get Access To
           </h2>
           <div className="w-24 h-1 bg-green-600 mt-4"></div>
           <p className="font-mono text-sm uppercase tracking-widest text-gray-600 mt-4">
-            Strategic Communication Modules
+            Your Complete Strategic Communication Toolkit
           </p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">

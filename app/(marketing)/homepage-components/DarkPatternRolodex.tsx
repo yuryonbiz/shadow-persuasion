@@ -5,14 +5,14 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 const patterns = [
-  { name: "ANCHORING", description: "Set the initial frame of reference for a negotiation.", effectiveness: 8, context: "Negotiation, Sales" },
-  { name: "THE VOID PULL", description: "Use strategic silence to make the other party fill the void.", effectiveness: 9, context: "Negotiation, Conflict" },
-  { name: "SCARCITY FRAME", description: "Create urgency by highlighting limited availability.", effectiveness: 7, context: "Sales, Marketing" },
-  { name: "PATTERN INTERRUPTION", description: "Break someone's expected script to make them more suggestible.", effectiveness: 8, context: "Social Engineering" },
-  { name: "MIRRORING", description: "Subtly mimic body language to build subconscious rapport.", effectiveness: 6, context: "Rapport Building" },
-  { name: "FRAME CONTROL", description: "Define the context and meaning of the interaction.", effectiveness: 10, context: "All Interactions" },
-  { name: "SOCIAL PROOF", description: "Leverage the influence of others to validate a choice.", effectiveness: 7, context: "Marketing, Persuasion" },
-  { name: "EMOTIONAL HIJACKING", description: "Shift a conversation from a logical to an emotional basis.", effectiveness: 9, context: "High-Stakes Persuasion" },
+  { name: "ANCHORING", description: "Set the reference point in any negotiation to frame what's reasonable.", effectiveness: 8, context: "Negotiation, Sales" },
+  { name: "STRATEGIC SILENCE", description: "Use well-timed pauses to create space for the other party to fill.", effectiveness: 9, context: "Negotiation, Conflict Resolution" },
+  { name: "SCARCITY FRAMING", description: "Communicate genuine urgency or limited availability.", effectiveness: 7, context: "Sales, Business" },
+  { name: "PATTERN INTERRUPT", description: "Break someone's expected script to open them to a new perspective.", effectiveness: 8, context: "Conversations, Presentations" },
+  { name: "MIRRORING", description: "Match body language and communication style to build natural rapport.", effectiveness: 6, context: "Rapport Building" },
+  { name: "FRAME CONTROL", description: "Define the context and meaning of any interaction.", effectiveness: 10, context: "All Interactions" },
+  { name: "SOCIAL PROOF", description: "Leverage credible third-party validation to support your position.", effectiveness: 7, context: "Sales, Persuasion" },
+  { name: "EMOTIONAL REFRAMING", description: "Shift the emotional context of a conversation to create alignment.", effectiveness: 9, context: "High-Stakes Conversations" },
 ];
 
 const DarkPatternRolodex = () => {
@@ -26,9 +26,9 @@ const DarkPatternRolodex = () => {
     <section className="relative py-16" ref={ref}>
         <div className="text-left mb-12">
             <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
-            APPENDIX E: DARK PATTERN INDEX
+            APPENDIX E: TECHNIQUE PREVIEW
             </h2>
-            <p className="text-3xl mt-2">Partial Listing</p>
+            <p className="text-3xl mt-2">Sample Techniques from the Library</p>
         </div>
 
         <div className="relative h-80 flex items-center justify-center">
@@ -101,7 +101,7 @@ const DarkPatternRolodex = () => {
             transition={{ duration: 0.5, delay: 0.8 }}
         >
             <p className="font-mono text-sm text-gray-500 uppercase tracking-wider">
-                [{patterns.length - 3} Additional Files Classified]
+                [50+ Techniques Available Inside the Full Library]
             </p>
         </motion.div>
     </section>
