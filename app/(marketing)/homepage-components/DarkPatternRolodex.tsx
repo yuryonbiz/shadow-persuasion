@@ -31,8 +31,51 @@ const DarkPatternRolodex = () => {
             <p className="text-3xl mt-2">Sample Techniques from the Library</p>
         </div>
 
-        <div className="relative h-80 flex items-center justify-center">
-            {/* Three overlapping files */}
+        {/* Mobile: swipeable horizontal scroll */}
+        <div
+          className="flex md:hidden gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          <style>{`[style*="scrollbar-width: none"]::-webkit-scrollbar { display: none; }`}</style>
+          {patterns.map((pattern, index) => (
+            <motion.div
+              key={index}
+              className="min-w-[280px] w-[280px] flex-shrink-0 snap-center bg-[#F4ECD8] border-2 border-gray-400 shadow-xl rounded-sm p-6 flex flex-col justify-between"
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <div className="text-xs font-mono text-gray-400 mb-2">
+                FILE: {index + 1} of {patterns.length}
+              </div>
+              <div>
+                <h3 className="font-special-elite text-2xl font-bold text-black">
+                  {pattern.name}
+                </h3>
+                <p className="text-base text-gray-700 leading-snug mt-2">
+                  {pattern.description}
+                </p>
+              </div>
+              <div className="mt-4">
+                <div className="font-mono text-xs text-gray-500">
+                  Context: {pattern.context}
+                </div>
+                <div className="flex items-center gap-2 mt-2 font-mono text-xs">
+                  <div>Effectiveness:</div>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({length: 10}).map((_, i) => (
+                      <div key={i} className={`h-3 w-1.5 ${i < pattern.effectiveness ? 'bg-black' : 'bg-gray-300'}`}></div>
+                    ))}
+                  </div>
+                  <div>{pattern.effectiveness}/10</div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Desktop: overlapping cards */}
+        <div className="relative h-80 hidden md:flex items-center justify-center">
             {displayFiles.map((pattern, index) => (
                 <motion.div
                     key={index}
@@ -41,27 +84,27 @@ const DarkPatternRolodex = () => {
                     }`}
                     style={{
                         transform: `
-                            translateX(${(index - 1) * 25}px) 
-                            translateY(${index * 8}px) 
+                            translateX(${(index - 1) * 25}px)
+                            translateY(${index * 8}px)
                             rotate(${(index - 1) * 2}deg)
                         `,
-                        boxShadow: selectedFile === index 
-                            ? '0 20px 40px rgba(0,0,0,0.3)' 
+                        boxShadow: selectedFile === index
+                            ? '0 20px 40px rgba(0,0,0,0.3)'
                             : '0 10px 20px rgba(0,0,0,0.15)'
                     }}
                     initial={{ opacity: 0, y: 50, rotate: 0 }}
-                    animate={inView ? { 
-                        opacity: 1, 
-                        y: index * 8, 
+                    animate={inView ? {
+                        opacity: 1,
+                        y: index * 8,
                         rotate: (index - 1) * 2,
                         x: (index - 1) * 25
                     } : {}}
                     transition={{ duration: 0.6, delay: index * 0.2 }}
                     onClick={() => setSelectedFile(index)}
-                    whileHover={{ 
-                        scale: 1.05, 
+                    whileHover={{
+                        scale: 1.05,
                         y: index * 8 - 5,
-                        transition: { duration: 0.2 } 
+                        transition: { duration: 0.2 }
                     }}
                 >
                     <div className="absolute top-2 right-2 text-xs font-mono text-gray-400">

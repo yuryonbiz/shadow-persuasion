@@ -43,7 +43,7 @@ export const SystemCapabilities = () => {
   });
 
   return (
-    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
+    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg px-6 py-8 md:p-12">
         <div className="text-left mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-black">
             What You Get Access To

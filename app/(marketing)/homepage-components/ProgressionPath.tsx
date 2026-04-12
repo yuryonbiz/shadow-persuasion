@@ -49,13 +49,36 @@ const ProgressionPath = () => {
         <p className="text-3xl mt-2">Career Trajectory</p>
       </div>
 
-      {/* Alternating timeline grid */}
-      <div className="relative grid grid-cols-[1fr_auto_1fr] gap-x-6 gap-y-10 max-w-6xl mx-auto">
-        {/* Center line */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gray-300"
-          style={{ gridColumn: '2' }}
+      {/* Mobile: single column with centered line */}
+      <div className="relative flex flex-col items-center gap-y-10 max-w-6xl mx-auto md:hidden">
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 top-0 w-0.5 bg-amber-500 origin-top"
+          initial={{ height: 0 }}
+          animate={inView ? { height: '100%' } : {}}
+          transition={{ duration: 2, ease: 'easeOut' }}
         />
+
+        {levels.map((level, index) => (
+          <div key={level.name} className="flex flex-col items-center gap-4 relative z-10">
+            <motion.div
+              className="w-4 h-4 rounded-full bg-amber-500 border-4 border-[#F4ECD8]"
+              initial={{ scale: 0 }}
+              animate={inView ? { scale: 1 } : {}}
+              transition={{ duration: 0.4, delay: index * 0.2 + 0.3 }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+            >
+              <Card level={level} />
+            </motion.div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: alternating timeline grid */}
+      <div className="relative hidden md:grid grid-cols-[1fr_auto_1fr] gap-x-6 gap-y-10 max-w-6xl mx-auto">
         <motion.div
           className="absolute left-1/2 -translate-x-1/2 top-0 w-0.5 bg-amber-500 origin-top"
           initial={{ height: 0 }}

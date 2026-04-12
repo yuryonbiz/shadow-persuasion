@@ -64,9 +64,9 @@ export const SystemPreview = () => {
                 animate={inView ? "visible" : "hidden"}
                 variants={messageVariants}
                 transition={{ duration: 0.5, delay: index * 1.5 }}
-                 className="grid grid-cols-[100px_1fr] gap-4 items-start"
+                 className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-1 md:gap-4 items-start"
                >
-                 <div className="font-mono text-sm pt-1">{msg.speaker}:</div>
+                 <div className="font-mono text-sm font-bold md:font-normal pt-1">{msg.speaker}:</div>
                  <motion.p className="leading-relaxed">
                   {inView && msg.text.split("").map((char, charIndex) => (
                     <motion.span

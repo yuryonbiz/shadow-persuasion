@@ -30,7 +30,7 @@ export default function HomePage() {
       <CoverPage />
 
       {/* 2. ExecutiveSummary */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <ExecutiveSummary />
       </div>
 
@@ -47,7 +47,7 @@ export default function HomePage() {
       <SectionDivider text="// SEE WHAT THE SYSTEM ACTUALLY DOES //" />
 
       {/* 7. SystemCapabilities */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <SystemCapabilities />
       </div>
 
@@ -61,7 +61,7 @@ export default function HomePage() {
       <ConversationBreakdown />
 
       {/* 11. OperationalModules */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <OperationalModules />
       </div>
 
@@ -72,12 +72,12 @@ export default function HomePage() {
       <Evidence />
 
       {/* 14. Statements */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <Statements />
       </div>
 
       {/* 15-17. ProgressionPath, DarkPatternRolodex */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <ProgressionPath />
         <DarkPatternRolodex />
       </div>
@@ -86,12 +86,12 @@ export default function HomePage() {
       <ClassifiedComparison />
 
       {/* 19. FAQ */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-20 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <FAQ />
       </div>
 
       {/* 20. AccessRequest */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 md:py-14">
         <AccessRequest />
       </div>
 

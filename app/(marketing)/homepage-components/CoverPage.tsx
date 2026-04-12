@@ -54,7 +54,7 @@ const CoverPage = () => {
       />
 
       {/* CLASSIFIED / DECLASSIFIED stamps */}
-      <div className="absolute top-20 right-4 md:top-8 md:right-8 z-10">
+      <div className="absolute top-28 right-4 md:top-8 md:right-8 z-10">
         <motion.p
           className="text-red-700 text-xl md:text-3xl font-bold border-4 border-red-700 p-1 md:p-2 transform -rotate-12 origin-center scale-110"
           style={{ fontFamily: 'monospace' }}
@@ -88,7 +88,7 @@ const CoverPage = () => {
       <div className="z-0 max-w-5xl mx-auto">
         {/* Document number */}
         <motion.p
-          className="text-sm uppercase tracking-[0.3em] text-[#6B5B3E]"
+          className="mt-8 md:mt-0 text-sm uppercase tracking-[0.3em] text-[#6B5B3E]"
           initial={{ opacity: 0, y: -10 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
