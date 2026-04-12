@@ -9,9 +9,6 @@ import { useAuth } from '@/lib/auth-context';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { getCategoryIcon } from '@/lib/category-icons';
 
-// ── Library constants ──
-const categories = ['All', 'Influence', 'Negotiation', 'Rapport', 'Framing', 'Defense'];
-
 // ── Stacking types & helpers ──
 interface Step {
   stepNumber: number;

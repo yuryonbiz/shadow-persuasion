@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRef } from 'react';
-import { ArrowLeft, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2, RefreshCw, ChevronDown, ChevronUp, Send, Briefcase, Heart, DollarSign, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, BookOpen, Target, CheckCircle, XCircle, Lightbulb, MessageSquare, Swords, Link2, Sparkles, Book, Loader2, RefreshCw, ChevronDown, ChevronUp, Send, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/hooks/useAdmin';

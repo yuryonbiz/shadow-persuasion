@@ -6,7 +6,6 @@ import { Send } from 'lucide-react';
 import { ChatInput } from '@/components/app/ChatInput';
 import { ChatMessage } from '@/components/app/ChatMessage';
 
-// This would come from a database in a real app
 type Source = { book: string; author: string; technique: string; similarity: number };
 type Message = {
   id: string;

@@ -77,14 +77,14 @@ export function Sidebar() {
         <div className="relative pt-3 border-t border-gray-200 dark:border-[#333333]" ref={menuRef}>
           {menuOpen && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-[#222] border border-gray-200 dark:border-[#444] rounded-lg shadow-lg overflow-hidden">
-              <a
+              <Link
                 href="/app/settings"
                 onClick={() => setMenuOpen(false)}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#333] transition-colors"
               >
                 <Settings className="h-4 w-4" />
                 Settings
-              </a>
+              </Link>
               <button
                 onClick={() => { setTheme(theme === 'dark' ? 'light' : 'dark'); setMenuOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#333] transition-colors"

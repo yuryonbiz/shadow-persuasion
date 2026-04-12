@@ -113,7 +113,6 @@ export function ConversationCard({ conversation, onUpdate, onDelete }: Conversat
                             </button>
                             <button
                                 onClick={() => {
-                                    // TODO: Open edit modal
                                     setShowDropdown(false);
                                 }}
                                 className="w-full px-3 py-2 text-left text-sm hover:bg-gray-200 dark:hover:bg-gray-200 dark:bg-[#333333] flex items-center gap-2"

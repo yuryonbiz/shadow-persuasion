@@ -343,6 +343,12 @@ export default function LoginPage() {
         <p className="mt-8 text-center text-xs text-gray-400 dark:text-[#555555]">
           Influence is a skill. Master it responsibly.
         </p>
+        <p className="mt-4 text-center text-xs text-gray-400 dark:text-[#555555]">
+          By signing up, you agree to our{' '}
+          <a href="/terms" className="underline decoration-transparent hover:decoration-current transition-colors hover:text-gray-300">Terms of Service</a>
+          {' '}and{' '}
+          <a href="/privacy" className="underline decoration-transparent hover:decoration-current transition-colors hover:text-gray-300">Privacy Policy</a>.
+        </p>
       </div>
     </div>
   );

@@ -69,7 +69,6 @@ export function MessageRewriterFAB() {
 
     const handleCopy = async (text: string) => {
         await navigator.clipboard.writeText(text);
-        // TODO: Add toast notification
     };
 
     const getRiskColor = (risk: string) => {

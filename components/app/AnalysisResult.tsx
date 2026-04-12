@@ -13,7 +13,6 @@ export function AnalysisResult({ analysis, imagePreview }: AnalysisResultProps) 
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
-        // Add a toast notification here in a real app
     };
 
     return (

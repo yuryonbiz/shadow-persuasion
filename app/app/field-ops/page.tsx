@@ -1227,10 +1227,10 @@ export default function FieldOpsPage() {
         <div className="bg-white dark:bg-[#1A1A1A] p-4 rounded-lg border border-gray-200 dark:border-[#333333]">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-orange-400">{streakInfo.current}</p>
-              <p className="text-xs font-mono text-gray-500 uppercase">Current Streak</p>
+              <p className="text-2xl font-bold text-purple-400">{filteredPool.length}</p>
+              <p className="text-xs font-mono text-gray-500 uppercase">Missions Available</p>
             </div>
-            <Flame className="h-6 w-6 text-orange-400" />
+            <Target className="h-6 w-6 text-purple-400" />
           </div>
         </div>
         <div className="bg-white dark:bg-[#1A1A1A] p-4 rounded-lg border border-gray-200 dark:border-[#333333]">

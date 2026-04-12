@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ScenarioCard } from '@/components/app/ScenarioCard';
 import { Star, Loader2, Plus, X, Check, CheckSquare, Square, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -55,13 +55,6 @@ export default function TrainingArenaPage() {
   const [checkedScenarios, setCheckedScenarios] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const refreshScenarios = useCallback(() => {
-    fetch('/api/scenarios/list')
-      .then(res => res.json())
-      .then(data => setScenarios(data.scenarios || []))
-      .catch(err => console.error('Failed to fetch scenarios:', err));
-  }, []);
 
   useEffect(() => {
     fetch('/api/scenarios/list')
