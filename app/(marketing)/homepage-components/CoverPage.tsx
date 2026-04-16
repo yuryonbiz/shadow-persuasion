@@ -123,7 +123,7 @@ const CoverPage = () => {
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8, delay: 1.1 }}
         >
-          You&apos;re Leaving Money, Relationships, and Respect on the Table — Because Nobody Taught You How Influence Actually Works
+          You&apos;re Leaving Money, Relationships, and Respect on the Table. Because Nobody Taught You How Influence Actually Works
         </motion.p>
 
         {/* Category cards */}
@@ -173,7 +173,7 @@ const CoverPage = () => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
         >
-          START YOUR TRAINING — $99/MONTH <ArrowRight className="ml-2" />
+          START YOUR TRAINING: $99/MONTH <ArrowRight className="ml-2" />
         </motion.button>
 
         {/* Footer text */}

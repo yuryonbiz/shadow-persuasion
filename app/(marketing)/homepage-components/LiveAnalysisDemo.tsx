@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useState, useCallback } from 'react';
 
-const SAMPLE_INPUT = "I've been thinking about it, and I just don't think the timing is right for a raise. You know how much I value you — let's revisit this after Q3 when things settle down.";
+const SAMPLE_INPUT = "I've been thinking about it, and I just don't think the timing is right for a raise. You know how much I value you. Let's revisit this after Q3 when things settle down.";
 
 // Pre-built realistic result matching the actual /api/analyze output format
 const SAMPLE_RESULT = {
@@ -13,11 +13,11 @@ const SAMPLE_RESULT = {
   communicationStyle: { sensoryPreference: 'Auditory', emotionalState: 'Calculated composure', receptivity: 35 },
   tactics: [
     { tactic: 'Future Faking', category: 'Misdirection', quote: "let's revisit this after Q3", explanation: 'Pushes commitment to a vague future date with no guarantee. Creates the illusion of agreement while avoiding action.', counterResponse: "I appreciate the timeline. Can we set a specific date and define what metrics would make this a yes?" },
-    { tactic: 'Flattery Shield', category: 'Flattery', quote: "You know how much I value you", explanation: 'Emotional cushioning before a rejection. Makes you feel guilty for pushing back after being praised.', counterResponse: "Thank you — and because that value is mutual, I want to make sure my compensation reflects it. What would need to change?" },
+    { tactic: 'Flattery Shield', category: 'Flattery', quote: "You know how much I value you", explanation: 'Emotional cushioning before a rejection. Makes you feel guilty for pushing back after being praised.', counterResponse: "Thank you, and because that value is mutual, I want to make sure my compensation reflects it. What would need to change?" },
   ],
   responseOptions: [
     { type: 'Direct & Assertive', message: "I hear you on timing. I've done some research and my market rate is $X-Y. I'm not looking to leave, but I need us to close that gap. What would make this a yes before Q3?", riskLevel: 'MEDIUM', powerImpact: 3 },
-    { type: 'Strategic Patience', message: "I understand. Let's put a specific date on the calendar — say June 15th — and agree on the metrics you'd need to see. That way we're both clear on the path forward.", riskLevel: 'LOW', powerImpact: 2 },
+    { type: 'Strategic Patience', message: "I understand. Let's put a specific date on the calendar, say June 15th, and agree on the metrics you'd need to see. That way we're both clear on the path forward.", riskLevel: 'LOW', powerImpact: 2 },
   ],
   successProbability: 72,
 };
@@ -97,7 +97,7 @@ const LiveAnalysisDemo = () => {
                 transition={{ duration: 0.8, delay: 0.2 }}
               />
             </div>
-            <p className="text-sm mt-2 font-mono text-yellow-400">Moderate Threat &mdash; {r.tactics.length} tactics detected</p>
+            <p className="text-sm mt-2 font-mono text-yellow-400">Moderate Threat, {r.tactics.length} tactics detected</p>
           </div>
 
           {/* Power Dynamics + Communication — side by side on desktop */}
@@ -145,7 +145,7 @@ const LiveAnalysisDemo = () => {
                   <div className="text-[10px] font-mono uppercase text-[#D4A017] mt-1">Openness</div>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-3">Low receptivity — resistant to direct persuasion. Use reframing and questions instead of statements.</p>
+              <p className="text-xs text-gray-500 mt-3">Low receptivity: resistant to direct persuasion. Use reframing and questions instead of statements.</p>
             </div>
           </div>
 

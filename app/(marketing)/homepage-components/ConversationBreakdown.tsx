@@ -34,7 +34,7 @@ const ConversationBreakdown = () => {
     },
     {
       original: '"I need some time to think about us"',
-      breakdown: 'Processing pause — usually about feeling overwhelmed, not losing interest.',
+      breakdown: 'Processing pause, usually about feeling overwhelmed, not losing interest.',
       response: '"Take all the time you need. I\'m confident in what we have when you\'re ready."',
       patterns: ['PROCESSING PAUSE', 'SPACE REQUEST']
     }

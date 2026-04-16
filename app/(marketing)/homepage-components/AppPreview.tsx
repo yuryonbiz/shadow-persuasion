@@ -146,7 +146,7 @@ function AnalyzeScreen() {
         <div className="w-full bg-[#333] rounded-full h-2">
           <div className="bg-gradient-to-r from-yellow-500 to-red-500 h-2 rounded-full" style={{ width: '70%' }} />
         </div>
-        <div className="text-[9px] text-white mt-1 font-bold">7 / 10 — Significant Manipulation Detected</div>
+        <div className="text-[9px] text-white mt-1 font-bold">7 / 10: Significant Manipulation Detected</div>
       </div>
 
       {/* Detected tactics */}
@@ -175,7 +175,7 @@ function AnalyzeScreen() {
       <div className="bg-[#1A1A1A] rounded-md p-2 border-l-2 border-[#D4A017]">
         <div className="text-[8px] text-[#D4A017] uppercase tracking-wider mb-1">Recommended Counter-Script</div>
         <div className="text-[9px] text-gray-300 leading-relaxed">
-          &quot;I appreciate your perspective. I need time to evaluate this properly — rushed decisions rarely serve either party well.&quot;
+          &quot;I appreciate your perspective. I need time to evaluate this properly. Rushed decisions rarely serve either party well.&quot;
         </div>
         <div className="text-[9px] text-gray-300 leading-relaxed mt-1">
           &quot;Let&apos;s revisit this Thursday when we can both review the details.&quot;
@@ -216,7 +216,7 @@ function CoachScreen() {
             <div className="bg-[#1a1508] border border-[#D4A017]/30 rounded-lg rounded-bl-sm px-2 py-1.5 max-w-[90%]">
               <div className="text-[8px] text-[#D4A017] mb-0.5 font-bold">SHADOW COACH</div>
               <div className="text-[9px] text-gray-300 leading-relaxed">
-                Here&apos;s your counter-strategy. First, don&apos;t react emotionally — that&apos;s what they expect. Deploy <span className="text-[#D4A017]">Frame Control</span>: reposition the conversation from &quot;asking for a raise&quot; to &quot;discussing my market value.&quot;
+                Here&apos;s your counter-strategy. First, don&apos;t react emotionally. That&apos;s what they expect. Deploy <span className="text-[#D4A017]">Frame Control</span>: reposition the conversation from &quot;asking for a raise&quot; to &quot;discussing my market value.&quot;
               </div>
             </div>
           </div>
@@ -354,7 +354,7 @@ export default function AppPreview() {
               <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
             </div>
             <div className="flex-1 text-center">
-              <span className="text-[11px] text-gray-400">Shadow Persuasion — Operator Console</span>
+              <span className="text-[11px] text-gray-400">Shadow Persuasion | Operator Console</span>
             </div>
             <div className="w-[54px]" /> {/* Spacer to center title */}
           </div>
@@ -436,7 +436,7 @@ export default function AppPreview() {
         {/* Bottom caption */}
         <div className="text-center mt-6">
           <p className="text-[11px] text-[#8B7355] tracking-wider uppercase">
-            Live interactive preview — actual application interface
+            Live interactive preview: actual application interface
           </p>
         </div>
       </motion.div>

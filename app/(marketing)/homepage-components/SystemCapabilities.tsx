@@ -7,13 +7,13 @@ const capabilities = [
   {
     icon: '[>_]',
     title: 'AI Strategic Coach',
-    description: 'Describe any situation — a salary negotiation, a difficult breakup conversation, a sales call gone sideways. Get a tactical game plan with word-for-word scripts in under 60 seconds.',
+    description: 'Describe any situation: a salary negotiation, a difficult breakup conversation, a sales call gone sideways. Get a tactical game plan with word-for-word scripts in under 60 seconds.',
     classified: false,
   },
   {
     icon: '[◉]',
     title: 'Conversation Analysis Engine',
-    description: 'Screenshot any text conversation. The AI identifies manipulation tactics, power imbalances, and hidden intentions — then gives you the exact words to shift the dynamic in your favor.',
+    description: 'Screenshot any text conversation. The AI identifies manipulation tactics, power imbalances, and hidden intentions, then gives you the exact words to shift the dynamic in your favor.',
     classified: true,
   },
   {

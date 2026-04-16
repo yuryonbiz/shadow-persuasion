@@ -48,7 +48,7 @@ const ClassifiedComparison = () => {
                     {leftFeatures.map(f => (
                         <li key={f} className="flex justify-between items-center text-lg">
                             <span>{f}</span>
-                            <span className="text-red-500 font-bold text-xl">&mdash;</span>
+                            <span className="text-red-500 font-bold text-xl">&#x2715;</span>
                         </li>
                     ))}
                 </ul>

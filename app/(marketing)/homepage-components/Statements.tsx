@@ -27,7 +27,7 @@ const Statement = ({ codename, date, title, children, index, inView }: Statement
     </span>
 
     <h3 className="font-mono text-xs uppercase tracking-widest text-amber-700 font-bold mb-1">
-      [{codename}] &mdash; {title}
+      [{codename}], {title}
     </h3>
     <p className="font-mono text-xs text-gray-500 mb-4">STATEMENT TAKEN {date}</p>
 
@@ -55,11 +55,11 @@ const Statements = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Statement codename="ALEX M." date="MARCH 2026" title="SALES PROFESSIONAL" index={0} inView={inView}>
-          <p>&ldquo;I used to wing every sales conversation. Shadow Persuasion taught me that closing isn&apos;t about pressure — it&apos;s about understanding what the other person actually needs and framing your offer around that. My close rate went from 22% to 71% in three months. The AI coach doesn&apos;t just give you lines to say. It teaches you WHY they work.&rdquo;</p>
+          <p>&ldquo;I used to wing every sales conversation. Shadow Persuasion taught me that closing isn&apos;t about pressure, it&apos;s about understanding what the other person actually needs and framing your offer around that. My close rate went from 22% to 71% in three months. The AI coach doesn&apos;t just give you lines to say. It teaches you WHY they work.&rdquo;</p>
         </Statement>
 
         <Statement codename="SARAH K." date="FEBRUARY 2026" title="TECH EXECUTIVE" index={1} inView={inView}>
-          <p>&ldquo;I was getting passed over for promotion despite outperforming my peers. The Conversation Analyzer showed me that my boss was using delay tactics every time I brought up advancement. The AI gave me a specific framework to reframe the conversation — and I got promoted within 6 weeks. This tool is like having a world-class negotiation coach in your pocket.&rdquo;</p>
+          <p>&ldquo;I was getting passed over for promotion despite outperforming my peers. The Conversation Analyzer showed me that my boss was using delay tactics every time I brought up advancement. The AI gave me a specific framework to reframe the conversation, and I got promoted within 6 weeks. This tool is like having a world-class negotiation coach in your pocket.&rdquo;</p>
         </Statement>
 
         <Statement codename="JAMES R." date="JANUARY 2026" title="STARTUP FOUNDER" index={2} inView={inView}>

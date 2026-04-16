@@ -60,10 +60,10 @@ const FAQ = () => {
         {/* Accordion container styled as dossier */}
         <div className="bg-[#efe5cc] border border-[#D4A017]/30 rounded-lg shadow-sm overflow-hidden">
           <AccordionItem question="Is this manipulation?">
-            <p>Strategic communication isn&apos;t manipulation — it&apos;s understanding how people actually make decisions and communicating more effectively. Every negotiation course, sales training, and leadership program teaches these same principles. The difference is that Shadow Persuasion gives you an AI coach that applies them to YOUR specific situations in real time. We focus on creating outcomes where both parties benefit.</p>
+            <p>Strategic communication isn&apos;t manipulation. It&apos;s understanding how people actually make decisions and communicating more effectively. Every negotiation course, sales training, and leadership program teaches these same principles. The difference is that Shadow Persuasion gives you an AI coach that applies them to YOUR specific situations in real time. We focus on creating outcomes where both parties benefit.</p>
           </AccordionItem>
           <AccordionItem question="Will this work against experienced negotiators?">
-            <p>Yes. Experienced negotiators rely on established patterns — and those patterns are cataloged in our technique library. The AI identifies which tactics are being used against you and provides counter-strategies. Members consistently report outperforming people with decades more experience.</p>
+            <p>Yes. Experienced negotiators rely on established patterns, and those patterns are cataloged in our technique library. The AI identifies which tactics are being used against you and provides counter-strategies. Members consistently report outperforming people with decades more experience.</p>
           </AccordionItem>
           <AccordionItem question="How quickly will I see results?">
             <p>Most members report a noticeable shift within the first week. The Conversation Analyzer gives you immediate insight into conversations you&apos;re already having. The Strategic Coach gives you scripts you can use today. Full mastery of the technique library typically takes 60-90 days of consistent practice.</p>

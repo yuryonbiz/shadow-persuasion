@@ -13,7 +13,7 @@ const scenario = {
   with: {
     title: 'Protocol-Enhanced Response',
     response:
-      "I appreciate the transparency. I want to make sure we're aligned — based on my research, the market rate for this role with my track record is in the $95-110K range. I'm not looking to leave, but I do need my compensation to reflect the value I'm delivering. What would need to happen for us to close that gap this quarter?",
+      "I appreciate the transparency. I want to make sure we're aligned. Based on my research, the market rate for this role with my track record is in the $95-110K range. I'm not looking to leave, but I do need my compensation to reflect the value I'm delivering. What would need to happen for us to close that gap this quarter?",
   },
 };
 

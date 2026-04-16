@@ -51,14 +51,14 @@ const paragraphs = [
   ),
   (
     <>
-      This is an AI-powered strategic communication system that gives you an unfair advantage in every conversation that matters. Upload a screenshot of a text exchange and get instant analysis of power dynamics, hidden intentions, and manipulation tactics — plus word-for-word scripts to respond. Get real-time coaching for negotiations, difficult conversations, and high-stakes meetings. Practice with AI role-play before the real thing.
+      This is an AI-powered strategic communication system that gives you an unfair advantage in every conversation that matters. Upload a screenshot of a text exchange and get instant analysis of power dynamics, hidden intentions, and manipulation tactics, plus word-for-word scripts to respond. Get real-time coaching for negotiations, difficult conversations, and high-stakes meetings. Practice with AI role-play before the real thing.
     </>
   ),
   (
     <>
       Members report significant salary increases after their first negotiation using the system.{' '}
       <Highlight>Relationship satisfaction scores improve within 30 days.</Highlight>{' '}
-      The difference isn&apos;t talent — it&apos;s having an AI that decodes what people really mean and tells you exactly what to say back.
+      The difference isn&apos;t talent. It&apos;s having an AI that decodes what people really mean and tells you exactly what to say back.
     </>
   ),
 ];

@@ -10,7 +10,7 @@ const conversation = [
   },
   {
     speaker: 'COACH',
-    text: "Here's your strategy. First, don't react emotionally — that's what they expect. Use Frame Control: reposition the conversation from \"asking for a raise\" to \"discussing your market value.\" Try this: \"I've been looking at what my role pays elsewhere, and I want to make sure we're aligned. Can we talk about how my compensation reflects the value I'm delivering?\" Then pause. Let them respond first.",
+    text: "Here's your strategy. First, don't react emotionally. That's what they expect. Use Frame Control: reposition the conversation from \"asking for a raise\" to \"discussing your market value.\" Try this: \"I've been looking at what my role pays elsewhere, and I want to make sure we're aligned. Can we talk about how my compensation reflects the value I'm delivering?\" Then pause. Let them respond first.",
   },
   {
     speaker: 'MEMBER',
@@ -54,7 +54,7 @@ export const SystemPreview = () => {
         <div className="relative bg-[#F4ECD8] p-6 sm:p-8 border-2 border-gray-400 shadow-lg">
            <div className="absolute top-2 right-2 font-mono text-xs text-gray-500"></div>
           <h3 className="font-mono text-center text-sm uppercase tracking-widest text-black mb-6 border-b border-dashed border-gray-400 pb-4">
-            Transcript of AI Console Session — Intercepted ██/██/2026
+            Transcript of AI Console Session: Intercepted ██/██/2026
           </h3>
           
           <div className="space-y-6 font-special-elite text-lg text-gray-900">

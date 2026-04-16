@@ -14,7 +14,7 @@ const modules = [
     {
         id: 'MODULE-002',
         title: 'Strategic Coach',
-        description: 'AI coaching chat for any situation. Describe what you\'re facing — salary talks, a tough breakup, a client negotiation — get tactical guidance immediately.',
+        description: 'AI coaching chat for any situation. Describe what you\'re facing: salary talks, a tough breakup, a client negotiation. Get tactical guidance immediately.',
         classification: 'ACTIVE',
     },
     {
@@ -32,7 +32,7 @@ const modules = [
     {
         id: 'MODULE-005',
         title: 'People Profiles',
-        description: 'Build communication profiles for key people in your life — your boss, partner, clients. Track interactions and get personalized strategies.',
+        description: 'Build communication profiles for key people in your life: your boss, partner, clients. Track interactions and get personalized strategies.',
         classification: 'ACTIVE',
     },
     {
@@ -62,7 +62,7 @@ const modules = [
     {
         id: 'MODULE-010',
         title: 'Voice Profile',
-        description: 'The AI learns YOUR writing style and adapts all scripts and responses to sound like you — not a robot.',
+        description: 'The AI learns YOUR writing style and adapts all scripts and responses to sound like you, not a robot.',
         classification: 'ACTIVE',
     },
 ];
