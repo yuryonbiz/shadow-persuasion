@@ -1,9 +1,6 @@
 
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-
 const levels = [
   {
     name: 'CIVILIAN',
@@ -50,10 +47,8 @@ const levels = [
 ];
 
 const ProgressionPath = () => {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.15 });
-
   return (
-    <section ref={ref} className="relative py-16">
+    <section className="relative py-16">
       <div className="text-left mb-16">
         <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
           APPENDIX D: OPERATOR PROGRESSION PATH
@@ -63,39 +58,28 @@ const ProgressionPath = () => {
 
       {/* Mobile: single column with centered line */}
       <div className="relative flex flex-col items-center gap-y-10 max-w-6xl mx-auto md:hidden">
-        <motion.div
+        <div
           className="absolute left-1/2 -translate-x-1/2 top-0 w-0.5 bg-amber-500 origin-top"
-          initial={{ height: 0 }}
-          animate={inView ? { height: '100%' } : {}}
-          transition={{ duration: 2, ease: 'easeOut' }}
+          style={{ height: '100%' }}
         />
 
-        {levels.map((level, index) => (
+        {levels.map((level) => (
           <div key={level.name} className="flex flex-col items-center gap-4 relative z-10">
-            <motion.div
+            <div
               className="w-4 h-4 rounded-full bg-amber-500 border-4 border-[#F4ECD8]"
-              initial={{ scale: 0 }}
-              animate={inView ? { scale: 1 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.2 + 0.3 }}
             />
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.2 }}
-            >
+            <div>
               <Card level={level} />
-            </motion.div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Desktop: alternating timeline grid */}
       <div className="relative hidden md:grid grid-cols-[1fr_auto_1fr] gap-x-6 gap-y-10 max-w-6xl mx-auto">
-        <motion.div
+        <div
           className="absolute left-1/2 -translate-x-1/2 top-0 w-0.5 bg-amber-500 origin-top"
-          initial={{ height: 0 }}
-          animate={inView ? { height: '100%' } : {}}
-          transition={{ duration: 2, ease: 'easeOut' }}
+          style={{ height: '100%' }}
         />
 
         {levels.map((level, index) => {
@@ -108,38 +92,25 @@ const ProgressionPath = () => {
             >
               {/* Left cell */}
               {isLeft ? (
-                <motion.div
-                  className="flex justify-end"
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                >
+                <div className="flex justify-end">
                   <Card level={level} />
-                </motion.div>
+                </div>
               ) : (
                 <div />
               )}
 
               {/* Center dot */}
               <div className="flex items-center justify-center relative z-10">
-                <motion.div
+                <div
                   className="w-4 h-4 rounded-full bg-amber-500 border-4 border-[#F4ECD8]"
-                  initial={{ scale: 0 }}
-                  animate={inView ? { scale: 1 } : {}}
-                  transition={{ duration: 0.4, delay: index * 0.2 + 0.3 }}
                 />
               </div>
 
               {/* Right cell */}
               {!isLeft ? (
-                <motion.div
-                  className="flex justify-start"
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                >
+                <div className="flex justify-start">
                   <Card level={level} />
-                </motion.div>
+                </div>
               ) : (
                 <div />
               )}

@@ -1,8 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-
 const capabilities = [
   {
     icon: '[>_]',
@@ -24,11 +21,6 @@ const capabilities = [
   },
 ];
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 const Stamp = ({ text, color, className }: { text: string; color: string; className?: string }) => (
   <div className={`absolute -rotate-6 scale-110 border-2 ${color} p-1 text-xs font-bold uppercase tracking-wider ${color} opacity-80 ${className}`}>
     {text}
@@ -37,13 +29,8 @@ const Stamp = ({ text, color, className }: { text: string; color: string; classN
 
 
 export const SystemCapabilities = () => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
   return (
-    <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg px-6 py-8 md:p-12">
+    <section className="relative bg-[#EDE3D0] rounded-lg px-6 py-8 md:p-12">
         <div className="text-left mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-black">
             What You Get Access To
@@ -55,12 +42,8 @@ export const SystemCapabilities = () => {
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {capabilities.map((capability, index) => (
-            <motion.div
+            <div
               key={capability.title}
-              variants={cardVariants}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
               className="relative flex flex-col rounded-sm border border-[#999] bg-[#F4ECD8] p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black"
             >
               {capability.classified && (
@@ -80,10 +63,10 @@ export const SystemCapabilities = () => {
                   Status: Available
                 </span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-        
+
         {/* Use Cases Section */}
         <div className="mt-12">
           <h3 className="text-2xl font-bold text-black mb-2 text-center">PRACTICAL APPLICATIONS</h3>

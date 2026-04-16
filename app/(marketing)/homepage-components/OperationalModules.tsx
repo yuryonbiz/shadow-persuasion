@@ -1,9 +1,6 @@
 
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-
 const modules = [
     {
         id: 'MODULE-001',
@@ -67,11 +64,6 @@ const modules = [
     },
 ];
 
-const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-};
-
 const ClassificationStamp = ({ text }: { text: string }) => {
     const color = 'border-green-600 text-green-700';
     return (
@@ -82,25 +74,16 @@ const ClassificationStamp = ({ text }: { text: string }) => {
 };
 
 export const OperationalModules = () => {
-    const [ref, inView] = useInView({
-        triggerOnce: true,
-        threshold: 0.1,
-    });
-
     return (
-        <section ref={ref} className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
+        <section className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
             <div className="text-left mb-12">
                 <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">Appendix A</h2>
                 <p className="font-special-elite text-3xl text-black mt-2">Everything Inside Your Membership</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {modules.map((module, index) => (
-                    <motion.div
+                {modules.map((module) => (
+                    <div
                         key={module.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate={inView ? 'visible' : 'hidden'}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
                         className="relative flex flex-col rounded-sm border border-gray-400 bg-[#F4ECD8] p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black"
                     >
                         <div className="flex items-center justify-between border-b-2 border-dashed border-gray-400 pb-2">
@@ -112,7 +95,7 @@ export const OperationalModules = () => {
                             <p className="mt-2 font-special-elite text-base text-gray-800 leading-relaxed">{module.description}</p>
                         </div>
                         <ClassificationStamp text={module.classification} />
-                    </motion.div>
+                    </div>
                 ))}
             </div>
         </section>

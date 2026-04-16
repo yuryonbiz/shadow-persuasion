@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import { useState, useCallback } from 'react';
 
 const SAMPLE_INPUT = "I've been thinking about it, and I just don't think the timing is right for a raise. You know how much I value you. Let's revisit this after Q3 when things settle down.";
@@ -23,7 +22,6 @@ const SAMPLE_RESULT = {
 };
 
 const LiveAnalysisDemo = () => {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(true);
   const [animKey, setAnimKey] = useState(0);
@@ -43,26 +41,15 @@ const LiveAnalysisDemo = () => {
   return (
     <section className="bg-[#0D0D0D] w-full">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        <motion.div
-          ref={ref}
-          className="text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="text-center mb-10">
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-400 mb-2">
             SAMPLE ANALYSIS OUTPUT
           </h2>
           <p className="text-3xl text-white">See What the System Reveals</p>
-        </motion.div>
+        </div>
 
         {/* Input section */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div className="mb-8">
           <label className="block font-mono text-xs text-gray-500 mb-2 uppercase tracking-wider">
             Message Being Analyzed
           </label>
@@ -73,7 +60,7 @@ const LiveAnalysisDemo = () => {
             <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
             <span className="font-mono text-xs text-green-400/80 uppercase tracking-wider">Analysis Engine</span>
           </div>
-        </motion.div>
+        </div>
 
         {/* Results — mirrors the real analyze page layout */}
         <motion.div

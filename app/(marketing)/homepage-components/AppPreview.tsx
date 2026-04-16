@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 
 const navItems = [
   { icon: '◈', label: 'Dashboard' },
@@ -278,7 +277,6 @@ function CoachScreen() {
 export default function AppPreview() {
   const [activeTab, setActiveTab] = useState<Tab>('Dashboard');
   const [isAutoCycling, setIsAutoCycling] = useState(true);
-  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.15 });
 
   const cycleTab = useCallback(() => {
     setActiveTab((prev) => {
@@ -305,13 +303,8 @@ export default function AppPreview() {
   };
 
   return (
-    <section ref={ref} className="bg-[#F4ECD8] py-20 px-6 md:px-12">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="max-w-5xl mx-auto"
-      >
+    <section className="bg-[#F4ECD8] py-20 px-6 md:px-12">
+      <div className="max-w-5xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-10">
           <div className="text-xs tracking-[0.3em] text-[#8B7355] uppercase mb-3">[ Section VII ]</div>
@@ -340,12 +333,7 @@ export default function AppPreview() {
         </div>
 
         {/* Browser frame */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          className="rounded-xl overflow-hidden shadow-2xl border border-[#333]"
-        >
+        <div className="rounded-xl overflow-hidden shadow-2xl border border-[#333]">
           {/* Title bar */}
           <div className="bg-[#1E1E1E] px-4 py-2.5 flex items-center gap-3">
             <div className="flex gap-1.5">
@@ -431,7 +419,7 @@ export default function AppPreview() {
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Bottom caption */}
         <div className="text-center mt-6">
@@ -439,7 +427,7 @@ export default function AppPreview() {
             Live interactive preview: actual application interface
           </p>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

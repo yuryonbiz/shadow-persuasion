@@ -1,8 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-
 interface ConversationRow {
   original: string;
   breakdown: string;
@@ -11,8 +8,6 @@ interface ConversationRow {
 }
 
 const ConversationBreakdown = () => {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.3 });
-
   const conversations: ConversationRow[] = [
     {
       original: '"I\'m just not looking for anything serious right now"',
@@ -57,22 +52,18 @@ const ConversationBreakdown = () => {
   return (
     <section className="py-16">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <motion.div 
-          ref={ref}
+        <div
           className="text-center mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
         >
           <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500 mb-2">
             EVIDENCE EXHIBIT C-1
           </h2>
           <p className="text-3xl text-black font-special-elite">Real Conversation Breakdown</p>
-        </motion.div>
+        </div>
 
         {/* Table Header - Desktop */}
         <div className="hidden lg:block">
-          <motion.div 
+          <div
             className="grid grid-cols-[2fr_3fr_3fr_1fr] gap-6 mb-6 bg-[#EDE3D0] border-2 border-gray-400 p-4"
             style={{
               background: `
@@ -81,9 +72,6 @@ const ConversationBreakdown = () => {
               `,
               backgroundBlendMode: 'overlay'
             }}
-            initial={{ opacity: 0, y: -20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="font-mono text-sm uppercase tracking-wider text-gray-700 font-bold">
               ORIGINAL MESSAGE
@@ -97,12 +85,12 @@ const ConversationBreakdown = () => {
             <div className="font-mono text-sm uppercase tracking-wider text-gray-700 font-bold">
               PATTERNS
             </div>
-          </motion.div>
+          </div>
 
           {/* Table Rows - Desktop */}
           <div className="space-y-2">
             {conversations.map((conv, index) => (
-              <motion.div
+              <div
                 key={index}
                 className="grid grid-cols-[2fr_3fr_3fr_1fr] gap-6 border-2 border-gray-400 p-4 hover:bg-[#EDE3D0] transition-colors"
                 style={{
@@ -112,9 +100,6 @@ const ConversationBreakdown = () => {
                   `,
                   backgroundBlendMode: 'overlay'
                 }}
-                initial={{ opacity: 0, x: -30 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
               >
                 <div className="text-sm">
                   <p className="italic text-gray-800 font-special-elite">
@@ -141,7 +126,7 @@ const ConversationBreakdown = () => {
                     </span>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -149,7 +134,7 @@ const ConversationBreakdown = () => {
         {/* Mobile/Tablet Layout */}
         <div className="lg:hidden space-y-6">
           {conversations.map((conv, index) => (
-            <motion.div
+            <div
               key={index}
               className="border-2 border-gray-400 p-6 space-y-4"
               style={{
@@ -159,9 +144,6 @@ const ConversationBreakdown = () => {
                 `,
                 backgroundBlendMode: 'overlay'
               }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
             >
               <div>
                 <h4 className="font-mono text-xs uppercase tracking-wider text-gray-600 mb-2">
@@ -205,12 +187,12 @@ const ConversationBreakdown = () => {
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* File Footer */}
-        <motion.div 
+        <div
           className="text-center mt-8 p-4 border-2 border-gray-400"
           style={{
             background: `
@@ -219,12 +201,9 @@ const ConversationBreakdown = () => {
             `,
             backgroundBlendMode: 'overlay'
           }}
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
         >
           <div className="h-4" />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

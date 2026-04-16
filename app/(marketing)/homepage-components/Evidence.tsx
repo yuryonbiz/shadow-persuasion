@@ -1,53 +1,24 @@
 'use client';
 
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { useEffect } from 'react';
-
-const AnimatedNumber = ({ value, suffix = '', prefix = '', inView }: { value: number; suffix?: string; prefix?: string; inView: boolean }) => {
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, (v) => {
-    if (suffix === '%' || suffix === '/10') return Math.round(v);
-    if (suffix === ' u/hr') return v.toFixed(1);
-    if (suffix === ' days') return v.toFixed(1);
-    if (suffix === '% acc.') return Math.round(v);
-    return Math.round(v);
-  });
-  const display = useTransform(rounded, (v) => `${prefix}${v}${suffix}`);
-
-  useEffect(() => {
-    if (inView) {
-      const controls = animate(count, value, { duration: 1.5, ease: 'easeOut' });
-      return controls.stop;
-    }
-  }, [inView, count, value]);
-
-  return <motion.span>{display}</motion.span>;
-};
-
 type RowData = {
   metric: string;
   before: string;
   after: string;
-  changeValue: number;
-  changePrefix: string;
-  changeSuffix: string;
+  changeDisplay: string;
 };
 
 const rows: RowData[] = [
-  { metric: 'Salary Negotiation Success', before: '1 in 4', after: '3 in 4', changeValue: 200, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Confidence in High-Stakes Conversations', before: '5.6/10', after: '9.2/10', changeValue: 64, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Ability to Detect Manipulation', before: '18%', after: '89%', changeValue: 394, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Time to Craft the Right Response', before: '2+ hours', after: '< 3 min', changeValue: 97, changePrefix: '-', changeSuffix: '%' },
-  { metric: 'Relationship Conflict Resolution', before: '41%', after: '84%', changeValue: 105, changePrefix: '+', changeSuffix: '%' },
-  { metric: 'Deal Close Rate (Business)', before: '28%', after: '67%', changeValue: 139, changePrefix: '+', changeSuffix: '%' },
+  { metric: 'Salary Negotiation Success', before: '1 in 4', after: '3 in 4', changeDisplay: '+200%' },
+  { metric: 'Confidence in High-Stakes Conversations', before: '5.6/10', after: '9.2/10', changeDisplay: '+64%' },
+  { metric: 'Ability to Detect Manipulation', before: '18%', after: '89%', changeDisplay: '+394%' },
+  { metric: 'Time to Craft the Right Response', before: '2+ hours', after: '< 3 min', changeDisplay: '-97%' },
+  { metric: 'Relationship Conflict Resolution', before: '41%', after: '84%', changeDisplay: '+105%' },
+  { metric: 'Deal Close Rate (Business)', before: '28%', after: '67%', changeDisplay: '+139%' },
 ];
 
 const Evidence = () => {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
-
   return (
-    <section ref={ref} className="relative px-6 md:px-12 py-20 bg-[#1A1A1A] text-[#E8E8E0]">
+    <section className="relative px-6 md:px-12 py-20 bg-[#1A1A1A] text-[#E8E8E0]">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-wider text-white">
@@ -66,26 +37,18 @@ const Evidence = () => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => (
-                <motion.tr
+              {rows.map((row) => (
+                <tr
                   key={row.metric}
                   className="border-b border-white/10"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
                 >
                   <td className="p-3">{row.metric}</td>
                   <td className="p-3 text-center">{row.before}</td>
                   <td className="p-3 text-center">{row.after}</td>
                   <td className="p-3 font-bold text-center text-[#D4A017]">
-                    <AnimatedNumber
-                      value={row.changeValue}
-                      prefix={row.changePrefix}
-                      suffix={row.changeSuffix}
-                      inView={inView}
-                    />
+                    {row.changeDisplay}
                   </td>
-                </motion.tr>
+                </tr>
               ))}
             </tbody>
           </table>

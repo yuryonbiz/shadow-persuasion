@@ -1,7 +1,5 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
 import {
   BookOpen,
   Brain,
@@ -64,44 +62,31 @@ const paragraphs = [
 ];
 
 const ExecutiveSummary = () => {
-  const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
-
   return (
-    <section ref={sectionRef}>
+    <section>
       {/* Header bar */}
       <div className="border-b-2 border-t-2 border-[#5C3A1E] py-1 mb-12 text-sm text-center text-[#6B5B3E] tracking-wide">
         <p>CLASSIFICATION: PUBLIC ACCESS | DATE: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}</p>
       </div>
 
       <div className="relative">
-        <motion.h2
-          className="text-4xl font-bold uppercase tracking-wider mb-10 text-center text-[#2A1F0E]"
-          initial={{ opacity: 0, y: 15 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-        >
+        <h2 className="text-4xl font-bold uppercase tracking-wider mb-10 text-center text-[#2A1F0E]">
           Executive Summary
-        </motion.h2>
+        </h2>
 
         {/* Two-column layout */}
         <div className="flex flex-col lg:flex-row gap-10 lg:gap-14">
           {/* Left column — text */}
           <div className="flex-1 space-y-6 text-lg leading-relaxed text-[#3B2E1A]">
             {paragraphs.map((content, i) => (
-              <AnimatedParagraph key={i} index={i}>
+              <p key={i}>
                 {content}
-              </AnimatedParagraph>
+              </p>
             ))}
           </div>
 
           {/* Right column — Intelligence Brief */}
-          <motion.div
-            className="lg:w-[340px] flex-shrink-0"
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
+          <div className="lg:w-[340px] flex-shrink-0">
             <div className="border-2 border-[#A0884A] bg-[#F4ECD8]/50 p-6 sticky top-8">
               <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[#5C3A1E] border-b border-[#A0884A]/50 pb-3 mb-5">
                 Intelligence Brief
@@ -111,15 +96,9 @@ const ExecutiveSummary = () => {
                 {stats.map((stat, i) => {
                   const Icon = stat.icon;
                   return (
-                    <motion.div
+                    <div
                       key={stat.label}
                       className="flex items-start gap-3 p-3 border border-[#A0884A]/30 bg-[#F4ECD8]/40"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={isInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{
-                        duration: 0.45,
-                        delay: 0.5 + i * 0.12,
-                      }}
                     >
                       <div className="mt-0.5 text-[#8B6914]">
                         <Icon size={20} strokeWidth={1.8} />
@@ -132,7 +111,7 @@ const ExecutiveSummary = () => {
                           {stat.label}
                         </p>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
@@ -142,34 +121,11 @@ const ExecutiveSummary = () => {
                 involved.
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
   );
 };
-
-/** Scroll-triggered paragraph reveal */
-function AnimatedParagraph({
-  children,
-  index,
-}: {
-  children: React.ReactNode;
-  index: number;
-}) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
-
-  return (
-    <motion.p
-      ref={ref}
-      initial={{ opacity: 0, y: 18 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.55, delay: index * 0.12 }}
-    >
-      {children}
-    </motion.p>
-  );
-}
 
 export default ExecutiveSummary;

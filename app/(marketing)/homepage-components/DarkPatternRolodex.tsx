@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 
 const patterns = [
   { name: "ANCHORING", description: "Set the reference point in any negotiation to frame what's reasonable.", effectiveness: 8, context: "Negotiation, Sales" },
@@ -40,13 +39,12 @@ const TechniqueCard = ({ pattern, index, total }: { pattern: typeof patterns[num
 );
 
 const DarkPatternRolodex = () => {
-  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   const mid = (patterns.length - 1) / 2;
 
   return (
-    <section className="relative py-16" ref={ref}>
+    <section className="relative py-16">
         <div className="text-left mb-12">
             <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
             APPENDIX E: TECHNIQUE PREVIEW
@@ -61,15 +59,12 @@ const DarkPatternRolodex = () => {
         >
           <style>{`.tech-scroll::-webkit-scrollbar { display: none; }`}</style>
           {patterns.map((pattern, index) => (
-            <motion.div
+            <div
               key={index}
               className="relative min-w-[260px] w-[260px] h-[220px] flex-shrink-0 snap-center"
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
             >
               <TechniqueCard pattern={pattern} index={index} total={patterns.length} />
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -87,15 +82,12 @@ const DarkPatternRolodex = () => {
               <motion.div
                 key={index}
                 className="absolute left-1/2 top-8 w-[260px] h-[250px] cursor-pointer"
-                style={{ zIndex: isHovered ? 50 : zBase }}
-                initial={{ opacity: 0, y: 60, rotate: 0, x: '-50%' }}
-                animate={inView ? {
-                  opacity: 1,
+                style={{
+                  zIndex: isHovered ? 50 : zBase,
                   x: `calc(-50% + ${xSpread}px)`,
                   y: yDip,
                   rotate: rotation,
-                } : {}}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                }}
                 whileHover={{
                   y: -20,
                   scale: 1.08,
@@ -112,16 +104,11 @@ const DarkPatternRolodex = () => {
         </div>
 
         {/* File info */}
-        <motion.div
-            className="text-center mt-8"
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.8 }}
-        >
+        <div className="text-center mt-8">
             <p className="font-mono text-sm text-gray-500 uppercase tracking-wider">
                 [700+ Techniques Available Inside the Full Library]
             </p>
-        </motion.div>
+        </div>
     </section>
   );
 };
