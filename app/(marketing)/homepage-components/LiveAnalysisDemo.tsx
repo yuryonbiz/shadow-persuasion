@@ -190,6 +190,11 @@ const LiveAnalysisDemo = () => {
             </a>
           </div>
         </motion.div>
+        <div className="flex items-center justify-center gap-6 mt-6 text-xs text-gray-600 font-mono">
+          <span>🔒 256-bit encryption</span>
+          <span>🗑️ Delete your data anytime</span>
+          <span>🚫 Never shared or sold</span>
+        </div>
       </div>
     </section>
   );

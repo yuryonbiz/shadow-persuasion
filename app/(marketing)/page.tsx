@@ -20,6 +20,8 @@ import FAQ from './homepage-components/FAQ';
 import AccessRequest from './homepage-components/AccessRequest';
 import Footer from './homepage-components/Footer';
 import SectionDivider from './homepage-components/SectionDivider';
+import MidPageCTA from './homepage-components/MidPageCTA';
+import Guarantee from './homepage-components/Guarantee';
 
 const specialElite = Special_Elite({ subsets: ['latin'], weight: '400' });
 
@@ -42,6 +44,9 @@ export default function HomePage() {
 
       {/* 5. AppPreview */}
       <AppPreview />
+
+      {/* Mid-page CTA after AppPreview */}
+      <MidPageCTA headline="Convinced? Start Training Now." />
 
       {/* 6. SectionDivider */}
       <SectionDivider text="// SEE WHAT THE SYSTEM ACTUALLY DOES //" />
@@ -76,6 +81,9 @@ export default function HomePage() {
         <Statements />
       </div>
 
+      {/* Mid-page CTA after Statements */}
+      <MidPageCTA headline="Ready to Become the Most Strategic Communicator in Any Room?" />
+
       {/* 15-17. ProgressionPath, DarkPatternRolodex */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">
         <ProgressionPath />
@@ -84,6 +92,9 @@ export default function HomePage() {
 
       {/* 18. ClassifiedComparison */}
       <ClassifiedComparison />
+
+      {/* Guarantee */}
+      <Guarantee />
 
       {/* 19. FAQ */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 md:space-y-16 py-10 md:py-14">

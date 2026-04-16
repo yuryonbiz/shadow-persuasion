@@ -43,20 +43,24 @@ const stats = [
 const paragraphs = [
   (
     <>
-      Every day, you walk into conversations where the other person has more leverage than you. Your boss controls your salary. Your clients control the deal. Even in personal relationships, the person who understands psychology better holds the cards.{' '}
-      <Highlight>Shadow Persuasion changes that equation permanently.</Highlight>
+      Every day, you walk into conversations where the other person has more leverage than you. Your boss controls your salary. Your clients control the deal. Even in personal relationships, the person who understands psychology better holds the cards.
     </>
   ),
   (
     <>
-      This is an AI-powered strategic communication system that gives you an unfair advantage in every conversation that matters. Upload a screenshot of a text exchange and get instant analysis of power dynamics, hidden intentions, and manipulation tactics, plus word-for-word scripts to respond. Get real-time coaching for negotiations, difficult conversations, and high-stakes meetings. Practice with AI role-play before the real thing.
+      You replay the conversation in your head and think of what you <Highlight>SHOULD</Highlight> have said. You watch less qualified people get promoted because they know how to play the game. You lose deals to competitors who aren&apos;t better, just better at framing. You let boundaries get crossed because you didn&apos;t know how to push back without blowing things up.{' '}
+      <Highlight>Every one of these moments has a cost, and it compounds.</Highlight>
     </>
   ),
   (
     <>
-      Members report significant salary increases after their first negotiation using the system.{' '}
-      <Highlight>Relationship satisfaction scores improve within 30 days.</Highlight>{' '}
-      The difference isn&apos;t talent. It&apos;s having an AI that decodes what people really mean and tells you exactly what to say back.
+      Shadow Persuasion changes that. Upload a screenshot and know exactly what they&apos;re trying to pull on you, and what to say back. Get word-for-word scripts before your next negotiation. Practice high-stakes conversations with AI before the real thing.{' '}
+      <Highlight>Stop leaving leverage on the table.</Highlight>
+    </>
+  ),
+  (
+    <>
+      Members report <Highlight>$5,000 to $50,000+ salary increases</Highlight> after their first negotiation using the system. Relationship satisfaction scores improve within 30 days. The difference isn&apos;t talent. It&apos;s having an AI that decodes what people really mean and tells you exactly what to say back.
     </>
   ),
 ];

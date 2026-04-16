@@ -59,6 +59,9 @@ const FAQ = () => {
 
         {/* Accordion container styled as dossier */}
         <div className="bg-[#efe5cc] border border-[#D4A017]/30 rounded-lg shadow-sm overflow-hidden">
+          <AccordionItem question="How is this different from just using ChatGPT?">
+            <p>ChatGPT gives generic advice. Shadow Persuasion is built specifically for influence and persuasion with 700+ cataloged techniques, a structured training system with progress tracking, AI that learns your personal communication style, scenario practice with real-time coaching, and people profiles that track your relationships. It&apos;s the difference between asking a friend for advice and working with a specialist.</p>
+          </AccordionItem>
           <AccordionItem question="Is this manipulation?">
             <p>Strategic communication isn&apos;t manipulation. It&apos;s understanding how people actually make decisions and communicating more effectively. Every negotiation course, sales training, and leadership program teaches these same principles. The difference is that Shadow Persuasion gives you an AI coach that applies them to YOUR specific situations in real time. We focus on creating outcomes where both parties benefit.</p>
           </AccordionItem>
@@ -70,6 +73,12 @@ const FAQ = () => {
           </AccordionItem>
           <AccordionItem question="What if I'm a complete beginner?">
             <p>The system meets you where you are. Beginners start with foundational techniques and guided practice scenarios. The AI adapts its coaching to your current skill level and progressively introduces more advanced frameworks as you improve.</p>
+          </AccordionItem>
+          <AccordionItem question="What if I sound scripted or robotic using these techniques?">
+            <p>The Voice Profile feature learns YOUR natural communication style from samples you provide. Every script and suggestion is adapted to sound like you, not a template. The goal is to make you sharper, not different.</p>
+          </AccordionItem>
+          <AccordionItem question="Is my conversation data private and secure?">
+            <p>Yes. All data is encrypted in transit and at rest. We never share, sell, or use your conversations for training. Your uploaded screenshots and chat histories are tied to your account and only accessible by you. You can delete your data at any time.</p>
           </AccordionItem>
           <AccordionItem question="Is $99/month worth it?">
             <p>One successful salary negotiation typically yields $5,000-$50,000+ in additional income. One better business deal can be worth multiples of that. Members consistently report that a single win in their first month more than pays for a full year of membership. And unlike a one-time course, the AI coach is available 24/7 for every new situation you face.</p>

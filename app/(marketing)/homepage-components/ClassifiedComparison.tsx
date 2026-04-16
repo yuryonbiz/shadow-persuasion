@@ -3,13 +3,13 @@
 import styles from './ClassifiedComparison.module.css';
 
 const leftFeatures = [
-    "Google searches and YouTube videos",
-    "Reading psychology books",
-    "Trial and error in real conversations",
-    "No feedback on what went wrong",
-    "No personalized scripts",
-    "No practice environment",
-    "Months or years to improve",
+    "YouTube videos and free advice (generic, no personalization)",
+    "Communication books ($20, no practice environment)",
+    "Online courses ($500-$2,000, no AI feedback)",
+    "Executive coach ($300-500/hour, limited availability)",
+    "ChatGPT (generic AI, no structured training)",
+    "Therapy ($150-300/session, different focus)",
+    "Trial and error (costly mistakes, slow progress)",
 ];
 
 const rightFeatures = [
@@ -42,7 +42,7 @@ const ClassifiedComparison = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-2 border-gray-400 bg-[#F4ECD8] shadow-lg p-6 sm:p-8">
             {/* Trying Alone */}
             <div className="border border-dashed border-gray-400 p-6">
-                <h3 className="text-2xl text-center font-bold">TRYING TO FIGURE IT OUT ALONE</h3>
+                <h3 className="text-2xl text-center font-bold">THE ALTERNATIVES</h3>
                 <p className="text-center font-mono text-lg text-gray-600 mb-6">&nbsp;</p>
                 <ul className="space-y-4">
                     {leftFeatures.map(f => (
