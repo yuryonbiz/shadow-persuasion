@@ -16,52 +16,52 @@ const scenario = {
 const ScenarioSimulator = () => {
   return (
     <section
-      className="relative px-6 md:px-12 py-20 bg-[#EDE3D0] text-[#1A1A1A] flex justify-center"
+      className="relative px-6 md:px-12 py-20 bg-[#1A1A1A] text-[#E8E8E0] flex justify-center"
     >
       <div className="max-w-5xl w-full">
         <div className="text-left mb-12">
-          <h2 className="font-mono text-sm uppercase tracking-widest text-[#D4A017]">
+          <h2 className="font-mono text-sm uppercase tracking-widest text-amber-500/70">
             EXHIBIT C: SCENARIO SIMULATOR
           </h2>
-          <p className="text-3xl md:text-4xl mt-2 text-[#1A1A1A]">
+          <p className="text-3xl md:text-4xl mt-2 text-white">
             Tactical Response Comparison
           </p>
         </div>
 
         <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* WITHOUT card */}
-          <div className="relative border-2 border-red-300 bg-red-50 p-6 sm:p-8 shadow-2xl rounded-lg">
+          <div className="relative border-2 border-red-800/60 bg-[#222] p-6 sm:p-8 shadow-2xl rounded-lg">
             <div className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-red-700 via-red-500 to-red-700 rounded-t-lg" />
-            <h3 className="font-mono text-sm uppercase tracking-widest text-red-600 mb-1">
+            <h3 className="font-mono text-sm uppercase tracking-widest text-red-400 mb-1">
               Without Protocol
             </h3>
-            <p className="text-xs text-red-400 font-mono mb-6">
+            <p className="text-xs text-red-400/50 font-mono mb-6">
               {scenario.without.title}
             </p>
-            <p className="text-lg leading-relaxed text-gray-600 italic">
+            <p className="text-lg leading-relaxed text-gray-400 italic">
               &ldquo;{scenario.without.response}&rdquo;
             </p>
           </div>
 
           {/* VS badge */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex">
-            <div className="w-14 h-14 rounded-full bg-[#EDE3D0] border-2 border-[#D4A017] flex items-center justify-center shadow-lg">
-              <span className="font-mono text-[#D4A017] font-bold text-sm">
+            <div className="w-14 h-14 rounded-full bg-[#1A1A1A] border-2 border-amber-500 flex items-center justify-center shadow-lg">
+              <span className="font-mono text-amber-400 font-bold text-sm">
                 VS
               </span>
             </div>
           </div>
 
           {/* WITH card */}
-          <div className="relative border-2 border-green-600 bg-green-50 p-6 sm:p-8 shadow-2xl rounded-lg">
+          <div className="relative border-2 border-green-600/50 bg-[#222] p-6 sm:p-8 shadow-2xl rounded-lg">
             <div className="absolute -top-px left-0 right-0 h-1 bg-gradient-to-r from-green-700 via-green-500 to-green-700 rounded-t-lg" />
-            <h3 className="font-mono text-sm uppercase tracking-widest text-green-700 mb-1">
+            <h3 className="font-mono text-sm uppercase tracking-widest text-green-400 mb-1">
               With Protocol
             </h3>
-            <p className="text-xs text-green-600 font-mono mb-6">
+            <p className="text-xs text-green-400/50 font-mono mb-6">
               {scenario.with.title}
             </p>
-            <p className="text-lg leading-relaxed text-gray-800">
+            <p className="text-lg leading-relaxed text-gray-200">
               &ldquo;{scenario.with.response}&rdquo;
             </p>
           </div>
