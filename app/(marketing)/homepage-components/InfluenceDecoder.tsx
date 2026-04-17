@@ -17,7 +17,7 @@ const annotations = [
 const InfluenceDecoder = () => {
   return (
     <section className="relative bg-[#EDE3D0] rounded-lg p-8 md:p-12">
-      <div className="text-left mb-12">
+      <div className="text-center mb-12">
         <h2 className="font-mono text-sm uppercase tracking-widest text-gray-500">
           INFLUENCE DECODER
         </h2>
