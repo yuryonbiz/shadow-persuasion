@@ -7,10 +7,9 @@ import HowItWorks from './homepage-components/HowItWorks';
 import { SystemCapabilities } from './homepage-components/SystemCapabilities';
 import AppPreview from './homepage-components/AppPreview';
 import { SystemPreview } from './homepage-components/SystemPreview';
-import LiveAnalysisDemo from './homepage-components/LiveAnalysisDemo';
 import LiveAnalysisDemoTabs from './homepage-components/LiveAnalysisDemoTabs';
-import LiveAnalysisDemoTwoCol from './homepage-components/LiveAnalysisDemoTwoCol';
-import LiveAnalysisDemoSummary from './homepage-components/LiveAnalysisDemoSummary';
+import LiveAnalysisDemoTabsV2 from './homepage-components/LiveAnalysisDemoTabsV2';
+import LiveAnalysisDemoTabsV3 from './homepage-components/LiveAnalysisDemoTabsV3';
 import InfluenceDecoder from './homepage-components/InfluenceDecoder';
 import ConversationBreakdown from './homepage-components/ConversationBreakdown';
 import ScenarioSimulator from './homepage-components/ScenarioSimulator';
@@ -61,20 +60,17 @@ export default function HomePage() {
         <SystemCapabilities />
       </div>
 
-      {/* 8. LiveAnalysisDemo — ORIGINAL (current) */}
-      <LiveAnalysisDemo />
-
-      {/* OPTION A: Tabbed version */}
-      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">Option A: Tabbed Layout</div>
+      {/* Tabbed Analysis Demo — V1: Dark (original) */}
+      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">V1: Dark Theme</div>
       <LiveAnalysisDemoTabs />
 
-      {/* OPTION B: Two-column version */}
-      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">Option B: Two-Column Layout</div>
-      <LiveAnalysisDemoTwoCol />
+      {/* Tabbed Analysis Demo — V2: Beige/Parchment */}
+      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">V2: Beige / Parchment Theme</div>
+      <LiveAnalysisDemoTabsV2 />
 
-      {/* OPTION C: Summary + expandable */}
-      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">Option C: Summary Card + Expandable</div>
-      <LiveAnalysisDemoSummary />
+      {/* Tabbed Analysis Demo — V3: Navy/Slate */}
+      <div className="bg-[#D4A017] text-center py-2 font-mono text-sm font-bold text-black uppercase tracking-wider">V3: Navy / Slate Theme</div>
+      <LiveAnalysisDemoTabsV3 />
 
       {/* 9. SystemPreview */}
       <SystemPreview />
