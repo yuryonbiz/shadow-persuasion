@@ -20,6 +20,7 @@ import FAQ from './homepage-components/FAQ';
 import AccessRequest from './homepage-components/AccessRequest';
 import Footer from './homepage-components/Footer';
 import SectionDivider from './homepage-components/SectionDivider';
+import FieldAssessment from './homepage-components/FieldAssessment';
 import MidPageCTA from './homepage-components/MidPageCTA';
 import Guarantee from './homepage-components/Guarantee';
 import WhyNotChatGPT from './homepage-components/WhyNotChatGPT';
@@ -46,7 +47,10 @@ export default function HomePage() {
       {/* 5. AppPreview */}
       <AppPreview />
 
-      {/* Mid-page CTA after AppPreview */}
+      {/* Field Assessment quiz */}
+      <FieldAssessment />
+
+      {/* Mid-page CTA after assessment */}
       <MidPageCTA headline="Convinced? Start Training Now." />
 
       {/* 6. SectionDivider */}
