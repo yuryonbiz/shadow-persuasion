@@ -1,5 +1,23 @@
 'use client';
 
+import { Briefcase, Crown, DollarSign, Wallet, Heart, Users, Baby, Flame, AlertTriangle, MessageCircle, Megaphone, Shield } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+const categories: { icon: LucideIcon; name: string; uses: string[] }[] = [
+  { icon: Briefcase, name: 'Career & Work', uses: ['Get a raise', 'Land a promotion', 'Win workplace conflict', 'Survive office politics'] },
+  { icon: Crown, name: 'Leadership', uses: ['Get team buy-in', 'Handle underperformers', 'Earn respect as new leader', 'Drive change adoption'] },
+  { icon: DollarSign, name: 'Business & Sales', uses: ['Close hesitant deals', 'Stop client ghosting', 'Charge higher prices', 'Win negotiations'] },
+  { icon: Wallet, name: 'Personal Finance', uses: ['Negotiate big purchases', 'Get refunds when policy says no', 'Exit contracts cleanly', 'Get exceptions made'] },
+  { icon: Heart, name: 'Dating & Attraction', uses: ['Build tension & chemistry', 'Get out of the friend zone', 'Read mixed signals', 'Make them commit'] },
+  { icon: Users, name: 'Relationships', uses: ['Set boundaries', 'Repair trust', 'Handle toxic people', 'Defuse conflicts'] },
+  { icon: Baby, name: 'Parenting', uses: ['Get teens to listen', 'Co-parent with difficult ex', 'Enforce boundaries with respect', 'Have hard conversations'] },
+  { icon: Flame, name: 'Personal Power', uses: ['Stop people-pleasing', 'Build unshakeable confidence', 'Command a room', 'Overcome imposter syndrome'] },
+  { icon: AlertTriangle, name: 'High Stakes', uses: ['Win custody situations', 'Get second chances', 'Convince someone to get help', 'Handle public failure'] },
+  { icon: MessageCircle, name: 'Texting & Online', uses: ['Get more DM replies', 'Recover dead conversations', 'Close over text', 'Improve dating app results'] },
+  { icon: Megaphone, name: 'Influence & Audience', uses: ['Build a trusted audience', 'Write content that converts', 'Make your brand stand out', 'Grow social following'] },
+  { icon: Shield, name: 'Defend & Protect', uses: ['Spot manipulation', 'Detect liars', 'Shut down gaslighting', 'Recognize toxic people early'] },
+];
+
 const capabilities = [
   {
     icon: '[>_]',
@@ -72,33 +90,23 @@ export const SystemCapabilities = () => {
           <h3 className="text-2xl font-bold text-black mb-2 text-center">PRACTICAL APPLICATIONS</h3>
           <p className="text-center text-gray-600 text-sm mb-8 font-mono uppercase tracking-wider">121 use cases across 12 categories</p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              { emoji: '💼', name: 'Career & Work', uses: ['Get a raise', 'Land a promotion', 'Win workplace conflict', 'Survive office politics'] },
-              { emoji: '👔', name: 'Leadership', uses: ['Get team buy-in', 'Handle underperformers', 'Earn respect as new leader', 'Drive change adoption'] },
-              { emoji: '💰', name: 'Business & Sales', uses: ['Close hesitant deals', 'Stop client ghosting', 'Charge higher prices', 'Win negotiations'] },
-              { emoji: '💵', name: 'Personal Finance', uses: ['Negotiate big purchases', 'Get refunds when policy says no', 'Exit contracts cleanly', 'Get exceptions made'] },
-              { emoji: '❤️', name: 'Dating & Attraction', uses: ['Build tension & chemistry', 'Get out of the friend zone', 'Read mixed signals', 'Make them commit'] },
-              { emoji: '👥', name: 'Relationships', uses: ['Set boundaries', 'Repair trust', 'Handle toxic people', 'Defuse conflicts'] },
-              { emoji: '👨‍👩‍👧', name: 'Parenting', uses: ['Get teens to listen', 'Co-parent with difficult ex', 'Enforce boundaries with respect', 'Have hard conversations'] },
-              { emoji: '🧍', name: 'Personal Power', uses: ['Stop people-pleasing', 'Build unshakeable confidence', 'Command a room', 'Overcome imposter syndrome'] },
-              { emoji: '🌋', name: 'High Stakes', uses: ['Win custody situations', 'Get second chances', 'Convince someone to get help', 'Handle public failure'] },
-              { emoji: '💬', name: 'Texting & Online', uses: ['Get more DM replies', 'Recover dead conversations', 'Close over text', 'Improve dating app results'] },
-              { emoji: '📣', name: 'Influence & Audience', uses: ['Build a trusted audience', 'Write content that converts', 'Make your brand stand out', 'Grow social following'] },
-              { emoji: '🛡️', name: 'Defend & Protect', uses: ['Spot manipulation', 'Detect liars', 'Shut down gaslighting', 'Recognize toxic people early'] },
-            ].map((cat) => (
-              <div key={cat.name} className="bg-[#F4ECD8] border border-[#999] p-4 hover:border-black hover:shadow-md transition-all duration-200">
-                <div className="text-2xl mb-2">{cat.emoji}</div>
-                <h4 className="font-bold text-black text-sm mb-2">{cat.name}</h4>
-                <ul className="text-xs text-gray-700 space-y-1">
-                  {cat.uses.map((u) => (
-                    <li key={u} className="flex items-start gap-1">
-                      <span className="text-green-700 mt-0.5 shrink-0">&#x2713;</span>
-                      <span>{u}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <div key={cat.name} className="bg-[#F4ECD8] border border-[#999] p-4 hover:border-black hover:shadow-md transition-all duration-200">
+                  <Icon className="h-6 w-6 text-[#5C3A1E] mb-2" strokeWidth={1.8} />
+                  <h4 className="font-bold text-black text-sm mb-2">{cat.name}</h4>
+                  <ul className="text-xs text-gray-700 space-y-1">
+                    {cat.uses.map((u) => (
+                      <li key={u} className="flex items-start gap-1">
+                        <span className="text-green-700 mt-0.5 shrink-0">&#x2713;</span>
+                        <span>{u}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
     </section>
