@@ -300,6 +300,7 @@ export default function SalaryNegotiationLP() {
               </div>
             )}
           </div>
+        </div>
         </section>
 
       {/* ══ 8. COACHING SESSION (salary-specific) ══ */}
