@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         quantity: 1,
       }],
       return_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      allow_promotion_codes: true,
+      allow_promotion_codes: false,
       subscription_data: { metadata: { plan } },
       metadata: { plan },
     });

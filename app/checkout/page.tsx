@@ -67,9 +67,7 @@ function CheckoutPage() {
       {/* Minimal header — no navigation, distraction-free */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/pricing" className="flex items-center gap-1.5 text-sm text-[#6B5B3E] hover:text-[#D4A017] transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Link>
+          <div />
           <img src="/logo.png" alt="Shadow Persuasion" className="h-8" />
           <div className="flex items-center gap-1 text-xs text-[#6B5B3E]">
             <Lock className="h-3 w-3" /> Secure Checkout
