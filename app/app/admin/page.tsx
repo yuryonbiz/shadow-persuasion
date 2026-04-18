@@ -390,6 +390,16 @@ export default function AdminPage() {
         continue;
       }
 
+      // Check for duplicate (same title AND author)
+      const isDuplicate = dbBooks.some(
+        b => b.title.toLowerCase() === item.title.trim().toLowerCase() &&
+             b.author.toLowerCase() === item.author.trim().toLowerCase()
+      );
+      if (isDuplicate) {
+        updateQueueItem(item.id, { status: 'error', error: `"${item.title.trim()}" by ${item.author.trim()} already exists in the knowledge base. Delete it first if you want to re-upload.` });
+        continue;
+      }
+
       updateQueueItem(item.id, { status: 'processing' });
       try {
         await processOneBook(item.file, item.title.trim(), item.author.trim());

@@ -3,10 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false, autoRefreshToken: false } }
 );
 
 export const maxDuration = 60;
+export const config = { api: { bodyParser: { sizeLimit: '50mb' } } };
 
 function slugify(text: string): string {
   return text
