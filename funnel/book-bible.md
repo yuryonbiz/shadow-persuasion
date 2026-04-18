@@ -1,8 +1,9 @@
 # Shadow Persuasion — Book Bible
 
-**Status:** Draft v1 for review
-**Purpose:** Central reference for writing the 217-page ebook
+**Status:** Draft v2 (length reduced 115 pages)
+**Purpose:** Central reference for writing the 115-page field manual
 **Book title:** *The 47 Counterintuitive Conversation Tactics That Make People Say Yes Without Realizing Why*
+**Positioning:** "Field manual you read in an afternoon and use for a decade" — intentionally short, reference-style, high-density. Target: ~29,000 words across 15 chapters.
 
 ---
 
