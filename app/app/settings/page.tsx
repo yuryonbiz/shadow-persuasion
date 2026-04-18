@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { Save, Loader2, Check, User, Mic, RotateCcw, Upload, Image, X } from 'lucide-react';
+import { useSubscription } from '@/lib/subscription';
+import { Save, Loader2, Check, User, Mic, RotateCcw, Upload, Image, X, CreditCard, ExternalLink } from 'lucide-react';
 
 const TONE_OPTIONS = ['Professional', 'Casual', 'Friendly', 'Direct', 'Diplomatic', 'Assertive', 'Warm'];
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { subscription, loading: subLoading } = useSubscription();
+  const [portalLoading, setPortalLoading] = useState(false);
   const [personality, setPersonality] = useState('');
   const [writingStyle, setWritingStyle] = useState('');
   const [tones, setTones] = useState<string[]>([]);
@@ -124,6 +127,26 @@ export default function SettingsPage() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    if (!subscription?.customerId) return;
+    setPortalLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: subscription.customerId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (e) {
+      console.error('Failed to open billing portal:', e);
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   const handleResetOnboarding = () => {
     if (!confirm('This will show the onboarding flow next time you visit the dashboard. Continue?')) return;
     localStorage.setItem('shadow-force-onboarding', 'true');
@@ -164,6 +187,76 @@ export default function SettingsPage() {
             <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
           </div>
         </div>
+      </div>
+
+      {/* Subscription & Billing */}
+      <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] rounded-lg p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <CreditCard className="h-5 w-5 text-[#D4A017]" />
+          <h2 className="font-mono text-sm text-[#D4A017] uppercase tracking-wider font-bold">Subscription & Billing</h2>
+        </div>
+        {subLoading ? (
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription...
+          </div>
+        ) : subscription?.active ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-[#333]">
+                <p className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase mb-0.5">Plan</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">{subscription.plan || 'Pro'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-[#333]">
+                <p className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase mb-0.5">Status</p>
+                <p className="text-sm font-medium">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono ${
+                    subscription.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                    subscription.status === 'trialing' ? 'bg-blue-500/20 text-blue-400' :
+                    subscription.status === 'past_due' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {subscription.status}
+                  </span>
+                </p>
+              </div>
+            </div>
+            {subscription.currentPeriodEnd && (
+              <div className="p-3 bg-gray-50 dark:bg-[#111] rounded-lg border border-gray-200 dark:border-[#333]">
+                <p className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase mb-0.5">Next Billing Date</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Billing email: {user?.email}
+            </p>
+            <button
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+              className="w-full py-2.5 border border-[#D4A017] text-[#D4A017] font-mono font-bold uppercase tracking-wider rounded-lg hover:bg-[#D4A017] hover:text-[#0A0A0A] disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              {portalLoading ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Opening Portal...</>
+              ) : (
+                <><ExternalLink className="h-4 w-4" /> Manage Subscription</>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No active subscription</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Account: {user?.email}
+            </p>
+            <a
+              href="/pricing"
+              className="block w-full py-2.5 bg-[#D4A017] text-[#0A0A0A] font-mono font-bold uppercase tracking-wider rounded-lg hover:bg-[#E8B830] transition-all text-center text-sm"
+            >
+              Choose a Plan
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Voice Profile */}

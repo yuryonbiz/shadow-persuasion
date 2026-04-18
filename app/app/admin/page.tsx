@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X, Plus, Power, ArrowUp, ArrowDown, Download, Clock, XCircle } from 'lucide-react';
+import { Upload, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X, Plus, Power, ArrowUp, ArrowDown, Download, Clock, XCircle, Users } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/hooks/useAdmin';
 
@@ -489,6 +489,20 @@ export default function AdminPage() {
   const [taxNewUcTitle, setTaxNewUcTitle] = useState('');
   const [taxSaving, setTaxSaving] = useState(false);
 
+  // ===== Users & Subscriptions state =====
+  const [users, setUsers] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  const loadUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/admin/users');
+      const data = await res.json();
+      if (Array.isArray(data)) setUsers(data);
+    } catch {}
+    setUsersLoading(false);
+  };
+
   const getAuthHeaders = async () => {
     const token = await user?.getIdToken();
     return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
@@ -506,6 +520,7 @@ export default function AdminPage() {
   };
 
   useEffect(() => { if (isAdmin) loadTaxonomy(); }, [user, isAdmin]);
+  useEffect(() => { if (isAdmin && !adminLoading) loadUsers(); }, [isAdmin, adminLoading]);
 
   const taxApi = async (method: string, body?: any, params?: string) => {
     setTaxSaving(true);
@@ -582,6 +597,79 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold uppercase font-mono tracking-wider">Knowledge Base — Admin</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">Upload books and manage the AI knowledge base</p>
       </header>
+
+      {/* Users & Subscriptions */}
+      <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-[#D4A017]" />
+            <h2 className="font-mono text-sm text-[#D4A017] uppercase tracking-wider">Users & Subscriptions</h2>
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">({users.length} total)</span>
+          </div>
+          <button onClick={loadUsers} disabled={usersLoading} className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#D4A017] flex items-center gap-1 disabled:opacity-50">
+            {usersLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} Refresh
+          </button>
+        </div>
+
+        {usersLoading && users.length === 0 ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 text-[#D4A017] animate-spin" />
+          </div>
+        ) : users.length === 0 ? (
+          <p className="text-gray-500 text-center py-8 text-sm">No users found.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-[#333]">
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">User ID</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">First Seen</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Last Active</th>
+                  <th className="text-right py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Sessions</th>
+                  <th className="text-right py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Messages</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Subscription</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Period End</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.user_id} className="border-b border-gray-100 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#222] transition-colors">
+                    <td className="py-2 px-2 font-mono text-gray-700 dark:text-gray-300" title={u.user_id}>
+                      {u.user_id.slice(0, 8)}...
+                    </td>
+                    <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
+                      {u.first_seen ? new Date(u.first_seen).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
+                    </td>
+                    <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
+                      {u.last_active ? new Date(u.last_active).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
+                    </td>
+                    <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300 font-mono">{u.total_sessions}</td>
+                    <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300 font-mono">{u.total_messages}</td>
+                    <td className="py-2 px-2 text-gray-700 dark:text-gray-300 capitalize">
+                      {u.subscription_plan || <span className="text-gray-500">Free</span>}
+                    </td>
+                    <td className="py-2 px-2">
+                      <span className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-mono uppercase ${
+                        u.subscription_status === 'active' ? 'bg-green-500/20 text-green-400' :
+                        u.subscription_status === 'trialing' ? 'bg-blue-500/20 text-blue-400' :
+                        u.subscription_status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                        u.subscription_status === 'past_due' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-gray-500/20 text-gray-500'
+                      }`}>
+                        {u.subscription_status || 'none'}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
+                      {u.subscription_period_end ? new Date(u.subscription_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Upload Section */}
       <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333]">
