@@ -6,35 +6,41 @@ It's March 12th, 2019. The elevator hits the 47th floor of a building on Park Av
 
 I'm here to close an $847,000 deal with a woman I've been trying to reach for six months. Her name is Dana Ruiz. She's the CFO of a logistics company I'm not allowed to name in this book. She's fifty-four. She's been in finance since 1989. Three different people have told me she doesn't buy from vendors she doesn't like.
 
-I've read Chris Voss's *Never Split the Difference* twice. Both times marked up. I've drilled labels and calibrated questions with a partner in my company's training room until I could do them in my sleep. I have a one-page strategy doc folded into my blazer. Fourteen specific moves, mapped to the three objection paths my manager and I think are most likely.
+I've read Chris Voss's *Never Split the Difference* twice. Voss is the former FBI hostage negotiator whose book is the Bible of modern sales and negotiation training. If you've ever been on a sales call where the other person sounded slightly too interested in your feelings, they read Voss. I've drilled his techniques with a partner in my company's training room until I could do them in my sleep. I have a one-page strategy doc folded into my blazer. Fourteen specific moves, mapped to the three objection paths my manager and I think are most likely.
 
 I'm ready.
 
 She walks into the conference room seven minutes late, drops her phone on the table face-down, and says, "You have forty minutes."
 
-I open with a mirror. Low-stakes. Warm.
+I open with the move every Voss reader opens with. A mirror. You repeat back the last few words the other person said, in a slightly curious tone. The theory goes: they'll keep talking, feel heard, and the conversation settles on a frame you've anchored.
 
 "Forty minutes."
 
 She glances up. "Forty minutes."
 
-That's the move. Get them to repeat themselves. Anchor the time frame. Build a rhythm.
+That's the move working. In theory.
 
-I label. "It sounds like your day has been intense."
+I try a label next. This is Voss's signature technique. You name the emotion you think the other person is feeling, out loud, in a short flat sentence. If you're right, they feel understood. If you're wrong, they'll correct you, which gives you information. Both are supposed to be wins.
+
+"It sounds like your day has been intense."
 
 She doesn't answer. She opens a bottle of water.
 
-I try a calibrated question. "How are you thinking about the renewal conversation?"
+I try a calibrated question. Another Voss move. Instead of asking something that can be answered with yes or no, you ask an open-ended question starting with *how* or *what* so the person has to think and reveal information.
+
+"How are you thinking about the renewal conversation?"
 
 "I'm here," she says. "Talk."
 
 I notice my palms are damp. That's fine. That's normal.
 
-I start my pitch. Softly. Structured. I hit the reciprocity opener, a compliment I pulled from a public op-ed she wrote in *CFO* magazine two years earlier. "The line in your piece about compound interest on organizational decisions changed how I think about what we do."
+I start my pitch. Softly. Structured. I hit the reciprocity opener, which is an old Cialdini move: compliment the person in a way that makes them feel seen, ideally with something specific you found in their public work, so they feel slightly indebted and more open. I quote from an op-ed she wrote in *CFO* magazine two years earlier. "The line in your piece about compound interest on organizational decisions changed how I think about what we do."
 
 She nods. Once.
 
-I deploy the no-oriented question. "Is it crazy to think we could cut the implementation to six weeks instead of twelve?"
+I deploy the no-oriented question. This one was popularized by a negotiator named Jim Camp and borrowed by Voss. You phrase your request so the other person can say *no* without feeling trapped, which supposedly makes them more willing to engage, because people protect their right to refuse more than their right to agree.
+
+"Is it crazy to think we could cut implementation to six weeks instead of twelve?"
 
 She looks at me for a second longer than she should.
 
@@ -44,7 +50,7 @@ She tilts her head, maybe a quarter of an inch.
 
 I can see I'm losing her.
 
-So I do what every sales book ever written tells you to do when you're losing them. I lean in. I stack. I run the "that's right" gambit, summarizing her position back to her to land an emotional alignment. I mirror the last three words of every sentence she offers.
+So I do what every sales book ever written tells you to do when you're losing them. I lean in. I stack. I run the "that's right" gambit, which is Voss's name for paraphrasing someone's position back to them so accurately that they say *that's right*, which supposedly lands an emotional alignment and shifts their posture. I mirror the last three words of every sentence she offers.
 
 Thirty-two minutes in, Dana holds up one finger.
 
@@ -90,27 +96,29 @@ Every one of those books was telling me the same story I'd just lost a deal exec
 
 The book that finally cracked it open wasn't on that shelf.
 
-I was re-reading *Thinking, Fast and Slow* for the third time. It's long. Not tactical. I wasn't reading it to solve anything. I liked the way Kahneman thought.
+I was re-reading *Thinking, Fast and Slow* by the psychologist Daniel Kahneman for the third time. It's long. Not tactical. I wasn't reading it to solve anything. I liked the way Kahneman thought.
 
 Somewhere in the middle of the book, in a footnote I'd never paid attention to, there's a reference to a 1966 paper by a psychologist named Jack Brehm. The paper is called *A Theory of Psychological Reactance*.
 
 I Google Scholared it at 11 PM on a Tuesday.
 
-The abstract described something I'd experienced my whole adult life without knowing had a name. Brehm had proposed, with data, that when humans perceive an attempt to influence them, their immediate response isn't assessment. It's resistance. Not resistance to the content of the request. Resistance to being influenced, full stop.
+The paper described something I'd experienced my whole adult life without knowing had a name. Brehm's finding, put simply, was this: when humans perceive that someone is trying to influence them, their first reaction isn't *let me consider it*. Their first reaction is *resist*. And it's not resistance to the content of the request. It's resistance to being influenced at all. It's automatic. It fires before conscious thought. Brehm called it *reactance*. Sixty years of follow-up research has been confirming the finding ever since.
 
-I read the paper that night. Then every paper in its citation list. Then the follow-up literature. Miron and Brehm 2006. Dillard and Shen 2005. A meta-analysis pulling together sixty years of results.
+Every time Dana had seen one of my Voss moves land, her brain had flagged it as an influence attempt before she even knew what she was doing. Her detector was firing. The more skillfully I deployed, the harder the detector fired.
 
-And I understood Dana.
+I understood Dana.
 
-The entire mainstream persuasion industry, everything I had ever paid for, studied, or practiced, was a manual for firing the reactance alarm. That was what it was.
+I also understood that the entire mainstream persuasion industry, everything I had ever paid for, studied, or practiced, was a manual for firing the reactance alarm. That was what it was.
 
-Cialdini's principles are visible. Voss's labels are visible. Greene's laws are visible. Carnegie's smiles are visible. A skilled listener sees a labeled emotion land and the first thing they feel isn't validation. They feel *this person is running something on me*.
+Every major persuasion book on the shelf teaches moves that are visible by design. Voss's labels and calibrated questions are visible. Robert Cialdini's six principles from *Influence* (reciprocity, commitment, social proof, authority, liking, scarcity) are visible the moment someone recognizes the pattern. Robert Greene's forty-eight laws of power from his book of the same name are visible. Dale Carnegie's use-their-name-and-smile playbook is visible enough that my seventy-year-old mother catches it when a waiter does it.
+
+A skilled listener sees a labeled emotion land and the first thing they feel isn't validation. They feel *this person is running something on me.*
 
 The best-selling persuasion books on earth were teaching people to fire the very alarm they were trying to bypass.
 
 It seemed too simple to be true. It was also obviously true the moment I saw it.
 
-I'd been deploying a playbook against someone who had the playbook memorized better than I did. It hadn't mattered that I'd executed it well. The execution was the problem.
+I'd been deploying a playbook against a woman who had the playbook memorized better than I did. It hadn't mattered that I'd executed it well. The execution was the problem.
 
 ***
 
@@ -122,13 +130,17 @@ I recorded every sales call I took in my consulting gigs. Then I started recordi
 
 Four hundred and seven hours.
 
-I transcribed the ones where I won. Transcribed the ones where I lost. Tagged every technique I used. Every label, every calibrated question, every story, every silence. Tagged them by timestamp. Built a spreadsheet I still have and still update.
+I transcribed the ones where I got what I came for. Transcribed the ones where I didn't. Tagged every technique I used in each one. Labels, mirrors, calibrated questions, anchors, stories, silences. Built a spreadsheet I still have and still update.
 
-What emerged wasn't what I expected.
+What I found wasn't what I expected.
 
-The wins didn't correlate with the tactics I had added to the conversation. They correlated with tactics I had removed.
+Here's one example from the archive that will give you a feel for it. In November 2020 I was on a call with the CTO of a fintech startup in Austin. We were talking about a $340K engineering consulting deal. Eighteen-minute call. I closed it. When I watched the transcript afterwards, I counted the techniques I had used. Zero labels. Zero mirrors. Zero calibrated questions. No reciprocity opener. No social proof story. Nothing from any book.
 
-The losses didn't correlate with being unprepared. They correlated with being prepared and visible.
+What I had done was this. I'd asked him what was going on with his team. He told me. I said the thing that was actually true: that it sounded hard, and that I'd seen two similar situations go badly in the last year. I asked him what his team actually needed. He told me. I told him what I thought would help and what I thought wouldn't. The deal closed at the end of the call.
+
+Compare that to a transcript from three weeks earlier. Different prospect. Same size deal. Forty-two minutes. I deployed every Voss move I knew. Labels, mirrors, calibrated questions, no-oriented questions, reciprocity opener, a social proof story from Cialdini's playbook. I closed nothing. In the debrief I could see where the prospect's tone had shifted, a specific moment around minute fourteen, right after a label that landed too cleanly. His voice got fifteen percent quieter for the rest of the call. I remember listening to it and recognizing what Dana's face had looked like across the table.
+
+The pattern held across the archive. When I'd tried less, the outcomes were better. When I'd prepared more specifically and deployed more visibly, the outcomes got worse. Not sometimes. Consistently.
 
 In the transcripts of my best performances, I could find almost nothing recognizable from any sales book. I wasn't labeling. I wasn't mirroring. I wasn't anchoring. I was doing something else. Something quieter and harder to name at first.
 
@@ -136,7 +148,7 @@ Forty-seven of those something-elses eventually became this book.
 
 A friend of a friend offered me a VP of Sales job at a Series B company in late 2022. Not what I was looking for. But runway was runway, and the founder told me I could run the team however I wanted.
 
-I spent the first month teaching the team to remove things. Shorter emails. Cut qualifying questions from seven to two. Stop naming emotions unless you were absolutely certain what emotion was there. Stop trying to build rapport and just be useful. Stop closing. Let the conversation arrive at its own ending.
+I spent the first month teaching the team to remove things. Shorter emails. Cut qualifying questions from seven to two. Stop naming emotions unless they were absolutely certain what emotion was there. Stop trying to build rapport and just be useful. Stop closing. Let the conversation arrive at its own ending.
 
 Close rate went from 18% to 41% over eleven months. Revenue 3.4x. I was a VP at forty, which is what I'd been telling myself I wanted to be.
 
