@@ -8,7 +8,16 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    // 1. Fetch all subscriptions
+    // 1. Fetch all registered users
+    const { data: registeredUsers, error: usersError } = await supabase
+      .from('users')
+      .select('firebase_uid, email, display_name, created_at, last_login_at');
+
+    if (usersError) {
+      console.error('[ADMIN_USERS] users query error:', usersError);
+    }
+
+    // 2. Fetch all subscriptions
     const { data: subscriptions, error: subError } = await supabase
       .from('subscriptions')
       .select('user_id, plan, status, current_period_end, stripe_customer_id, updated_at');
@@ -17,7 +26,7 @@ export async function GET() {
       console.error('[ADMIN_USERS] subscriptions query error:', subError);
     }
 
-    // 2. Fetch unique user_ids from chat_sessions with first and last activity, plus session count
+    // 3. Fetch session counts per user
     const { data: sessions, error: sessError } = await supabase
       .from('chat_sessions')
       .select('user_id, created_at, updated_at');
@@ -26,7 +35,7 @@ export async function GET() {
       console.error('[ADMIN_USERS] chat_sessions query error:', sessError);
     }
 
-    // 3. Fetch message counts per session, then we'll map to user
+    // 4. Fetch message counts per session
     const { data: messages, error: msgError } = await supabase
       .from('chat_messages')
       .select('session_id, created_at');
@@ -35,30 +44,18 @@ export async function GET() {
       console.error('[ADMIN_USERS] chat_messages query error:', msgError);
     }
 
-    // Build session -> user_id map and per-session message counts
+    // Build session -> user_id map
     const sessionUserMap: Record<string, string> = {};
-    const userSessions: Record<string, { count: number; firstSeen: string; lastActive: string }> = {};
+    const userSessionCounts: Record<string, number> = {};
+    const userLastActive: Record<string, string> = {};
 
     for (const s of sessions || []) {
       if (!s.user_id) continue;
       sessionUserMap[s.id ?? ''] = s.user_id;
-
-      if (!userSessions[s.user_id]) {
-        userSessions[s.user_id] = {
-          count: 0,
-          firstSeen: s.created_at,
-          lastActive: s.updated_at || s.created_at,
-        };
-      }
-      userSessions[s.user_id].count++;
-
-      // Track earliest and latest
-      if (s.created_at < userSessions[s.user_id].firstSeen) {
-        userSessions[s.user_id].firstSeen = s.created_at;
-      }
+      userSessionCounts[s.user_id] = (userSessionCounts[s.user_id] || 0) + 1;
       const activity = s.updated_at || s.created_at;
-      if (activity > userSessions[s.user_id].lastActive) {
-        userSessions[s.user_id].lastActive = activity;
+      if (!userLastActive[s.user_id] || activity > userLastActive[s.user_id]) {
+        userLastActive[s.user_id] = activity;
       }
     }
 
@@ -87,35 +84,58 @@ export async function GET() {
       };
     }
 
-    // Merge all user IDs from all sources
-    const allUserIds = new Set<string>();
-    for (const uid of Object.keys(userSessions)) allUserIds.add(uid);
-    for (const uid of Object.keys(subMap)) allUserIds.add(uid);
+    // Build user list from registered users (primary source)
+    const seenIds = new Set<string>();
+    const users: any[] = [];
 
-    // Build final user list
-    const users = Array.from(allUserIds).map(userId => {
-      const session = userSessions[userId];
-      const sub = subMap[userId];
-
-      return {
-        user_id: userId,
-        first_seen: session?.firstSeen || null,
-        last_active: session?.lastActive || null,
-        total_sessions: session?.count || 0,
-        total_messages: userMessages[userId] || 0,
+    for (const u of registeredUsers || []) {
+      seenIds.add(u.firebase_uid);
+      const sub = subMap[u.firebase_uid];
+      users.push({
+        user_id: u.firebase_uid,
+        email: u.email,
+        display_name: u.display_name,
+        registered_at: u.created_at,
+        last_login_at: u.last_login_at,
+        last_active: userLastActive[u.firebase_uid] || u.last_login_at,
+        total_sessions: userSessionCounts[u.firebase_uid] || 0,
+        total_messages: userMessages[u.firebase_uid] || 0,
         subscription_status: sub?.status || null,
         subscription_plan: sub?.plan || null,
         subscription_period_end: sub?.current_period_end || null,
         stripe_customer_id: sub?.stripe_customer_id || null,
-      };
-    });
+      });
+    }
 
-    // Sort by first_seen descending (newest first), nulls last
+    // Also include users from sessions/subscriptions not yet in users table
+    for (const uid of [...Object.keys(userSessionCounts), ...Object.keys(subMap)]) {
+      if (seenIds.has(uid)) continue;
+      seenIds.add(uid);
+      const sub = subMap[uid];
+      users.push({
+        user_id: uid,
+        email: null,
+        display_name: null,
+        registered_at: null,
+        last_login_at: null,
+        last_active: userLastActive[uid] || null,
+        total_sessions: userSessionCounts[uid] || 0,
+        total_messages: userMessages[uid] || 0,
+        subscription_status: sub?.status || null,
+        subscription_plan: sub?.plan || null,
+        subscription_period_end: sub?.current_period_end || null,
+        stripe_customer_id: sub?.stripe_customer_id || null,
+      });
+    }
+
+    // Sort by registered_at descending (newest first), nulls last
     users.sort((a, b) => {
-      if (!a.first_seen && !b.first_seen) return 0;
-      if (!a.first_seen) return 1;
-      if (!b.first_seen) return -1;
-      return new Date(b.first_seen).getTime() - new Date(a.first_seen).getTime();
+      const aDate = a.registered_at || a.last_active;
+      const bDate = b.registered_at || b.last_active;
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
 
     return NextResponse.json(users);

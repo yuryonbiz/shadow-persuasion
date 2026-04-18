@@ -21,9 +21,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false);
+
+      // Register/update user in database on login
+      if (user) {
+        try {
+          const token = await user.getIdToken();
+          fetch('/api/user/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ email: user.email, displayName: user.displayName }),
+          }).catch(() => {});
+        } catch {}
+      }
     });
 
     return unsubscribe;

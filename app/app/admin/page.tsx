@@ -622,8 +622,8 @@ export default function AdminPage() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-[#333]">
-                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">User ID</th>
-                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">First Seen</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">User</th>
+                  <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Registered</th>
                   <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Last Active</th>
                   <th className="text-right py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Sessions</th>
                   <th className="text-right py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Messages</th>
@@ -636,11 +636,12 @@ export default function AdminPage() {
               <tbody>
                 {users.map(u => (
                   <tr key={u.user_id} className="border-b border-gray-100 dark:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-[#222] transition-colors">
-                    <td className="py-2 px-2 font-mono text-gray-700 dark:text-gray-300" title={u.user_id}>
-                      {u.user_id.slice(0, 8)}...
+                    <td className="py-2 px-2" title={u.user_id}>
+                      <div className="text-gray-700 dark:text-gray-300 text-xs">{u.email || u.user_id.slice(0, 12) + '...'}</div>
+                      {u.display_name && <div className="text-gray-500 text-[10px]">{u.display_name}</div>}
                     </td>
                     <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
-                      {u.first_seen ? new Date(u.first_seen).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
+                      {u.registered_at ? new Date(u.registered_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
                     </td>
                     <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
                       {u.last_active ? new Date(u.last_active).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
