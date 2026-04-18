@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, BookOpen, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X, Plus, Power, ArrowUp, ArrowDown } from 'lucide-react';
+import { Upload, Trash2, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Eye, ChevronLeft, ChevronRight, Pencil, Check, X, Plus, Power, ArrowUp, ArrowDown, Download, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { useAdmin } from '@/lib/hooks/useAdmin';
 
@@ -19,10 +19,21 @@ type UploadBook = {
   skipped: { index: number; reason: string; text: string }[];
 };
 
+type QueueItemStatus = 'pending' | 'processing' | 'done' | 'error';
+type QueueItem = {
+  id: string;
+  file: File;
+  title: string;
+  author: string;
+  status: QueueItemStatus;
+  error?: string;
+};
+
 type DBBook = {
   title: string;
   author: string;
   chunks: number;
+  storage_path?: string;
 };
 
 type Chunk = {
@@ -83,13 +94,13 @@ export default function AdminPage() {
 
   const [uploads, setUploads] = useState<UploadBook[]>([]);
   const [dbBooks, setDbBooks] = useState<DBBook[]>([]);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
   const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [expandedSkipped, setExpandedSkipped] = useState<string | null>(null);
+
+  // Multi-file upload queue
+  const [uploadQueue, setUploadQueue] = useState<QueueItem[]>([]);
   
   // Edit book state
   const [editingBook, setEditingBook] = useState<string | null>(null);
@@ -175,6 +186,21 @@ export default function AdminPage() {
     setLoadingChunks(false);
   };
 
+  const addFilesToQueue = useCallback((files: FileList | File[]) => {
+    const newItems: QueueItem[] = Array.from(files)
+      .filter(f => /\.(pdf|txt|md)$/i.test(f.name))
+      .map(f => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        file: f,
+        title: f.name.replace(/\.(pdf|txt|md)$/i, '').replace(/[-_]/g, ' '),
+        author: '',
+        status: 'pending' as QueueItemStatus,
+      }));
+    if (newItems.length > 0) {
+      setUploadQueue(prev => [...prev, ...newItems]);
+    }
+  }, []);
+
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -186,19 +212,24 @@ export default function AdminPage() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      if (!title) setTitle(file.name.replace(/\.(pdf|txt|md)$/i, '').replace(/[-_]/g, ' '));
+    if (e.dataTransfer.files?.length) {
+      addFilesToQueue(e.dataTransfer.files);
     }
-  }, [title]);
+  }, [addFilesToQueue]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      if (!title) setTitle(file.name.replace(/\.(pdf|txt|md)$/i, '').replace(/[-_]/g, ' '));
+    if (e.target.files?.length) {
+      addFilesToQueue(e.target.files);
+      e.target.value = ''; // reset so same files can be re-selected
     }
+  };
+
+  const updateQueueItem = (id: string, updates: Partial<QueueItem>) => {
+    setUploadQueue(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+  };
+
+  const removeFromQueue = (id: string) => {
+    setUploadQueue(prev => prev.filter(item => item.id !== id));
   };
 
   // Retry skipped chunks
@@ -242,41 +273,58 @@ export default function AdminPage() {
     loadBooks();
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile || !title || !author) return;
-    setIsProcessing(true);
+  const processOneBook = async (file: File, bookTitle: string, bookAuthor: string): Promise<void> => {
     const bookId = Date.now().toString();
     const skipped: UploadBook['skipped'] = [];
 
     setUploads(prev => [{
-      id: bookId, title, author, fileName: selectedFile.name,
+      id: bookId, title: bookTitle, author: bookAuthor, fileName: file.name,
       chunks: 0, totalChunks: 0, status: 'extracting', skipped: [],
     }, ...prev]);
 
     try {
+      // 1. Upload original file to Supabase Storage
+      setStatusText('Uploading file to storage...');
+      let storagePath: string | null = null;
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', bookTitle);
+        formData.append('author', bookAuthor);
+        const storageRes = await fetch('/api/admin/upload-file', { method: 'POST', body: formData });
+        const storageData = await storageRes.json();
+        if (storageData.stored && storageData.storagePath) {
+          storagePath = storageData.storagePath;
+        }
+      } catch {
+        // Storage upload is best-effort; don't block ingestion
+      }
+
+      // 2. Extract text
       setStatusText('Reading file...');
       let text = '';
       let pageCount = 0;
 
-      if (selectedFile.name.toLowerCase().endsWith('.pdf')) {
-        const result = await extractPdfText(selectedFile);
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        const result = await extractPdfText(file);
         text = result.text;
         pageCount = result.pages;
         setStatusText(`Extracted ${pageCount} pages. Preparing chunks...`);
       } else {
-        text = await selectedFile.text();
+        text = await file.text();
         setStatusText(`Read file. Preparing chunks...`);
       }
 
       if (text.length < 100) throw new Error('Could not extract enough text.');
 
+      // 3. Chunk and ingest
       const allChunks = chunkText(text);
       const totalChunks = allChunks.length;
 
       setUploads(prev => prev.map(b =>
         b.id === bookId ? { ...b, status: 'processing', totalChunks } : b
       ));
-      setStatusText(`${pageCount ? pageCount + ' pages → ' : ''}${totalChunks} chunks. Processing...`);
+      setStatusText(`${pageCount ? pageCount + ' pages -> ' : ''}${totalChunks} chunks. Processing...`);
 
       const BATCH_SIZE = 3;
       let processed = 0;
@@ -287,14 +335,13 @@ export default function AdminPage() {
           const res = await fetch('/api/admin/ingest', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chunks: batch, title, author }),
+            body: JSON.stringify({ chunks: batch, title: bookTitle, author: bookAuthor, storagePath }),
           });
           const responseText = await res.text();
           try {
             const data = JSON.parse(responseText);
             if (res.ok && data.processed) {
               processed += data.processed;
-              // Track partially failed chunks in batch
               const failed = batch.length - data.processed;
               if (failed > 0) {
                 for (let j = data.processed; j < batch.length; j++) {
@@ -328,12 +375,32 @@ export default function AdminPage() {
         b.id === bookId ? { ...b, status: 'error', error: err.message, skipped: [...skipped] } : b
       ));
       setStatusText('');
+      throw err; // rethrow so queue handler marks it as error
+    }
+  };
+
+  const handleProcessQueue = async () => {
+    const pending = uploadQueue.filter(q => q.status === 'pending');
+    if (pending.length === 0) return;
+    setIsProcessing(true);
+
+    for (const item of pending) {
+      if (!item.title.trim() || !item.author.trim()) {
+        updateQueueItem(item.id, { status: 'error', error: 'Title and author are required' });
+        continue;
+      }
+
+      updateQueueItem(item.id, { status: 'processing' });
+      try {
+        await processOneBook(item.file, item.title.trim(), item.author.trim());
+        updateQueueItem(item.id, { status: 'done' });
+      } catch (err: any) {
+        updateQueueItem(item.id, { status: 'error', error: err.message || 'Processing failed' });
+      }
     }
 
     setIsProcessing(false);
-    setSelectedFile(null);
-    setTitle('');
-    setAuthor('');
+    setStatusText('');
   };
 
   const handleDelete = async (bookTitle: string) => {
@@ -350,6 +417,19 @@ export default function AdminPage() {
         setChunks([]);
       }
     } catch {}
+  };
+
+  const handleDownload = async (book: DBBook) => {
+    if (!book.storage_path) return;
+    try {
+      const res = await fetch(`/api/admin/upload-file?path=${encodeURIComponent(book.storage_path)}`);
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
   };
 
   const categoryColors: Record<string, string> = {
@@ -483,39 +563,78 @@ export default function AdminPage() {
 
       {/* Upload Section */}
       <div className="p-6 bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-200 dark:border-[#333]">
-        <h2 className="font-mono text-sm text-[#D4A017] uppercase tracking-wider mb-4">Upload a Book</h2>
+        <h2 className="font-mono text-sm text-[#D4A017] uppercase tracking-wider mb-4">Upload Books</h2>
         <div onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-            ${dragActive ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-gray-300 dark:border-[#444] hover:border-[#666]'}
-            ${selectedFile ? 'border-green-500/50 bg-green-500/5' : ''}`}
+            ${dragActive ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-gray-300 dark:border-[#444] hover:border-[#666]'}`}
           onClick={() => document.getElementById('file-input')?.click()}>
-          <input id="file-input" type="file" accept=".pdf,.txt,.md" onChange={handleFileSelect} className="hidden" />
-          {selectedFile ? (
-            <div className="flex items-center justify-center gap-3">
-              <BookOpen className="h-6 w-6 text-green-400" />
-              <span className="text-green-400 font-mono">{selectedFile.name}</span>
-              <span className="text-gray-500 text-sm">({(selectedFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+          <input id="file-input" type="file" accept=".pdf,.txt,.md" multiple onChange={handleFileSelect} className="hidden" />
+          <Upload className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+          <p className="text-gray-500 dark:text-gray-400">Drop PDF, TXT, or MD files here</p>
+          <p className="text-gray-600 text-sm mt-1">or click to browse (multiple files supported)</p>
+        </div>
+
+        {/* Upload Queue */}
+        {uploadQueue.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase">Queue ({uploadQueue.filter(q => q.status === 'pending').length} pending)</span>
+              {uploadQueue.some(q => q.status === 'done') && !isProcessing && (
+                <button onClick={() => setUploadQueue(prev => prev.filter(q => q.status !== 'done'))}
+                  className="text-xs text-gray-500 hover:text-gray-300">Clear completed</button>
+              )}
             </div>
-          ) : (
-            <><Upload className="h-8 w-8 text-gray-500 mx-auto mb-2" /><p className="text-gray-500 dark:text-gray-400">Drop a PDF, TXT, or MD file here</p><p className="text-gray-600 text-sm mt-1">or click to browse</p></>
-          )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="block text-xs font-mono text-gray-500 dark:text-gray-400 uppercase mb-1">Book Title</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Influence"
-              className="w-full p-2.5 bg-gray-50 dark:bg-[#222] text-gray-800 dark:text-[#E8E8E0] border border-gray-300 dark:border-[#444] rounded-lg focus:ring-2 focus:ring-[#D4A017] focus:outline-none placeholder-gray-600" />
+            {uploadQueue.map(item => (
+              <div key={item.id} className={`p-3 rounded-lg border ${
+                item.status === 'processing' ? 'bg-[#D4A017]/5 border-[#D4A017]/30' :
+                item.status === 'done' ? 'bg-green-500/5 border-green-500/30' :
+                item.status === 'error' ? 'bg-red-500/5 border-red-500/30' :
+                'bg-gray-50 dark:bg-[#222] border-gray-200 dark:border-[#333]'
+              }`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {item.status === 'pending' && <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                  {item.status === 'processing' && <Loader2 className="h-4 w-4 text-[#D4A017] animate-spin flex-shrink-0" />}
+                  {item.status === 'done' && <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />}
+                  {item.status === 'error' && <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />}
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate flex-1">{item.file.name} ({(item.file.size / 1024 / 1024).toFixed(1)} MB)</span>
+                  <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded ${
+                    item.status === 'pending' ? 'bg-gray-500/20 text-gray-400' :
+                    item.status === 'processing' ? 'bg-[#D4A017]/20 text-[#D4A017]' :
+                    item.status === 'done' ? 'bg-green-500/20 text-green-400' :
+                    'bg-red-500/20 text-red-400'
+                  }`}>{item.status}</span>
+                  {item.status === 'pending' && (
+                    <button onClick={() => removeFromQueue(item.id)}
+                      className="p-1 text-gray-500 hover:text-red-400 transition-colors flex-shrink-0" title="Remove">
+                      <XCircle className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {(item.status === 'pending' || item.status === 'error') && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <input type="text" value={item.title} onChange={e => updateQueueItem(item.id, { title: e.target.value })}
+                      placeholder="Book title" disabled={isProcessing}
+                      className="w-full p-2 bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-[#E8E8E0] border border-gray-300 dark:border-[#444] rounded text-sm focus:ring-1 focus:ring-[#D4A017] focus:outline-none placeholder-gray-600 disabled:opacity-50" />
+                    <input type="text" value={item.author} onChange={e => updateQueueItem(item.id, { author: e.target.value })}
+                      placeholder="Author" disabled={isProcessing}
+                      className="w-full p-2 bg-white dark:bg-[#1A1A1A] text-gray-800 dark:text-[#E8E8E0] border border-gray-300 dark:border-[#444] rounded text-sm focus:ring-1 focus:ring-[#D4A017] focus:outline-none placeholder-gray-600 disabled:opacity-50" />
+                  </div>
+                )}
+                {item.status === 'error' && item.error && (
+                  <p className="text-red-400 text-xs mt-1">{item.error}</p>
+                )}
+              </div>
+            ))}
           </div>
-          <div>
-            <label className="block text-xs font-mono text-gray-500 dark:text-gray-400 uppercase mb-1">Author</label>
-            <input type="text" value={author} onChange={e => setAuthor(e.target.value)} placeholder="e.g. Robert Cialdini"
-              className="w-full p-2.5 bg-gray-50 dark:bg-[#222] text-gray-800 dark:text-[#E8E8E0] border border-gray-300 dark:border-[#444] rounded-lg focus:ring-2 focus:ring-[#D4A017] focus:outline-none placeholder-gray-600" />
-          </div>
-        </div>
-        <button onClick={handleUpload} disabled={!selectedFile || !title || !author || isProcessing}
-          className="mt-4 w-full py-3 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B030] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
-          {isProcessing ? <><Loader2 className="h-5 w-5 animate-spin" /> Processing...</> : <><Upload className="h-5 w-5" /> Ingest Book</>}
-        </button>
+        )}
+
+        {/* Process Queue button */}
+        {uploadQueue.some(q => q.status === 'pending') && (
+          <button onClick={handleProcessQueue} disabled={isProcessing || !uploadQueue.some(q => q.status === 'pending' && q.title.trim() && q.author.trim())}
+            className="mt-4 w-full py-3 bg-[#D4A017] text-[#0A0A0A] font-bold rounded-lg uppercase tracking-wider hover:bg-[#E8B030] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+            {isProcessing ? <><Loader2 className="h-5 w-5 animate-spin" /> Processing...</> : <><Upload className="h-5 w-5" /> Process Queue ({uploadQueue.filter(q => q.status === 'pending').length} books)</>}
+          </button>
+        )}
         {statusText && <p className="text-[#D4A017] text-sm text-center mt-2 font-mono">{statusText}</p>}
       </div>
 
@@ -645,6 +764,12 @@ export default function AdminPage() {
                       <p className="text-gray-500 text-sm">{book.author} · {book.chunks} chunks</p>
                     </div>
                     <div className="flex items-center gap-1">
+                      {book.storage_path && (
+                        <button onClick={() => handleDownload(book)}
+                          className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors" title="Download original file">
+                          <Download className="h-4 w-4" />
+                        </button>
+                      )}
                       <button onClick={() => startEdit(book)}
                         className="p-2 text-gray-500 dark:text-gray-400 hover:text-[#D4A017] transition-colors" title="Edit book">
                         <Pencil className="h-4 w-4" />

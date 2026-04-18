@@ -42,18 +42,22 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from('knowledge_chunks')
-      .select('book_title, author');
+      .select('book_title, author, storage_path');
 
     if (error) throw error;
 
     // Group by book
-    const bookMap: Record<string, { title: string; author: string; chunks: number }> = {};
+    const bookMap: Record<string, { title: string; author: string; chunks: number; storage_path?: string }> = {};
     for (const row of data || []) {
       const key = row.book_title;
       if (!bookMap[key]) {
         bookMap[key] = { title: row.book_title, author: row.author, chunks: 0 };
       }
       bookMap[key].chunks++;
+      // Pick up storage_path from any row that has it
+      if (row.storage_path && !bookMap[key].storage_path) {
+        bookMap[key].storage_path = row.storage_path;
+      }
     }
 
     return NextResponse.json(Object.values(bookMap));

@@ -111,7 +111,7 @@ function defaultMetadata() {
 // POST: Process a BATCH of chunks (client sends 3 at a time)
 export async function POST(req: NextRequest) {
   try {
-    const { chunks, title, author } = await req.json();
+    const { chunks, title, author, storagePath } = await req.json();
 
     if (!chunks || !Array.isArray(chunks) || !title || !author) {
       return NextResponse.json({ error: 'chunks array, title, and author required' }, { status: 400 });
@@ -141,6 +141,7 @@ export async function POST(req: NextRequest) {
           content: chunk,
           token_count: chunk.split(/\s+/).length,
           embedding: embedding,
+          ...(storagePath ? { storage_path: storagePath } : {}),
         });
 
         if (!error) successCount++;
