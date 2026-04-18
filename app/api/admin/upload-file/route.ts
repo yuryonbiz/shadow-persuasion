@@ -8,7 +8,6 @@ const supabase = createClient(
 );
 
 export const maxDuration = 60;
-export const config = { api: { bodyParser: { sizeLimit: '50mb' } } };
 
 function slugify(text: string): string {
   return text
