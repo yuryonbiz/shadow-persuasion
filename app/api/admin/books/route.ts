@@ -40,11 +40,25 @@ export async function PUT(req: NextRequest) {
 // GET: List all books with chunk counts
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    // Try with storage_path first, fall back without it if column doesn't exist
+    let data: any[] | null = null;
+    let hasStoragePath = true;
+
+    const res1 = await supabase
       .from('knowledge_chunks')
       .select('book_title, author, storage_path');
 
-    if (error) throw error;
+    if (res1.error) {
+      // Column likely doesn't exist, retry without it
+      hasStoragePath = false;
+      const res2 = await supabase
+        .from('knowledge_chunks')
+        .select('book_title, author');
+      if (res2.error) throw res2.error;
+      data = res2.data;
+    } else {
+      data = res1.data;
+    }
 
     // Group by book
     const bookMap: Record<string, { title: string; author: string; chunks: number; storage_path?: string }> = {};
@@ -54,8 +68,7 @@ export async function GET() {
         bookMap[key] = { title: row.book_title, author: row.author, chunks: 0 };
       }
       bookMap[key].chunks++;
-      // Pick up storage_path from any row that has it
-      if (row.storage_path && !bookMap[key].storage_path) {
+      if (hasStoragePath && row.storage_path && !bookMap[key].storage_path) {
         bookMap[key].storage_path = row.storage_path;
       }
     }
