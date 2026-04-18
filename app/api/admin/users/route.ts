@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -119,6 +119,68 @@ export async function GET() {
     });
 
     return NextResponse.json(users);
+  } catch (error: any) {
+    console.error('[ADMIN_USERS]', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// POST: Admin actions on a user's subscription
+export async function POST(req: NextRequest) {
+  try {
+    const { action, userId, plan, status } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json({ error: 'userId required' }, { status: 400 });
+    }
+
+    if (action === 'grant') {
+      // Grant or change a subscription manually (no Stripe involved)
+      const { error } = await supabase
+        .from('subscriptions')
+        .upsert({
+          user_id: userId,
+          plan: plan || 'monthly',
+          status: 'active',
+          current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, action: 'granted', plan: plan || 'monthly' });
+    }
+
+    if (action === 'change_plan') {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ plan, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, action: 'plan_changed', plan });
+    }
+
+    if (action === 'revoke') {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, action: 'revoked' });
+    }
+
+    if (action === 'activate') {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ status: 'active', updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, action: 'activated' });
+    }
+
+    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error: any) {
     console.error('[ADMIN_USERS]', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

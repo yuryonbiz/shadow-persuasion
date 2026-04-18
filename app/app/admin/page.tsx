@@ -630,6 +630,7 @@ export default function AdminPage() {
                   <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Subscription</th>
                   <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Status</th>
                   <th className="text-left py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Period End</th>
+                  <th className="text-right py-2 px-2 font-mono text-gray-500 dark:text-gray-400 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -662,6 +663,65 @@ export default function AdminPage() {
                     </td>
                     <td className="py-2 px-2 text-gray-600 dark:text-gray-400">
                       {u.subscription_period_end ? new Date(u.subscription_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : '-'}
+                    </td>
+                    <td className="py-2 px-2 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {u.subscription_status !== 'active' ? (
+                          <select
+                            className="text-[10px] bg-gray-100 dark:bg-[#333] border border-gray-300 dark:border-[#444] rounded px-1 py-0.5 text-gray-700 dark:text-gray-300"
+                            defaultValue=""
+                            onChange={async (e) => {
+                              const plan = e.target.value;
+                              if (!plan) return;
+                              if (!confirm(`Grant ${plan} access to ${u.user_id.slice(0, 8)}...?`)) { e.target.value = ''; return; }
+                              try {
+                                await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'grant', userId: u.user_id, plan }) });
+                                loadUsers();
+                              } catch {}
+                              e.target.value = '';
+                            }}
+                          >
+                            <option value="">Grant...</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                          </select>
+                        ) : (
+                          <>
+                            <select
+                              className="text-[10px] bg-gray-100 dark:bg-[#333] border border-gray-300 dark:border-[#444] rounded px-1 py-0.5 text-gray-700 dark:text-gray-300"
+                              defaultValue=""
+                              onChange={async (e) => {
+                                const plan = e.target.value;
+                                if (!plan) return;
+                                if (!confirm(`Change ${u.user_id.slice(0, 8)}... to ${plan}?`)) { e.target.value = ''; return; }
+                                try {
+                                  await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'change_plan', userId: u.user_id, plan }) });
+                                  loadUsers();
+                                } catch {}
+                                e.target.value = '';
+                              }}
+                            >
+                              <option value="">Plan...</option>
+                              <option value="weekly">Weekly</option>
+                              <option value="monthly">Monthly</option>
+                              <option value="yearly">Yearly</option>
+                            </select>
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`Revoke access for ${u.user_id.slice(0, 8)}...?`)) return;
+                                try {
+                                  await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'revoke', userId: u.user_id }) });
+                                  loadUsers();
+                                } catch {}
+                              }}
+                              className="text-[10px] text-red-400 hover:text-red-300 px-1.5 py-0.5 border border-red-500/30 rounded"
+                            >
+                              Revoke
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
