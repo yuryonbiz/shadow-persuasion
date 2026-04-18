@@ -6,7 +6,7 @@ The first thirty seconds of any conversation decide whether the rest of it is a 
 
 This chapter covers the four tactics I use at the start of every conversation that matters. You will not use all four in the same meeting. You will choose the one that fits the moment. Each one does the same work: it gives the other person's detector nothing to fire on.
 
-### Tactic #1 — The Cold Open
+### Tactic #1: The Cold Open
 
 Almost every high-stakes conversation starts with the same handful of scripted lines. *Thanks for making time. How's your week going. Before we dive in...* These phrases are so common that any listener over twenty-five has heard them a thousand times. They do not register as warm. They register as *this person is running an opener.* The detector tightens before you have said anything of substance.
 
@@ -24,7 +24,7 @@ How to deploy. Research the other person before the conversation. Find something
 
 The most common failure is making the observation feel like flattery. *I love your work* is flattery. *I noticed you haven't posted on LinkedIn since July* is observation. Flattery is a move. Observation is not.
 
-### Tactic #2 — The Pre-Frame
+### Tactic #2: The Pre-Frame
 
 Everything that happens in a conversation is filtered through the expectation the listener walked in with. If they expected a negotiation, every sentence you say sounds like a negotiation. If they expected a diagnostic conversation, the exact same sentences sound like diagnostics. You do not control what you say until you control what they expected to hear.
 
@@ -40,7 +40,7 @@ When the call arrived, the prospect was no longer talking to an SDR. They were t
 
 How to deploy. Before any conversation that matters, send one small signal that shapes what the other person expects. It should be twenty words or less, specific to them, and inform rather than sell. A 200-word pre-frame feels like a pitch. A fifteen-word observation feels like intelligence.
 
-### Tactic #3 — The 3-Second Read
+### Tactic #3: The 3-Second Read
 
 Most people walk into high-stakes conversations with a pre-planned opener and deliver it regardless of what they walk into. That is how warm prospects turn cold in under ten seconds. You prepared for a conversation you imagined. The actual conversation is different. You deliver your line anyway. The detector catches it as scripted.
 
@@ -58,7 +58,7 @@ How to deploy. In the last three seconds before you speak, look at the other per
 
 The failure mode is delivering the opener you rehearsed regardless of what you see. Most social anxiety, in my experience, comes from the friction between what the prepared line assumed and what the actual room contains.
 
-### Tactic #4 — The Assumption Audit
+### Tactic #4: The Assumption Audit
 
 Every conversation has assumptions baked in that neither party names out loud. The other person is operating under a set of unspoken rules about what this conversation is and what you are there to do. When you name one of those assumptions carefully, in genuine curiosity rather than accusation, the conversation shifts. The unspoken rule that was constraining the exchange is now on the table.
 
