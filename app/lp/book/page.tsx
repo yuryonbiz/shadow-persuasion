@@ -325,7 +325,7 @@ export default function BookFunnelPage() {
 
       <section className="px-6 py-12 md:py-16 max-w-5xl mx-auto text-center">
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-6">
-          Here&apos;s How I Went From <HL>Losing Almost Every Important Conversation</HL> In My Life…
+          Here&apos;s How I Went From <HL>Losing Almost Every Important Conversation</HL>{' '}In My Life…
           <br className="hidden md:block" />
           To Closing Almost Every One I Walk Into
         </h2>
@@ -384,7 +384,7 @@ export default function BookFunnelPage() {
       <section className="px-6 py-12 md:py-16 bg-[#EBE0C7]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-8 text-center">
-            And I Did It By Using A <HL>Completely Counterintuitive Model</HL> That I&apos;m About To Share With You On This Very Page
+            And I Did It By Using A <HL>Completely Counterintuitive Model</HL>{' '}That I&apos;m About To Share With You On This Very Page
           </h2>
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A] max-w-3xl mx-auto">
             <p>
@@ -432,9 +432,6 @@ export default function BookFunnelPage() {
             hidden="Couples therapy taught us frameworks. The book taught me what NOT to say. Removing those phrases ended the fight permanently."
           />
         </div>
-        <p className="text-center mt-10 text-sm text-[#5C3A1E] font-mono uppercase tracking-wider">
-          [Replace with real screenshots from your community / Facebook group]
-        </p>
       </section>
 
       {/* ═════════ 7. WE DON'T FOCUS ON ═════════ */}
@@ -514,7 +511,7 @@ export default function BookFunnelPage() {
 
       <section className="px-6 py-12 md:py-16 max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-8 text-center">
-          The <span className="text-[#D4A017]">Persuasion Detector</span> Is The Most Underrated Concept In The Entire Field Of Influence. And It&apos;s The Reason Every Other Book Has Been Failing You.
+          The <span className="text-[#D4A017]">Persuasion Detector</span>{' '}Is The Most Underrated Concept In The Entire Field Of Influence. And It&apos;s The Reason Every Other Book Has Been Failing You.
         </h2>
         <p className="text-base md:text-lg text-center text-[#3B2E1A] mb-10">Just think about it:</p>
 
@@ -570,7 +567,7 @@ export default function BookFunnelPage() {
         <div className="text-center mb-12">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#5C3A1E] mb-3">// THE SYSTEM //</p>
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight">
-            Here&apos;s The Exact <span className="text-[#D4A017]">4-Part System</span> Revealed In The Book
+            Here&apos;s The Exact <span className="text-[#D4A017]">4-Part System</span>{' '}Revealed In The Book
           </h2>
           <p className="text-base md:text-lg text-[#3B2E1A] mt-4 max-w-2xl mx-auto">
             For winning almost any high-stakes conversation without the other person ever knowing you tried.
@@ -695,7 +692,7 @@ export default function BookFunnelPage() {
           <div className="text-center mb-12">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#5C3A1E] mb-3">// FREE BONUSES //</p>
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight">
-              Plus You&apos;re Also Getting <span className="text-[#D4A017]">4 Free Bonuses</span> Worth $218
+              Plus You&apos;re Also Getting <span className="text-[#D4A017]">4 Free Bonuses</span>{' '}Worth $218
             </h2>
             <p className="text-base md:text-lg text-[#3B2E1A] mt-4">
               All included free with your $7 download. No upsells. No catch.
@@ -787,7 +784,7 @@ export default function BookFunnelPage() {
           <div className="text-center mb-8">
             <Shield className="h-16 w-16 text-[#D4A017] mx-auto mb-4" />
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight">
-              The <span className="text-[#D4A017]">Best Money-Back Guarantee</span> In The World
+              The <span className="text-[#D4A017]">Best Money-Back Guarantee</span>{' '}In The World
             </h2>
           </div>
 
