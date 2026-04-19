@@ -51,10 +51,10 @@ def build_cover():
 
     label_font = ImageFont.truetype(str(FONT_TTF), 40)
     title_font = ImageFont.truetype(str(FONT_TTF), 110)
-    subtitle_font = ImageFont.truetype(str(FONT_TTF), 58)
+    subtitle_font = ImageFont.truetype(str(FONT_TTF), 62)
     author_font = ImageFont.truetype(str(FONT_TTF), 52)
 
-    # Logo — 900px wide, centered, starts at y=380
+    # Logo — 900px wide, centered, starts at y=380 (same as bonus 3/4)
     logo = Image.open(str(LOGO)).convert("RGBA")
     scale = 900 / logo.width
     logo_resized = logo.resize((int(logo.width * scale), int(logo.height * scale)), Image.LANCZOS)
@@ -62,39 +62,45 @@ def build_cover():
     logo_y = 380
     img.paste(logo_resized, (logo_x, logo_y), logo_resized)
 
-    # Bonus label — snug under logo
+    # Bonus label — exactly like bonus 3/4 (logo bottom + 80)
     label_text = "// FREE BONUS  02 //"
     bbox = draw.textbbox((0, 0), label_text, font=label_font)
     label_y = logo_y + logo_resized.height + 80
     draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, label_y), label_text, fill=BROWN, font=label_font)
 
-    # Title — 2 lines, same spacing pattern as bonus 3/4
+    # Title — 3 lines to match the rhythm of bonus 3 (which has 3 title lines)
     title_y = label_y + 120
     title_line_spacing = 135
 
-    title_lines = ["POWER DYNAMICS", "CHEATSHEET"]
+    title_lines = ["THE POWER", "DYNAMICS", "CHEATSHEET"]
     for i, line in enumerate(title_lines):
         bbox = draw.textbbox((0, 0), line, font=title_font)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, title_y + i * title_line_spacing),
                   line, fill=DARK, font=title_font)
 
-    # Gold rule — standard formula matching bonus 3/4
+    # Gold rule
     rule_y = title_y + (len(title_lines) * title_line_spacing) + 60
     draw.rectangle([(WIDTH // 2 - 200, rule_y), (WIDTH // 2 + 200, rule_y + 3)], fill=GOLD)
 
-    # Subtitle — 3 natural lines to match rhythm of other bonuses
+    # Subtitle — 3 lines, more breathing room to fill vertical space
     subtitle_lines = [
         "The One-Page Reference",
         "For Any Conversation",
         "That Actually Matters",
     ]
-    sub_y = rule_y + 80
+    sub_y = rule_y + 100
     for line in subtitle_lines:
         bbox = draw.textbbox((0, 0), line, font=subtitle_font)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, sub_y), line, fill=BROWN, font=subtitle_font)
-        sub_y += 90
+        sub_y += 110
 
-    # Author — bottom
+    # Tagline closer to where author would normally sit — reduces dead gap
+    tagline_font = ImageFont.truetype(str(FONT_TTF), 44)
+    tagline_text = "PULL IT UP. READ IT. WIN THE ROOM."
+    bbox = draw.textbbox((0, 0), tagline_text, font=tagline_font)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, sub_y + 180), tagline_text, fill=GOLD, font=tagline_font)
+
+    # Author — bottom (same as bonus 3/4)
     author_text = "NATE HARLAN"
     bbox = draw.textbbox((0, 0), author_text, font=author_font)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, HEIGHT - 280), author_text, fill=DARK, font=author_font)
@@ -193,7 +199,10 @@ SECTIONS = [
 
 def build_docx():
     doc = Document()
-    set_page_background_cream(doc)
+    # NOTE: do NOT call set_page_background_cream() here. The PNG cover already
+    # has cream baked in, and the <w:background> element causes Word to render
+    # a top gap above the cover image. Bonuses 1, 3, 4 omit it and render correctly.
+    # set_page_background_cream(doc)  # ← this was the top-gap bug
 
     # ==== SECTION 1: COVER (full-bleed) ====
     cover_section = doc.sections[0]
@@ -206,8 +215,10 @@ def build_docx():
     cover_section.header_distance = Inches(0)
     cover_section.footer_distance = Inches(0)
 
+    # NOTE: do NOT set alignment here. Setting jc="left" makes Word add
+    # vertical line-height padding above the inline image. Bonus 3/4 omit
+    # alignment entirely and render flush to top — match that exactly.
     cover_p = doc.add_paragraph()
-    cover_p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     cover_p.paragraph_format.space_before = Pt(0)
     cover_p.paragraph_format.space_after = Pt(0)
     cover_p.paragraph_format.line_spacing = 1.0
