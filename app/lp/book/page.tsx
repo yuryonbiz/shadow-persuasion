@@ -54,7 +54,7 @@ function OrderBox({ small = false, bgVariant = 'cream' }: { small?: boolean; bgV
       } p-6 md:p-10 text-center shadow-[8px_8px_0_0_rgba(0,0,0,0.15)]`}
     >
       <p className={`text-xs font-mono uppercase tracking-[0.25em] ${isDark ? 'text-[#D4A017]' : 'text-[#5C3A1E]'} mb-3`}>
-        ⏱  This Offer Expires Soon — Limited Time
+        ⏱  This Offer Expires Soon. Limited Time.
       </p>
       <div className="flex items-end justify-center gap-3 mb-2">
         <span className={`text-2xl line-through ${isDark ? 'text-[#F4ECD8]/40' : 'text-[#5C3A1E]/60'}`}>$47</span>
@@ -201,7 +201,7 @@ export default function BookFunnelPage() {
     <main className={`${specialElite.className} bg-[#F4ECD8] text-[#1A1A1A] overflow-x-hidden`}>
       {/* ═════════ TOP BANNER — urgency strip ═════════ */}
       <div className="bg-black text-[#F4ECD8] py-2.5 text-center text-xs md:text-sm font-mono uppercase tracking-wider">
-        ⚠  Limited Time: Get The Field Manual For <span className="text-[#D4A017]">$7</span> (Normally $47) — <a href="#order" className="underline hover:text-[#D4A017]">Claim Now →</a>
+        ⚠  Limited Time: Get The Field Manual For <span className="text-[#D4A017]">$7</span> (Normally $47).  <a href="#order" className="underline hover:text-[#D4A017]">Claim Now →</a>
       </div>
 
       {/* ═════════ 1. HERO ═════════ */}
@@ -209,10 +209,7 @@ export default function BookFunnelPage() {
         <div className="max-w-5xl mx-auto text-center">
           <img src="/logo.png" alt="Shadow Persuasion" className="w-32 md:w-44 mx-auto mb-8 dark:hidden" />
 
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#6B5B3E] mb-3">
-            <span className="font-bold">CLASSIFICATION:</span> Field Manual / Public Drop
-          </p>
-          <p className="text-sm md:text-base text-[#5C3A1E] uppercase tracking-wider font-bold mb-6 max-w-3xl mx-auto">
+          <p className="text-lg md:text-2xl lg:text-3xl text-[#5C3A1E] font-bold uppercase tracking-wider leading-snug mb-8 max-w-4xl mx-auto">
             For Anyone Who&apos;s Ever Walked Out Of A Conversation Wondering Why They Just Agreed To Something They Didn&apos;t Want To Agree To
           </p>
 
@@ -224,7 +221,7 @@ export default function BookFunnelPage() {
 
           <p className="text-lg md:text-xl text-[#3B2E1A] max-w-3xl mx-auto leading-relaxed mb-10">
             While bypassing their built-in &ldquo;persuasion detector,&rdquo; eliminating the awkwardness of memorized scripts,
-            and working in real everyday conversations — not just pitches and negotiations.
+            and working in real everyday conversations. Not just pitches and negotiations.
           </p>
 
           {/* Book mockup placeholder */}
@@ -280,21 +277,23 @@ export default function BookFunnelPage() {
             </h2>
             <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A]">
               <p>
-                <strong>Shadow Persuasion</strong> is a counterintuitive approach to influence that allows you to win
-                conversations, negotiations, and high-stakes interactions{' '}
-                <HL>without the other person ever realizing they were being persuaded.</HL>
+                <strong>Shadow Persuasion</strong> is a counterintuitive approach to influence that lets you win
+                the conversations that actually decide your life. Salary negotiations. Fights with your partner.
+                Arguments with teenagers. Custody mediation. Reconnecting with estranged family. Sales calls.
+                Job interviews. Conversations with manipulators you cannot cut out of your life.
               </p>
               <p>
-                We achieve this by deploying <strong>47 below-the-radar tactics</strong> that bypass the brain&apos;s
-                built-in &ldquo;persuasion detector&rdquo; — the same defense mechanism that quietly destroys 90% of
-                the techniques you read about in every other influence book.
+                You win these conversations <HL>without the other person ever realizing they were being persuaded.</HL>
               </p>
               <p>
-                And as a result, this frees you up to walk into any conversation — a salary negotiation, a sales call, a
-                tense talk with your partner, a meeting with a difficult boss — and{' '}
-                <HL>steer the outcome without saying anything that registers as &ldquo;trying to persuade.&rdquo;</HL>
+                We do it by deploying <strong>47 below-the-radar tactics</strong> that bypass the brain&apos;s
+                built-in &ldquo;persuasion detector.&rdquo; That is the defense mechanism firing in your listener&apos;s head
+                the second they sense you are trying to influence them. It is also the reason why 90% of the techniques
+                you read about in every other influence book quietly stop working the moment you deploy them.
               </p>
-              <p>This is <strong>Shadow Persuasion</strong>.</p>
+              <p>
+                This is <strong>Shadow Persuasion</strong>.
+              </p>
             </div>
           </div>
           <div className="bg-white border-2 border-[#5C3A1E]/40 p-6 md:p-8 shadow-[8px_8px_0_0_rgba(0,0,0,0.10)]">
@@ -306,7 +305,7 @@ export default function BookFunnelPage() {
                 { n: '01', title: 'Disable The Detector', body: 'In the first 30 seconds, turn off the listener\'s "I\'m being sold" alarm.' },
                 { n: '02', title: 'Plant The Conclusion', body: 'Structure the conversation so they reach your outcome on their own.' },
                 { n: '03', title: 'Shift The Frame', body: 'When you can\'t win the conversation being had, quietly change what it\'s about.' },
-                { n: '04', title: 'Lock In Without Closing', body: 'Exit in a way that prevents reversal — without any visible "closing" move.' },
+                { n: '04', title: 'Lock In Without Closing', body: 'Exit in a way that prevents reversal without any visible "closing" move.' },
               ].map((s) => (
                 <li key={s.n} className="flex gap-4">
                   <span className="font-mono text-3xl font-black text-[#D4A017] leading-none">{s.n}</span>
@@ -333,7 +332,7 @@ export default function BookFunnelPage() {
         <p className="text-base md:text-lg text-[#3B2E1A] max-w-3xl mx-auto">
           By throwing out every persuasion book on my shelf and doing the opposite of what they teach.
           <br />
-          <em>This is something completely new, completely different, completely unlike anything you&apos;ve heard about influence before — read the story below to discover Shadow Persuasion.</em>
+          <em>This is something completely new, completely different, completely unlike anything you&apos;ve heard about influence before. Read the story below to discover Shadow Persuasion.</em>
         </p>
       </section>
 
@@ -341,7 +340,7 @@ export default function BookFunnelPage() {
       <section className="px-6 py-8 md:py-12 max-w-3xl mx-auto text-base md:text-lg leading-[1.85] text-[#1A1A1A] space-y-5">
         <p><strong>Dear Future Shadow Persuader,</strong></p>
         <p>
-          <strong>From:</strong> The laptop of [Your Name]<br />
+          <strong>From:</strong> The laptop of Nate Harlan<br />
           <strong>Re:</strong> Why every persuasion book in your house is making you worse at this (and the only counterintuitive way out)
         </p>
 
@@ -349,7 +348,7 @@ export default function BookFunnelPage() {
 
         <p>
           Would it surprise you to learn that I went from <HL>losing 90% of my important conversations</HL> to winning
-          almost every one I walk into — using the information revealed in this field manual?
+          almost every one I walk into, using the information revealed in this field manual?
         </p>
         <p>Skeptical?</p>
         <p>You should be.</p>
@@ -360,21 +359,24 @@ export default function BookFunnelPage() {
         </h3>
         <p>But first, read this disclaimer:</p>
         <p>
-          I have the benefit of [INSERT YOUR EXPERIENCE — e.g., spending the last 8 years recording, dissecting, and reverse-engineering thousands of high-stakes conversations across sales, negotiation, dating, and corporate politics].
+          I have the benefit of spending the last eight years recording, dissecting, and reverse-engineering over four
+          hundred hours of my own high-stakes conversations. Sales calls. Negotiations. Hard conversations with my wife.
+          Parent-teacher conferences. Custody mediation. An ugly three-month kitchen renovation dispute. Coaching sessions
+          with my private clients. I have watched my own tactics land and fail at a level of detail most people never get.
         </p>
         <p>
           The average person who buys any &ldquo;how to&rdquo; information gets little to no results. I&apos;m using
           these references for example purposes only.
         </p>
         <p>
-          Your results will vary and depend on many factors — including but not limited to your background, experience,
+          Your results will vary and depend on many factors. Including but not limited to your background, experience,
           and willingness to actually try the tactics in real conversations instead of just reading about them.
         </p>
         <p>
           All purchases entail risk as well as massive and consistent effort and action. If you&apos;re not willing to
           accept that, please <strong>DO NOT</strong> get this eBook.
         </p>
-        <p>And yes — it took me time and energy to figure this out.</p>
+        <p>And yes, it took me time and energy to figure this out.</p>
         <p>With that said... let me jump right in and show you...</p>
       </section>
 
@@ -387,18 +389,20 @@ export default function BookFunnelPage() {
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A] max-w-3xl mx-auto">
             <p>
               The same <strong>Shadow Persuasion</strong> model that{' '}
-              <HL>1,200+ ambitious professionals from all over the world</HL> are now using to win conversations they used
-              to lose…
+              <HL>1,200+ readers from every walk of life</HL> are now using to win conversations they used to lose.
             </p>
             <p>
-              …and in turn close higher-paying deals, get the salary they&apos;re actually worth, end fights they used to
-              lose to their partner, and walk into rooms they used to avoid — faster than ever before…
+              Sales professionals closing deals they used to leave on the table. Parents finally getting teenagers to listen.
+              Underpaid employees landing raises they have been asking for unsuccessfully for two years. People in long
+              recurring fights with partners and family members finally ending those fights in a single conversation.
+              Readers facing custody mediation, contractor disputes, narcissistic bosses, and estranged family members.
             </p>
             <p>
-              …all while <strong>never sounding &ldquo;salesy,&rdquo; never deploying a single memorized script, and
-              never having anyone catch them &ldquo;running a technique&rdquo;</strong>…
+              All of them getting outcomes they wanted, while <strong>never sounding &ldquo;salesy,&rdquo; never
+              deploying a single memorized script, and never having anyone catch them &ldquo;running a technique&rdquo;</strong>
+              on the other side of the table.
             </p>
-            <p>…and best of all, <HL>without reading another single persuasion book ever again.</HL></p>
+            <p>And best of all, <HL>without reading another single persuasion book ever again.</HL></p>
           </div>
         </div>
       </section>
@@ -412,20 +416,20 @@ export default function BookFunnelPage() {
           <Testimonial
             name="Marcus T."
             result="$42K Salary Increase"
-            quote="Negotiated a $42,000 raise without my manager realizing the negotiation had even started. She came out thinking it was her idea."
-            hidden="Every visible negotiation tactic damages the relationship — even when it works. Shadow tactics don't."
+            quote="Negotiated a $42,000 raise without my manager realizing the negotiation had even started. She walked out of the meeting thinking it was her idea."
+            hidden="Every visible negotiation tactic damages the relationship. Even when it works. Shadow tactics do not."
           />
           <Testimonial
-            name="Priya R."
-            result="3 Enterprise Deals in 60 Days"
-            quote="Closed three enterprise deals in 60 days without ever using a single 'closing technique' my sales trainer drilled into me."
-            hidden="Sophisticated buyers actively pattern-match against trained sales tactics. Removing them was the unlock."
+            name="Elena R."
+            result="Reconciled with estranged father"
+            quote="I had not spoken to my father in seven years. Used the opening tactic from Chapter 3 at my cousin's wedding. We have been talking weekly since."
+            hidden="I had rehearsed every apology and reconciliation line. All of them fired his detector. What actually worked was a Cold Open about something unrelated."
           />
           <Testimonial
             name="Daniel K."
-            result="Ended a 2-year fight"
-            quote="Finally ended a recurring fight with my wife that had been dragging on for two years — in one 12-minute conversation, using tactics from Chapter 9."
-            hidden="Couples therapy taught us frameworks; the book taught me what NOT to say. Removing those phrases ended it."
+            result="Ended a 2-year recurring fight"
+            quote="Finally ended a recurring fight with my wife that had been dragging on for two years. One 12-minute conversation, using tactics from Chapter 10."
+            hidden="Couples therapy taught us frameworks. The book taught me what NOT to say. Removing those phrases ended the fight permanently."
           />
         </div>
         <p className="text-center mt-10 text-sm text-[#5C3A1E] font-mono uppercase tracking-wider">
@@ -454,12 +458,12 @@ export default function BookFunnelPage() {
             ))}
           </ul>
           <p className="mt-10 text-lg md:text-xl text-center leading-relaxed">
-            In fact: <HL>we rarely (if ever) use anything that another person could possibly recognize as a &ldquo;technique.&rdquo;</HL>
+            In fact, <HL>we rarely (if ever) use anything that another person could possibly recognize as a &ldquo;technique.&rdquo;</HL>
           </p>
           <p className="mt-6 text-base md:text-lg text-center text-[#F4ECD8]/80 leading-relaxed">
-            Instead, we deploy the 47 tactics most influence books never mention — because they&apos;re too subtle to
-            write a chapter about, too quiet to film for YouTube, and too counterintuitive for the gurus selling you
-            &ldquo;high-status frame control&rdquo; courses to even understand.
+            Instead, we deploy the 47 tactics most influence books never mention. They are too subtle to write a chapter
+            about. Too quiet to film for YouTube. Too counterintuitive for the gurus selling you &ldquo;high-status frame
+            control&rdquo; courses to even understand.
           </p>
         </div>
       </section>
@@ -499,8 +503,8 @@ export default function BookFunnelPage() {
         <div className="mt-10 max-w-2xl mx-auto bg-[#8B0000]/10 border-2 border-[#8B0000]/40 p-6 text-center">
           <AlertTriangle className="h-8 w-8 text-[#8B0000] mx-auto mb-3" />
           <p className="text-base md:text-lg text-[#1A1A1A]">
-            The Circle of Doom not only sucked, but kept me stuck for <HL>3 years</HL> — forcing me to underearn, lose
-            arguments I was actually right about, and watch less-talented people get promoted ahead of me.
+            The Circle of Doom not only sucked. It kept me stuck for <HL>3 years</HL>, forcing me to underearn, lose
+            arguments I was right about, and watch less-talented people get promoted ahead of me.
           </p>
         </div>
       </section>
@@ -510,7 +514,7 @@ export default function BookFunnelPage() {
 
       <section className="px-6 py-12 md:py-16 max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-8 text-center">
-          The <span className="text-[#D4A017]">Persuasion Detector</span> Is The Most Underrated Concept In The Entire Field Of Influence — And It&apos;s The Reason Every Other Book Has Been Failing You
+          The <span className="text-[#D4A017]">Persuasion Detector</span> Is The Most Underrated Concept In The Entire Field Of Influence. And It&apos;s The Reason Every Other Book Has Been Failing You.
         </h2>
         <p className="text-base md:text-lg text-center text-[#3B2E1A] mb-10">Just think about it:</p>
 
@@ -535,13 +539,13 @@ export default function BookFunnelPage() {
           </p>
           <p className="text-base md:text-lg leading-relaxed mb-4">
             Every human brain has one. It evolved over hundreds of thousands of years to spot{' '}
-            <strong>influence attempts</strong> — because in a tribal environment, being persuaded by the wrong person
-            was literally a survival risk.
+            <strong>influence attempts</strong>. In a tribal environment, being persuaded by the wrong person was a
+            survival risk, so the brain learned to resist first and evaluate later.
           </p>
           <p className="text-base md:text-lg leading-relaxed mb-4">
-            When the persuasion detector fires, three things happen instantly: <HL>trust drops</HL>, the listener
-            becomes <HL>resistant</HL>, and they start <HL>mentally pushing back</HL> on whatever you say next — even
-            things they would have agreed with five minutes earlier.
+            When the detector fires, three things happen instantly. <HL>Trust drops.</HL> The listener becomes{' '}
+            <HL>resistant.</HL> They start <HL>mentally pushing back</HL> on whatever you say next, even things they would
+            have agreed with five minutes earlier.
           </p>
           <p className="text-lg md:text-xl font-bold text-[#D4A017]">
             The entire &ldquo;visible persuasion&rdquo; industry is built on tactics that fire the detector.
@@ -569,7 +573,7 @@ export default function BookFunnelPage() {
             Here&apos;s The Exact <span className="text-[#D4A017]">4-Part System</span> Revealed In The Book
           </h2>
           <p className="text-base md:text-lg text-[#3B2E1A] mt-4 max-w-2xl mx-auto">
-            For winning almost any high-stakes conversation — without the other person ever knowing you tried.
+            For winning almost any high-stakes conversation without the other person ever knowing you tried.
           </p>
         </div>
 
@@ -578,7 +582,7 @@ export default function BookFunnelPage() {
             {
               n: '01',
               title: 'Disable The Detector',
-              body: 'The first 30 seconds determine whether they treat your words as collaborative — or as sales. Ten tactics for getting the detector quiet before you say anything that matters.',
+              body: 'The first 30 seconds determine whether they treat your words as collaborative or as sales. Ten tactics for getting the detector quiet before you say anything that matters.',
             },
             {
               n: '02',
@@ -593,7 +597,7 @@ export default function BookFunnelPage() {
             {
               n: '04',
               title: 'Lock In Without Closing',
-              body: 'Exit in a way that prevents reversal — without using any of the obvious "closing" moves. Eleven tactics for the last thirty seconds of any important exchange.',
+              body: 'Exit in a way that prevents reversal without using any of the obvious "closing" moves. Eleven tactics for the last thirty seconds of any important exchange.',
             },
           ].map((s) => (
             <div
@@ -620,10 +624,10 @@ export default function BookFunnelPage() {
             I&apos;ll Stake My Entire Reputation On This One Promise
           </h2>
           <p className="text-xl md:text-2xl text-[#D4A017] font-bold leading-relaxed mb-8">
-            You can win virtually any high-stakes conversation — without the other person ever realizing you tried to.
+            You can win virtually any high-stakes conversation without the other person ever realizing you tried to.
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85 mb-4">
-            Set your calendar right now — set it to <HL>30 days from today.</HL>
+            Set your calendar right now. Set it to <HL>30 days from today.</HL>
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85">
             Because if you implement the tactics in this book, that&apos;s when you&apos;ll start noticing your first
@@ -649,28 +653,28 @@ export default function BookFunnelPage() {
         <div className="bg-white border-2 border-[#5C3A1E]/40 p-6 md:p-10 shadow-[8px_8px_0_0_rgba(0,0,0,0.10)]">
           {[
             'How To Disable Anyone\'s Persuasion Detector In The First 30 Seconds Of A Conversation (so they treat everything you say next as collaborative, not sales)',
-            'The Counterintuitive "Cold Open" That Gets You An Audience With Anyone — Even People Who Normally Screen You Out',
+            'The Counterintuitive "Cold Open" That Gets You An Audience With Anyone, Including People Who Normally Screen You Out',
             'Why "Building Rapport" Is The Most Damaging Thing You Can Do In The First Five Minutes (and the invisible alternative that builds real trust)',
             'The Exact Opening That Disarms A Hostile Boss, Client, Partner, Or Family Member Before They Can Attack',
             'How Trying To Sound Confident Quietly Destroys Your Credibility (and the "low-status opening" elite negotiators use instead)',
             'The Step-By-Step Path To Make Anyone Reach YOUR Conclusion On Their Own (so they defend it later as if it were their idea)',
-            'The "Strategic Pause" — Why A Single 4-Second Silence Does More For Your Influence Than Any Technique On The Market',
-            'How To Use Someone\'s Own Words Against Their Resistance — Without Them Ever Noticing',
+            'The "Strategic Pause" That Makes A Contractor Drop A $13,500 Overcharge To $2,500 In 11 Seconds Of Silence',
+            'How To Use Someone\'s Own Words Against Their Resistance Without Them Ever Noticing',
             'The Counterintuitive Way To Handle Manipulators Without Confrontation (so they back off without ever realizing you saw what they were doing)',
-            'How To End A Two-Year Recurring Fight In One 12-Minute Conversation',
-            'Why "Mirroring" Backfires On Anyone Smarter Than A Toddler — And The Subtle Alternative That Works On Everyone',
-            'The Single Word That Makes People Believe You Are "On Their Side" (without you having to actually agree with anything)',
-            'How To Spot When Someone Is Running A Visible Tactic On You — And The Elegant Counter That Makes Them Feel Exposed Without You Having To Say A Word',
+            'How To End A Two-Year Recurring Fight In One 12-Minute Conversation (tested on spouses, parents, adult siblings, and ex-partners)',
+            'Why "Mirroring" Backfires On Anyone Smarter Than A Toddler (and the subtle alternative that works on everyone)',
+            'The Single Word That Makes People Believe You Are "On Their Side" Without You Having To Actually Agree With Anything',
+            'How To Spot When Someone Is Running A Visible Tactic On You (and the elegant counter that makes them feel exposed without you having to say a word)',
             'Why Deploying Cialdini\'s Principles Now Marks You As An Amateur (and the modern versions sophisticated listeners still fall for)',
             'The Quietest Way To Take Control Of A Meeting Without Speaking First Or Loudest',
-            'How To Make A "Yes" Stick — The Post-Agreement Pattern That Prevents The Other Person From Changing Their Mind 24 Hours Later',
-            'The "Reverse Qualifier" That Makes Prospects, Dates, And Bosses Chase You Instead',
+            'How To Make A "Yes" Stick: The Post-Agreement Pattern That Prevents The Other Person From Changing Their Mind 24 Hours Later',
+            'The "Reverse Qualifier" That Makes Prospects, Dates, And Bosses Chase You Instead Of The Reverse',
             'How To Win A Price Negotiation Without Naming The First Number',
             'The "Timeline Compression" Move That Ends A Three-Week Stalemate In A Single Email',
             'How To Get An Apology From Someone Who Will Never Admit They Were Wrong',
             'The One-Line Email Move That Cuts Post-Deal Reversal Rates From 31% Down To 4%',
-            'The "Volcano" Technique — How To Let A Manipulator\'s Primary Tactic Stop Working Against You Without Any Confrontation',
-            'The Last-Word Exit — How To End Every Important Conversation In A Position Of Strength Without Sounding Aggressive',
+            'The "Volcano" Technique: How To Let A Manipulator\'s Primary Tactic Stop Working Against You Without Any Confrontation',
+            'The Last-Word Exit: How To End Every Important Conversation In A Position Of Strength Without Sounding Aggressive',
             'The Hidden Cost Move That Collapses Someone\'s Bad Decision Before You Ever Have To Argue Against It',
             'The 7-Minute Daily Practice That Makes All 47 Tactics Second Nature Within 30 Days',
           ].map((text, i) => (
@@ -702,7 +706,7 @@ export default function BookFunnelPage() {
             <BonusCard
               num="1"
               title="The Manipulation Tactics Decoder"
-              description="50 common manipulation tactics across five categories — emotional, language, social, informational, and power plays — with the exact red flag for each one and the counter-move that shuts it down. Laid out so you can screenshot any page to your phone and pull it up mid-conversation."
+              description="50 common manipulation tactics across five categories (emotional, language, social, informational, and power plays) with the exact red flag for each one and the counter-move that shuts it down. Laid out so you can screenshot any page to your phone and pull it up mid-conversation."
               value="$47"
               icon={Eye}
             />
@@ -723,7 +727,7 @@ export default function BookFunnelPage() {
             <BonusCard
               num="4"
               title="The Reactance Detector Cheatsheet"
-              description="24 phrase swaps across four categories — the exact phrases that fire the listener's Persuasion Detector, and the quiet version of each one that does the same work invisibly. Plus ten signals that someone is running a tactic on YOU right now, and what to do about it."
+              description="24 phrase swaps across four categories. The exact phrases that fire the listener's Persuasion Detector, and the quiet version of each one that does the same work invisibly. Plus ten signals that someone is running a tactic on YOU right now, and what to do about it."
               value="$47"
               icon={Shield}
             />
@@ -759,18 +763,18 @@ export default function BookFunnelPage() {
           </p>
           <p>
             I&apos;m literally giving you this entire book, for <strong>$7</strong>, as a means of &ldquo;putting my best
-            foot forward&rdquo; and demonstrating real value. My hope is that you&apos;ll love it — and this will be the
+            foot forward&rdquo; and demonstrating real value. My hope is that you&apos;ll love it, and this will be the
             start of a good business relationship for years to come.
           </p>
           <h3 className="text-xl md:text-2xl font-bold uppercase tracking-wide pt-4 text-center text-[#8B0000]">
-            But With All That Said — This Won&apos;t Last Long
+            But With All That Said: This Won&apos;t Last Long
           </h3>
           <p>
             I was planning on selling this book for <strong>$47</strong>… then I lowered it to <strong>$27</strong>…
             and now to <strong>$7</strong> because at this price I can reach more people who actually need it.
           </p>
           <p>
-            <strong>It actually costs me ~$22 in advertising to sell one copy</strong> — meaning at $7 I take a small
+            <strong>It actually costs me around $22 in advertising to sell one copy.</strong> Meaning at $7 I take a small
             loss on every book. I&apos;m doing it because I&apos;m betting you&apos;ll love it enough to want more from
             me later. That&apos;s the entire deal. No tricks.
           </p>
@@ -789,14 +793,14 @@ export default function BookFunnelPage() {
 
           <div className="border-4 border-[#D4A017] bg-black p-6 md:p-10 space-y-5 text-base md:text-lg leading-relaxed">
             <p>
-              Download the eBook, read it — but more importantly, apply what you learn in there.
+              Download the eBook. Read it. More importantly, apply what you learn.
             </p>
             <p>
               And if you&apos;re not blown away by what you learn, just shoot me an email and request a refund within{' '}
               <HL>30 days.</HL>
             </p>
             <p className="text-xl md:text-2xl font-bold text-[#D4A017]">
-              We&apos;ll refund your $7 — and let you keep the Shadow Persuasion book free of charge. Along with all
+              We&apos;ll refund your $7 and let you keep the Shadow Persuasion book free of charge. Along with all
               the bonuses.
             </p>
             <p>How&apos;s that for the world&apos;s best money-back guarantee? I&apos;d say pretty good.</p>
@@ -848,10 +852,12 @@ export default function BookFunnelPage() {
             q="Who is this book for?"
             a={
               <p>
-                Anyone who finds themselves losing important conversations they should be winning — sales pros, founders,
-                ambitious career professionals, people in tough relationships, anyone who feels outmaneuvered by people
-                with stronger personalities. If you&apos;ve read Cialdini, Voss, or Greene and still feel like
-                you&apos;re losing — this book is for you.
+                Anyone who finds themselves losing important conversations they should be winning. Sales professionals.
+                Founders raising rounds. People overdue for a raise. Parents whose teenagers have stopped listening.
+                Partners stuck in a fight that keeps happening. Anyone navigating a difficult family member, a manipulative
+                coworker, a custody mediation, a contractor dispute, or a reconnection with someone they haven&apos;t
+                spoken to in years. If you&apos;ve read Cialdini, Voss, or Greene and still feel like you&apos;re losing
+                the rooms that matter, this book is for you.
               </p>
             }
           />
@@ -859,10 +865,11 @@ export default function BookFunnelPage() {
             q="How is this different from other persuasion books?"
             a={
               <p>
-                Every other book teaches you <strong>visible</strong> techniques — anchoring, mirroring, frame control.
+                Every other book teaches you <strong>visible</strong> techniques. Anchoring. Mirroring. Frame control.
                 The other person sees you running them and trust drops. This book teaches the 47 tactics that operate{' '}
                 <em>below</em> the threshold where the other person can detect them. That&apos;s why they actually work
-                in real conversations with sophisticated people.
+                in real conversations with sophisticated people, and why the techniques you learned from other books
+                quietly stop working the moment your listener is paying attention.
               </p>
             }
           />
@@ -926,20 +933,20 @@ export default function BookFunnelPage() {
       <section className="px-6 py-12 md:py-16 max-w-3xl mx-auto text-base md:text-lg leading-[1.85] text-[#1A1A1A] space-y-5">
         <p>I&apos;ll talk to you in our private community as soon as you download.</p>
         <p>Until then, to your success,</p>
-        <p className="text-2xl md:text-3xl italic" style={{ fontFamily: 'cursive' }}>
-          [Your Signature]
+        <p className="text-3xl md:text-4xl italic text-[#1A1A1A]" style={{ fontFamily: 'Brush Script MT, cursive' }}>
+          Nate Harlan
         </p>
 
         <hr className="border-[#5C3A1E]/30 my-8" />
 
         <div className="bg-[#EBE0C7] border-l-4 border-[#D4A017] p-6">
           <p className="font-bold text-[#1A1A1A] mb-3">
-            <strong>P.S.</strong> — Remember, the <em>Shadow Persuasion</em> book comes with the BEST money-back
+            <strong>P.S.</strong> Remember, the <em>Shadow Persuasion</em> book comes with the BEST money-back
             guarantee in the world.
           </p>
           <p>
-            Download it, read it, implement it, win the conversations you used to lose. And if you&apos;re not happy for
-            any reason (and I mean ANY reason) — just let me know and we&apos;ll refund your $7 and let you keep the
+            Download it. Read it. Implement it. Win the conversations you used to lose. And if you&apos;re not happy for
+            any reason (and I mean ANY reason), just let me know and we&apos;ll refund your $7 and let you keep the
             book and all bonuses.
           </p>
           <p className="mt-4">
