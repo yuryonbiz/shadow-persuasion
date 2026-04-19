@@ -28,6 +28,7 @@ import {
   Target,
   BookOpen,
   TrendingUp,
+  AlertTriangle,
 } from 'lucide-react';
 
 const specialElite = Special_Elite({ subsets: ['latin'], weight: '400' });
@@ -53,6 +54,7 @@ function UpsellAppInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paymentIntentId = searchParams.get('pi');
+  const isDirect = !paymentIntentId;
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,10 @@ function UpsellAppInner() {
     setError(null);
 
     if (!paymentIntentId) {
-      router.push('/lp/book');
+      // Direct visitor — no saved card to one-click charge. Route them
+      // through the book funnel so they can complete the proper flow and
+      // see this offer again at the end with the book-buyer rate.
+      router.push('/checkout/book');
       return;
     }
 
@@ -94,10 +99,30 @@ function UpsellAppInner() {
 
   return (
     <main className={`${specialElite.className} bg-[#F4ECD8] text-[#1A1A1A] overflow-x-hidden`}>
-      {/* ═════════ URGENCY BANNER ═════════ */}
-      <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
-        ⚠  <span className="font-bold">ONE FINAL OFFER.</span> Before your order is complete.
-      </div>
+      {/* ═════════ GUARD BANNER (direct visits without pi) ═════════ */}
+      {isDirect ? (
+        <div className="bg-[#1A1A1A] text-[#F4ECD8] border-b-4 border-[#D4A017]">
+          <div className="max-w-4xl mx-auto px-6 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+            <AlertTriangle className="h-6 w-6 text-[#D4A017] shrink-0" />
+            <div className="flex-1 text-sm md:text-base leading-snug">
+              <p className="font-bold text-[#D4A017] mb-1">The $34.95/mo rate below is the book-buyer price.</p>
+              <p className="text-[#F4ECD8]/80">
+                Retail on the main site is $99/mo. Start with the $7 book to unlock this rate (and the full funnel with the Playbooks + Vault upsell in between).
+              </p>
+            </div>
+            <a
+              href="/checkout/book"
+              className="shrink-0 bg-[#D4A017] text-black font-mono uppercase font-bold text-xs md:text-sm px-5 py-3 tracking-wider hover:bg-[#C4901A] transition-colors whitespace-nowrap"
+            >
+              Get The Book First · $7 →
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
+          ⚠  <span className="font-bold">ONE FINAL OFFER.</span> Before your order is complete.
+        </div>
+      )}
 
       {/* ═════════ 1. HERO ═════════ */}
       <section className="px-6 pt-10 pb-12 md:pt-14 md:pb-14">
@@ -387,7 +412,11 @@ function UpsellAppInner() {
             disabled={processing}
             className="w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 disabled:cursor-not-allowed text-black font-mono uppercase font-black text-lg md:text-2xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[6px_6px_0_0_#F4ECD8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#F4ECD8] mb-4"
           >
-            {processing ? 'Starting Membership…' : `✓ YES. UNLOCK THE COACH (${btnLabel}).`}
+            {processing
+              ? 'Starting Membership…'
+              : isDirect
+              ? 'GET THE BOOK FIRST → $7'
+              : `✓ YES. UNLOCK THE COACH (${btnLabel}).`}
           </button>
 
           {error && (
@@ -462,7 +491,11 @@ function UpsellAppInner() {
             disabled={processing}
             className="w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 text-black font-mono uppercase font-black text-base md:text-xl text-center px-6 py-5 tracking-wider transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]"
           >
-            {processing ? 'Starting Membership…' : `✓ START MEMBERSHIP (${btnLabel}).`}
+            {processing
+              ? 'Starting Membership…'
+              : isDirect
+              ? 'GET THE BOOK FIRST → $7'
+              : `✓ START MEMBERSHIP (${btnLabel}).`}
           </button>
         </div>
 

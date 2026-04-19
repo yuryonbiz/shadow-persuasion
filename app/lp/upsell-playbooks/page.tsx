@@ -71,6 +71,7 @@ function UpsellPlaybooksInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paymentIntentId = searchParams.get('pi');
+  const isDirect = !paymentIntentId;
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,9 +80,9 @@ function UpsellPlaybooksInner() {
     setError(null);
 
     if (!paymentIntentId) {
-      // No original payment intent — they got here without completing checkout.
-      // Bounce them back to the book LP.
-      router.push('/lp/book');
+      // Visited directly (no prior book purchase). Route them through the
+      // real funnel entry instead of one-click-charging a card they haven't given us.
+      router.push('/checkout/book');
       return;
     }
 
@@ -111,10 +112,30 @@ function UpsellPlaybooksInner() {
 
   return (
     <main className={`${specialElite.className} bg-[#F4ECD8] text-[#1A1A1A] overflow-x-hidden`}>
-      {/* ═════════ URGENCY BANNER ═════════ */}
-      <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
-        ⚠  <span className="font-bold">WAIT.</span> Your order isn&apos;t quite finished. This offer expires in <Countdown />.
-      </div>
+      {/* ═════════ GUARD BANNER (direct visits without pi) ═════════ */}
+      {isDirect ? (
+        <div className="bg-[#1A1A1A] text-[#F4ECD8] border-b-4 border-[#D4A017]">
+          <div className="max-w-4xl mx-auto px-6 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+            <AlertTriangle className="h-6 w-6 text-[#D4A017] shrink-0" />
+            <div className="flex-1 text-sm md:text-base leading-snug">
+              <p className="font-bold text-[#D4A017] mb-1">This bundle is only available after buying the Shadow Persuasion book.</p>
+              <p className="text-[#F4ECD8]/80">
+                The Playbooks reference the book&apos;s 47 tactics by name. Start with the book ($7) and this offer appears automatically at checkout.
+              </p>
+            </div>
+            <a
+              href="/checkout/book"
+              className="shrink-0 bg-[#D4A017] text-black font-mono uppercase font-bold text-xs md:text-sm px-5 py-3 tracking-wider hover:bg-[#C4901A] transition-colors whitespace-nowrap"
+            >
+              Get The Book First · $7 →
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
+          ⚠  <span className="font-bold">WAIT.</span> Your order isn&apos;t quite finished. This offer expires in <Countdown />.
+        </div>
+      )}
 
       {/* ═════════ 1. HERO ═════════ */}
       <section className="px-6 pt-10 pb-12 md:pt-16 md:pb-16">
@@ -418,7 +439,11 @@ function UpsellPlaybooksInner() {
             disabled={processing}
             className="block w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 disabled:cursor-not-allowed text-black font-mono uppercase font-black text-lg md:text-2xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[6px_6px_0_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#1A1A1A] mb-4"
           >
-            {processing ? 'Processing…' : '✓ YES. LOCK IN MY $47 UPGRADE.'}
+            {processing
+              ? 'Processing…'
+              : isDirect
+              ? 'GET THE BOOK FIRST → $7'
+              : '✓ YES. LOCK IN MY $47 UPGRADE.'}
           </button>
 
           {error && (
@@ -541,7 +566,11 @@ function UpsellPlaybooksInner() {
             disabled={processing}
             className="block w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 disabled:cursor-not-allowed text-black font-mono uppercase font-black text-lg md:text-xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]"
           >
-            {processing ? 'Processing…' : '✓ YES. LOCK IN THE PLAYBOOKS + VAULT FOR $47.'}
+            {processing
+              ? 'Processing…'
+              : isDirect
+              ? 'GET THE BOOK FIRST → $7'
+              : '✓ YES. LOCK IN THE PLAYBOOKS + VAULT FOR $47.'}
           </button>
         </div>
 
