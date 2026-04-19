@@ -4,7 +4,6 @@
 
 Nate Harlan
 
----
 
 Copyright © 2026 Shadow Persuasion LLC. All rights reserved.
 
@@ -18,7 +17,6 @@ First edition.
 
 Shadow Persuasion LLC
 Boulder, Colorado
-
 
 
 # Introduction
@@ -59,7 +57,6 @@ Your conversations are about to change.
 
 Nate Harlan
 Boulder, Colorado
-
 
 
 # Chapter 1
@@ -184,7 +181,6 @@ It seemed too simple to be true. It was also obviously true the moment I saw it.
 
 I'd been deploying a playbook against a woman who had the playbook memorized better than I did. It hadn't mattered that I'd executed it well. The execution was the problem.
 
-***
 
 So I did something that took me another fourteen months and that I don't recommend casually. I started recording every conversation I had that mattered.
 
@@ -239,7 +235,6 @@ The shelf of influence books everyone has read is a shelf of offensive tactics. 
 You get this book.
 
 *Field note: a month after the Dana meeting, she referred me to her successor at a different company. I closed him in one call, using the same mistake inverted. You can use failure like scaffolding, once you understand what broke.*
-
 
 
 # Chapter 2
@@ -307,7 +302,6 @@ At the back of the book there is an appendix organized by situation. If you pick
 The forty-seven tactics begin in the next chapter.
 
 *Field note: the detector is already firing in some of you. You are reading this and wondering if you are being persuaded right now by an author who wrote a book about persuasion. If you are asking that question, you already understand the thing this book is about.*
-
 
 
 # PART ONE
@@ -402,7 +396,6 @@ If you only ever use the Cold Open, you will already be ahead of every visible-t
 Your job in the first thirty seconds is to give the detector nothing to fire on. After that, you can get to the conversation you came to have.
 
 *Field note: Kate's wedding, Rachel's booking rate, Eliza's date, my 2018 review. Different stakes, same thirty seconds. Four ways to enter a conversation nobody in the room is braced for.*
-
 
 
 # Chapter 4
@@ -500,7 +493,6 @@ There is a line often attributed to the advertising legend David Ogilvy: *nothin
 *Field note: the best salespeople do not look like salespeople. Once you see this, you cannot unsee who is actually selling to you.*
 
 
-
 # Chapter 5
 
 ## Invisible Calibration
@@ -586,7 +578,6 @@ Dale Carnegie, in his 1936 book *How to Win Friends and Influence People*, quote
 Part One has been about the preconditions for the other kind of persuasion. What you do before anyone is being convinced of anything. The next section is about what happens inside the conversation once the preconditions are in place.
 
 *Field note: mirroring a posture is a trick. Mirroring language is chemistry. One gets caught. The other gets remembered.*
-
 
 
 # PART TWO
@@ -691,7 +682,6 @@ There is a line often attributed to Che Guevara (his actual authorship is disput
 *Field note: most people cannot hold silence for four seconds without talking. If you can, you are already in the top five percent of every negotiation you will ever be in.*
 
 
-
 # Chapter 7
 
 ## Stories Beat Pitches
@@ -765,7 +755,6 @@ The failure mode is abstraction. *Imagine how much better things will be* is a P
 Three tactics. Three ways of getting someone to reach a conclusion without being handed one. Notice what they share. In all three, the listener is doing the work of conviction. You are just providing the raw material.
 
 *Field note: the best persuaders I know do not sound persuasive. They sound like people who have stories.*
-
 
 
 # Chapter 8
@@ -863,7 +852,6 @@ The failure mode is stacking small yeses too obviously. If the listener catches 
 These four tactics share one structure. Each uses the listener's own words, principles, or feelings as the source of the agreement. You are not arguing. You are surfacing agreements that already existed and letting them do the work.
 
 *Field note: no one argues with themselves out loud. If you can get the conversation to a place where they are doing that, the rest happens on its own.*
-
 
 
 # Chapter 9
@@ -977,7 +965,6 @@ These four tactics close Part Two. They share the property that the listener doe
 *Field note: the best conversations end with the other person thanking you for helping them think clearly, without either of you being able to point to the sentence where the thinking happened.*
 
 
-
 # PART THREE
 
 ## Shift The Frame
@@ -1074,7 +1061,6 @@ Four tactics. Four ways to stop playing the conversation you cannot win and star
 *Field note: the side that names the fight usually wins it.*
 
 
-
 # Chapter 11
 
 ## Surfacing What's Hidden
@@ -1164,7 +1150,6 @@ The failure mode is overcorrecting. If the Misclassification lands as a status p
 Four tactics. Four things that had been under the surface, now above it. Each one is the conversational equivalent of flipping a light switch. The room is the same, but now you can see what was shaping the behavior all along.
 
 *Field note: the most expensive thing in most conversations is the assumption that nobody has named.*
-
 
 
 # Chapter 12
@@ -1258,7 +1243,6 @@ Four tactics. Four ways to change the dynamic underneath a conversation when the
 *Field note: some tactics work by adding. The best ones work by removing something nobody even knew was there.*
 
 
-
 # PART FOUR
 
 ## Lock In Without Closing
@@ -1335,7 +1319,6 @@ The failure mode is waiting too long. A Waiting Period of forty-eight hours is c
 Three tactics. Three ways to let the agreement become real without marking it in a way that fires the detector. In each, the move is to do less than the sales playbook tells you to do. To undermark the moment. To decline the ceremony.
 
 *Field note: the sale is lost at the moment it feels won. Most people learn this the expensive way.*
-
 
 
 # Chapter 14
@@ -1431,7 +1414,6 @@ Four tactics. Four ways to deepen a commitment without asking for more than what
 *Field note: write the email they would write to themselves in three hours if they were very busy. That is the email you want to send.*
 
 
-
 # Chapter 15
 
 ## The Last Thing They Hear
@@ -1521,7 +1503,6 @@ The tactics are finished. What remains is how you actually use them.
 *Field note: they do not remember what you said. They remember the state you left them in. Write the last line of the conversation on purpose.*
 
 
-
 # Chapter 16
 
 ## The Daily Practice
@@ -1595,7 +1576,6 @@ In six weeks, come back to this chapter. Read it again. It will read differently
 In six months, the tactics will be part of how you talk, and this book will be something you reference only when a specific problem comes up that you have not yet mapped. That is the right outcome. The book is not supposed to stay central. It is supposed to become the invisible layer underneath how you handle the conversations that matter.
 
 *Field note: eight years later, Dana and I still exchange emails at Christmas. She was the first person to run the counter-tactic on me. I have never forgotten it. You will have your own Dana. Pay attention when you meet her.*
-
 
 
 # Appendix
@@ -1763,7 +1743,6 @@ For manipulators, liars, gaslighting, narcissists, boundary violations.
 - **Tactic #33: The Paradox Reveal** (Ch 11). Two contradictory claims surfaced neutrally.
 - **Tactic #35: The Volcano** (Ch 12). Let the escalation burn out. Speak calmly when it is over.
 - **Tactic #41: The Waiting Period** (Ch 13). Time is often on your side, not theirs.
-
 
 
 *End of Shadow Persuasion, first draft.*
