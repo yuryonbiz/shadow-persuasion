@@ -98,6 +98,47 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'customer.subscription.created': {
+        // Fires when a subscription is created via API (e.g. the /api/checkout/upsell-app
+        // one-click flow). Checkout Sessions already flow through
+        // `checkout.session.completed`, so we only handle the API-created case here.
+        const subscription = event.data.object as Stripe.Subscription;
+        const funnel = subscription.metadata?.funnel;
+        if (funnel !== 'upsell_app') {
+          // Not our funnel — let `checkout.session.completed` handle it above
+          break;
+        }
+
+        const customerId =
+          typeof subscription.customer === 'string'
+            ? subscription.customer
+            : subscription.customer.id;
+
+        // Pull email from customer
+        const customer = await stripe.customers.retrieve(customerId);
+        const customerEmail =
+          !customer.deleted && 'email' in customer ? customer.email || null : null;
+
+        const userId = `stripe_${customerId}`;
+        const { error } = await supabase.from('subscriptions').upsert(
+          {
+            user_id: userId,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscription.id,
+            plan: subscription.metadata?.plan || 'monthly',
+            status: subscription.status === 'active' ? 'active' : subscription.status,
+            current_period_end: getSubscriptionPeriodEnd(subscription),
+            email: customerEmail,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+        if (error) {
+          console.error('[STRIPE WEBHOOK] Supabase insert error (upsell sub.created):', error);
+        }
+        break;
+      }
+
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.userId;
