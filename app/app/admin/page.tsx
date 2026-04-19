@@ -50,10 +50,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="p-6 md:p-10 max-w-7xl">
       <div className="mb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4A017]/70 mb-2">
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-2">
           // DASHBOARD //
         </p>
-        <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-[#F4ECD8]">
+        <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8]">
           Admin Overview
         </h1>
       </div>
@@ -108,7 +108,7 @@ export default function AdminDashboardPage() {
 
       {/* Navigation cards */}
       <div>
-        <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4A017]/70 mb-4">
+        <h2 className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-4">
           // SECTIONS //
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,9 +162,9 @@ function MetricCard({
   loading?: boolean;
 }) {
   return (
-    <div className="bg-[#111] border border-[#D4A017]/20 p-4">
+    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#D4A017]/20 p-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#F4ECD8]/60">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/60">
           {label}
         </p>
         <Icon className="h-4 w-4 text-[#D4A017]/70" />
@@ -173,7 +173,7 @@ function MetricCard({
         {value}
       </p>
       {sublabel && (
-        <p className="font-mono text-[10px] text-[#F4ECD8]/50 mt-1">{sublabel}</p>
+        <p className="font-mono text-[10px] text-gray-500 dark:text-[#F4ECD8]/50 mt-1">{sublabel}</p>
       )}
     </div>
   );
@@ -193,7 +193,7 @@ function NavCard({
   return (
     <Link
       href={href}
-      className="block bg-[#111] border border-[#D4A017]/20 p-5 hover:border-[#D4A017] transition-colors group"
+      className="block bg-white dark:bg-[#111] border border-gray-200 dark:border-[#D4A017]/20 p-5 hover:border-[#D4A017] transition-colors group"
     >
       <div className="flex items-start gap-3 mb-3">
         <Icon className="h-5 w-5 text-[#D4A017]" />
@@ -201,7 +201,7 @@ function NavCard({
           {title}
         </h3>
       </div>
-      <p className="text-sm text-[#F4ECD8]/70 leading-relaxed mb-3">{body}</p>
+      <p className="text-sm text-gray-600 dark:text-[#F4ECD8]/70 leading-relaxed mb-3">{body}</p>
       <div className="flex items-center gap-1 text-xs text-[#D4A017] group-hover:gap-2 transition-all">
         Open
         <ArrowRight className="h-3 w-3" />

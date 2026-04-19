@@ -164,7 +164,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="p-6 md:p-10">
-        <p className="text-[#F4ECD8]/50 font-mono text-sm">Loading order…</p>
+        <p className="text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">Loading order…</p>
       </div>
     );
   }
@@ -192,13 +192,13 @@ export default function OrderDetailPage() {
 
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4A017]/70 mb-2">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-2">
             // ORDER //
           </p>
-          <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#F4ECD8]">
+          <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8]">
             {order.email}
           </h1>
-          <p className="font-mono text-xs text-[#F4ECD8]/50 mt-2">
+          <p className="font-mono text-xs text-gray-500 dark:text-[#F4ECD8]/50 mt-2">
             ID {order.id.slice(0, 13)}…  ·  {fmtDate(order.created_at)}
           </p>
         </div>
@@ -229,16 +229,16 @@ export default function OrderDetailPage() {
           <Field label="Refunded" value={order.refunded_at ? fmtDate(order.refunded_at) : '—'} />
         </div>
         <div className="mt-5">
-          <p className="text-[10px] uppercase tracking-wider text-[#F4ECD8]/50 font-mono mb-2">Items</p>
+          <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/50 font-mono mb-2">Items</p>
           <div className="space-y-1.5">
             {order.items.map((slug) => (
               <div
                 key={slug}
-                className="flex items-center gap-3 bg-[#0A0A0A] border border-[#D4A017]/20 px-3 py-2 font-mono text-sm"
+                className="flex items-center gap-3 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#D4A017]/20 px-3 py-2 font-mono text-sm"
               >
                 <FileCheck className="h-4 w-4 text-[#D4A017]" />
-                <span className="text-[#F4ECD8]">{ITEM_LABELS[slug] || slug}</span>
-                <span className="ml-auto text-[#F4ECD8]/40 text-xs uppercase">{slug}</span>
+                <span className="text-gray-900 dark:text-[#F4ECD8]">{ITEM_LABELS[slug] || slug}</span>
+                <span className="ml-auto text-gray-400 dark:text-[#F4ECD8]/40 text-xs uppercase">{slug}</span>
               </div>
             ))}
           </div>
@@ -259,16 +259,16 @@ export default function OrderDetailPage() {
         </div>
         {charges.length > 0 && (
           <div className="mt-5">
-            <p className="text-[10px] uppercase tracking-wider text-[#F4ECD8]/50 font-mono mb-2">
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/50 font-mono mb-2">
               Charges ({charges.length})
             </p>
             <div className="space-y-2">
               {charges.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-3 bg-[#0A0A0A] border border-[#D4A017]/20 px-3 py-2 text-xs font-mono"
+                  className="flex items-center gap-3 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#D4A017]/20 px-3 py-2 text-xs font-mono"
                 >
-                  <span className="text-[#F4ECD8]">{fmt(c.amount)}</span>
+                  <span className="text-gray-900 dark:text-[#F4ECD8]">{fmt(c.amount)}</span>
                   <span
                     className={`px-2 py-0.5 uppercase tracking-wider ${
                       c.status === 'succeeded'
@@ -283,7 +283,7 @@ export default function OrderDetailPage() {
                       Refunded {fmt(c.amount_refunded)}
                     </span>
                   )}
-                  <span className="text-[#F4ECD8]/40 ml-auto">{fmtUnix(c.created)}</span>
+                  <span className="text-gray-400 dark:text-[#F4ECD8]/40 ml-auto">{fmtUnix(c.created)}</span>
                   {c.receipt_url && (
                     <a
                       href={c.receipt_url}
@@ -324,11 +324,11 @@ export default function OrderDetailPage() {
               />
               <Field label="Stripe Sub ID" value={subscription.stripe_subscription_id || '—'} mono />
             </div>
-            <div className="flex gap-2 flex-wrap pt-3 border-t border-[#D4A017]/10">
+            <div className="flex gap-2 flex-wrap pt-3 border-t border-gray-200 dark:border-[#D4A017]/10">
               <button
                 onClick={() => cancelSub('period_end')}
                 disabled={busy === 'cancel_sub' || subscription.status === 'cancelled'}
-                className="px-3 py-1.5 bg-[#111] border border-[#D4A017]/40 text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
+                className="px-3 py-1.5 bg-white dark:bg-[#111] border border-gray-300 dark:border-[#D4A017]/40 text-gray-900 dark:text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
               >
                 Cancel at Period End
               </button>
@@ -346,7 +346,7 @@ export default function OrderDetailPage() {
             </div>
           </div>
         ) : (
-          <p className="text-[#F4ECD8]/50 font-mono text-sm">
+          <p className="text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">
             This buyer does not have a SaaS subscription.
           </p>
         )}
@@ -360,10 +360,10 @@ export default function OrderDetailPage() {
               <Link
                 key={r.id}
                 href={`/app/admin/orders/${r.id}`}
-                className="flex items-center gap-3 bg-[#0A0A0A] border border-[#D4A017]/20 hover:border-[#D4A017] px-3 py-2 text-xs font-mono"
+                className="flex items-center gap-3 bg-gray-50 dark:bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#D4A017]/20 hover:border-[#D4A017] px-3 py-2 text-xs font-mono"
               >
-                <span className="text-[#F4ECD8]/60">{fmtDate(r.created_at)}</span>
-                <span className="text-[#F4ECD8]">{(r.items || []).join(' + ')}</span>
+                <span className="text-gray-500 dark:text-[#F4ECD8]/60">{fmtDate(r.created_at)}</span>
+                <span className="text-gray-900 dark:text-[#F4ECD8]">{(r.items || []).join(' + ')}</span>
                 <span className="ml-auto text-[#D4A017] font-bold">{fmt(r.amount_cents)}</span>
                 <StatusBadge status={r.status} small />
               </Link>
@@ -375,17 +375,17 @@ export default function OrderDetailPage() {
       {/* ─────────── Actions ─────────── */}
       <Section title="Actions">
         {/* Resend email */}
-        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-[#D4A017]/10">
+        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-gray-200 dark:border-[#D4A017]/10">
           <Mail className="h-5 w-5 text-[#D4A017] mt-0.5 shrink-0" />
           <div className="flex-1">
-            <p className="font-bold text-[#F4ECD8] text-sm mb-1">Resend delivery email</p>
-            <p className="text-xs text-[#F4ECD8]/60 mb-3">
+            <p className="font-bold text-gray-900 dark:text-[#F4ECD8] text-sm mb-1">Resend delivery email</p>
+            <p className="text-xs text-gray-600 dark:text-[#F4ECD8]/60 mb-3">
               Send the download links to {order.email} again. Useful if they say it didn&apos;t arrive.
             </p>
             <button
               onClick={() => act('resend_email')}
               disabled={busy === 'resend_email'}
-              className="px-3 py-1.5 bg-[#111] border border-[#D4A017]/40 text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
+              className="px-3 py-1.5 bg-white dark:bg-[#111] border border-gray-300 dark:border-[#D4A017]/40 text-gray-900 dark:text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
             >
               {busy === 'resend_email' ? 'Sending…' : 'Resend'}
             </button>
@@ -393,17 +393,17 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Mark delivered */}
-        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-[#D4A017]/10">
+        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-gray-200 dark:border-[#D4A017]/10">
           <FileCheck className="h-5 w-5 text-[#D4A017] mt-0.5 shrink-0" />
           <div className="flex-1">
-            <p className="font-bold text-[#F4ECD8] text-sm mb-1">Mark as delivered</p>
-            <p className="text-xs text-[#F4ECD8]/60 mb-3">
+            <p className="font-bold text-gray-900 dark:text-[#F4ECD8] text-sm mb-1">Mark as delivered</p>
+            <p className="text-xs text-gray-600 dark:text-[#F4ECD8]/60 mb-3">
               Stamps delivered_at now. Use for manual fulfillment outside the webhook flow.
             </p>
             <button
               onClick={() => act('mark_delivered')}
               disabled={busy === 'mark_delivered'}
-              className="px-3 py-1.5 bg-[#111] border border-[#D4A017]/40 text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
+              className="px-3 py-1.5 bg-white dark:bg-[#111] border border-gray-300 dark:border-[#D4A017]/40 text-gray-900 dark:text-[#F4ECD8] hover:border-[#D4A017] disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
             >
               {busy === 'mark_delivered' ? 'Marking…' : 'Mark Delivered'}
             </button>
@@ -414,8 +414,8 @@ export default function OrderDetailPage() {
         <div className="flex items-start gap-4">
           <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 shrink-0" />
           <div className="flex-1">
-            <p className="font-bold text-[#F4ECD8] text-sm mb-1">Refund</p>
-            <p className="text-xs text-[#F4ECD8]/60 mb-3">
+            <p className="font-bold text-gray-900 dark:text-[#F4ECD8] text-sm mb-1">Refund</p>
+            <p className="text-xs text-gray-600 dark:text-[#F4ECD8]/60 mb-3">
               Issues a full refund via Stripe and marks the order as refunded. Cannot be undone.
               {!canRefund && (
                 <span className="block mt-1 text-red-400">
@@ -438,7 +438,7 @@ export default function OrderDetailPage() {
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
                   placeholder="Internal note (optional)"
-                  className="w-full px-3 py-2 bg-[#0A0A0A] border border-[#D4A017]/30 text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0A0A0A] border border-gray-300 dark:border-[#D4A017]/30 text-gray-900 dark:text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
                 />
                 <div className="flex gap-2">
                   <button
@@ -458,7 +458,7 @@ export default function OrderDetailPage() {
                       setRefundOpen(false);
                       setRefundReason('');
                     }}
-                    className="px-3 py-1.5 bg-[#111] border border-[#D4A017]/30 text-[#F4ECD8]/60 hover:text-[#F4ECD8] font-mono text-xs uppercase tracking-wider"
+                    className="px-3 py-1.5 bg-white dark:bg-[#111] border border-gray-300 dark:border-[#D4A017]/30 text-gray-600 dark:text-[#F4ECD8]/60 hover:text-gray-900 dark:hover:text-[#F4ECD8] font-mono text-xs uppercase tracking-wider"
                   >
                     Cancel
                   </button>
@@ -471,7 +471,7 @@ export default function OrderDetailPage() {
 
       {/* ─────────── Raw data ─────────── */}
       <Section title="Raw metadata" collapsed>
-        <pre className="text-[10px] text-[#F4ECD8]/70 font-mono overflow-x-auto bg-[#0A0A0A] border border-[#D4A017]/20 p-3">
+        <pre className="text-[10px] text-gray-700 dark:text-[#F4ECD8]/70 font-mono overflow-x-auto bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#D4A017]/20 p-3">
           {JSON.stringify(order.metadata || {}, null, 2)}
         </pre>
       </Section>
@@ -484,7 +484,7 @@ export default function OrderDetailPage() {
 function Section({ title, children, collapsed }: { title: string; children: React.ReactNode; collapsed?: boolean }) {
   const [open, setOpen] = useState(!collapsed);
   return (
-    <div className="bg-[#111] border border-[#D4A017]/20 p-5 mb-5">
+    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#D4A017]/20 p-5 mb-5">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between mb-3 text-left"
@@ -510,10 +510,10 @@ function Field({
 }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-[#F4ECD8]/50 font-mono mb-1">
+      <p className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/50 font-mono mb-1">
         {label}
       </p>
-      <p className={`text-sm ${highlight ? 'text-[#D4A017] font-bold' : 'text-[#F4ECD8]'} ${mono ? 'font-mono break-all' : ''}`}>
+      <p className={`text-sm ${highlight ? 'text-[#D4A017] font-bold' : 'text-gray-900 dark:text-[#F4ECD8]'} ${mono ? 'font-mono break-all' : ''}`}>
         {value}
       </p>
     </div>
@@ -527,7 +527,7 @@ function StatusBadge({ status, small }: { status: string; small?: boolean }) {
     refunded: { icon: CircleX,     cls: 'bg-red-600/20 border-red-600 text-red-400', label: 'Refunded' },
     failed:   { icon: CircleAlert, cls: 'bg-red-800/20 border-red-800 text-red-500', label: 'Failed' },
   };
-  const cfg = map[status] || { icon: CircleAlert, cls: 'bg-[#333] text-[#F4ECD8]/70', label: status };
+  const cfg = map[status] || { icon: CircleAlert, cls: 'bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-[#F4ECD8]/70', label: status };
   const Icon = cfg.icon;
   const padding = small ? 'px-2 py-0.5' : 'px-3 py-1';
   const text = small ? 'text-[10px]' : 'text-xs';

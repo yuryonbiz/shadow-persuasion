@@ -89,16 +89,16 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#D4A017]/70 mb-2">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-2">
             // ORDERS //
           </p>
-          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-[#F4ECD8]">
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8]">
             Orders
           </h1>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-4 py-2 bg-[#111] border border-[#D4A017]/30 text-[#D4A017] hover:border-[#D4A017] font-mono text-xs uppercase tracking-wider"
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#111] border border-gray-300 dark:border-[#D4A017]/30 text-[#D4A017] hover:border-[#D4A017] font-mono text-xs uppercase tracking-wider"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Refresh
@@ -128,31 +128,31 @@ export default function OrdersPage() {
       )}
 
       {/* Filters */}
-      <div className="bg-[#111] border border-[#D4A017]/20 p-4 mb-6 flex flex-wrap gap-3 items-end">
+      <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#D4A017]/20 p-4 mb-6 flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-60">
-          <label className="block text-[10px] uppercase tracking-wider text-[#F4ECD8]/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/60 mb-1">
             Search email
           </label>
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#F4ECD8]/40" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 dark:text-[#F4ECD8]/40" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && load()}
               placeholder="user@example.com"
-              className="w-full pl-10 pr-3 py-2 bg-[#0A0A0A] border border-[#D4A017]/30 text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
+              className="w-full pl-10 pr-3 py-2 bg-white dark:bg-[#0A0A0A] border border-gray-300 dark:border-[#D4A017]/30 text-gray-900 dark:text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
             />
           </div>
         </div>
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#F4ECD8]/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/60 mb-1">
             Status
           </label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="px-3 py-2 bg-[#0A0A0A] border border-[#D4A017]/30 text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
+            className="px-3 py-2 bg-white dark:bg-[#0A0A0A] border border-gray-300 dark:border-[#D4A017]/30 text-gray-900 dark:text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
           >
             <option value="all">All</option>
             <option value="paid">Paid</option>
@@ -162,13 +162,13 @@ export default function OrdersPage() {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] uppercase tracking-wider text-[#F4ECD8]/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/60 mb-1">
             Product
           </label>
           <select
             value={product}
             onChange={(e) => setProduct(e.target.value)}
-            className="px-3 py-2 bg-[#0A0A0A] border border-[#D4A017]/30 text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
+            className="px-3 py-2 bg-white dark:bg-[#0A0A0A] border border-gray-300 dark:border-[#D4A017]/30 text-gray-900 dark:text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
           >
             <option value="all">All</option>
             <option value="book">Book</option>
@@ -187,50 +187,50 @@ export default function OrdersPage() {
       </div>
 
       {/* Summary */}
-      <div className="mb-4 text-xs text-[#F4ECD8]/60 font-mono">
+      <div className="mb-4 text-xs text-gray-500 dark:text-[#F4ECD8]/60 font-mono">
         Showing {orders.length} of {total} · Revenue (filtered view): {fmt(totalRevenueCents)}
       </div>
 
       {/* Table */}
-      <div className="bg-[#111] border border-[#D4A017]/20 overflow-x-auto">
+      <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#D4A017]/20 overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#0A0A0A] border-b border-[#D4A017]/20 text-left">
+          <thead className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#D4A017]/20 text-left">
             <tr>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono">Date</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono">Email</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono">Items</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Date</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Email</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Items</th>
               <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono text-right">Amount</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono">Status</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono">Member?</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono"></th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Status</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Member?</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[#F4ECD8]/50 font-mono text-sm">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">
                   Loading…
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[#F4ECD8]/50 font-mono text-sm">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">
                   No orders match these filters.
                 </td>
               </tr>
             ) : (
               orders.map((o) => (
-                <tr key={o.id} className="border-b border-[#D4A017]/10 hover:bg-[#0A0A0A]">
-                  <td className="px-4 py-3 text-xs text-[#F4ECD8]/70 font-mono whitespace-nowrap">
+                <tr key={o.id} className="border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A]">
+                  <td className="px-4 py-3 text-xs text-gray-600 dark:text-[#F4ECD8]/70 font-mono whitespace-nowrap">
                     {fmtDate(o.created_at)}
                   </td>
-                  <td className="px-4 py-3 text-[#F4ECD8] text-sm">
+                  <td className="px-4 py-3 text-gray-900 dark:text-[#F4ECD8] text-sm">
                     {o.email}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {o.items.map((slug) => {
-                        const cfg = ITEM_LABELS[slug] || { label: slug, color: 'bg-[#333] text-[#F4ECD8]' };
+                        const cfg = ITEM_LABELS[slug] || { label: slug, color: 'bg-gray-300 dark:bg-[#333] text-gray-800 dark:text-[#F4ECD8]' };
                         return (
                           <span
                             key={slug}
@@ -253,10 +253,10 @@ export default function OrdersPage() {
                       <span className="inline-flex items-center gap-1 text-xs text-[#D4A017]">
                         <Users className="h-3 w-3" />
                         {o.member.plan}
-                        <span className="text-[#F4ECD8]/50 ml-1">({o.member.status})</span>
+                        <span className="text-gray-500 dark:text-[#F4ECD8]/50 ml-1">({o.member.status})</span>
                       </span>
                     ) : (
-                      <span className="text-xs text-[#F4ECD8]/30">—</span>
+                      <span className="text-xs text-gray-400 dark:text-[#F4ECD8]/30">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -290,13 +290,13 @@ function FunnelCard({
   primary?: boolean;
 }) {
   return (
-    <div className={`border p-4 ${primary ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-[#D4A017]/20 bg-[#111]'}`}>
+    <div className={`border p-4 ${primary ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-gray-200 dark:border-[#D4A017]/20 bg-white dark:bg-[#111]'}`}>
       <div className="flex items-center justify-between mb-1">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#F4ECD8]/60">{label}</p>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#F4ECD8]/60">{label}</p>
         {!primary && <TrendingDown className="h-3 w-3 text-[#D4A017]/50" />}
       </div>
       <p className="font-mono text-2xl font-black text-[#D4A017]">{value}</p>
-      <p className="font-mono text-xs text-[#F4ECD8]/60">{subvalue}</p>
+      <p className="font-mono text-xs text-gray-500 dark:text-[#F4ECD8]/60">{subvalue}</p>
     </div>
   );
 }
@@ -308,7 +308,7 @@ function StatusBadge({ status }: { status: string }) {
     refunded: { icon: CircleX,     className: 'bg-red-600/20 border-red-600 text-red-400', label: 'Refunded' },
     failed:   { icon: CircleAlert, className: 'bg-red-800/20 border-red-800 text-red-500', label: 'Failed' },
   };
-  const cfg = map[status] || { icon: CircleAlert, className: 'bg-[#333] text-[#F4ECD8]/70', label: status };
+  const cfg = map[status] || { icon: CircleAlert, className: 'bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-[#F4ECD8]/70', label: status };
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${cfg.className}`}>
