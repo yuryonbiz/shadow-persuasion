@@ -1,24 +1,15 @@
 #!/usr/bin/env python3
 """
-Bonus #2: The Power Dynamics Cheatsheet
+Bonus #2: The Power Dynamics Cheatsheet (rev2)
 
-A single-page reference designed to be screenshotted to a phone and
-pulled up before any high-stakes conversation.
-
-Seven sections:
-  1. Pre-Flight Check (what to settle before you walk in)
-  2. First 30 Seconds (opening moves)
-  3. Who Has The Power (real-time read)
-  4. Power Moves (deploy)
-  5. Power Leaks (avoid)
-  6. When You're Losing (recovery)
-  7. Exit Well (ending the conversation)
-
-Generates:
-  - cover-bonus-2.png (cream cover image)
-  - bonus-2-power-dynamics-cheatsheet.docx
-    Page 1: cover
-    Page 2: the cheatsheet itself (screenshot-friendly)
+Rebuilt per user feedback:
+- Cover: tighter vertical balance, title in 2 lines (was 3), subtitle
+  in 2 natural lines (was 4 choppy ones)
+- Cheatsheet: plain English throughout (no jargon like BATNA),
+  5 chronological sections (BEFORE / OPEN / DURING / IF LOSING / END)
+  with one accent color instead of five different colors.
+- Each item rewritten for clarity: no tactic names, no cryptic
+  shorthand. Just 'this is what you do and why' in clear language.
 """
 
 from pathlib import Path
@@ -39,18 +30,15 @@ DOCX_OUT = REPO / "funnel" / "exports" / "bonus-2-power-dynamics-cheatsheet.docx
 BODY_FONT = "Georgia"
 TITLE_FONT = "Georgia"
 
-# Brand colors (RGB tuples for Pillow, RGBColor for docx)
+# Brand colors
 CREAM = (0xF4, 0xEC, 0xD8)
 DARK = (0x1A, 0x1A, 0x1A)
 BROWN = (0x5C, 0x3A, 0x1E)
 GOLD = (0xD4, 0xA0, 0x17)
-RED = (0x8B, 0x3D, 0x3D)
 
 DARK_RGB = RGBColor(0x1A, 0x1A, 0x1A)
 BROWN_RGB = RGBColor(0x5C, 0x3A, 0x1E)
 GOLD_RGB = RGBColor(0xD4, 0xA0, 0x17)
-RED_RGB = RGBColor(0x8B, 0x3D, 0x3D)
-GREEN_RGB = RGBColor(0x3D, 0x8B, 0x5E)
 GRAY_RGB = RGBColor(0x6B, 0x5B, 0x3E)
 
 
@@ -62,51 +50,52 @@ def build_cover():
     draw = ImageDraw.Draw(img)
 
     label_font = ImageFont.truetype(str(FONT_TTF), 40)
-    title_font = ImageFont.truetype(str(FONT_TTF), 100)
+    title_font = ImageFont.truetype(str(FONT_TTF), 120)
     subtitle_font = ImageFont.truetype(str(FONT_TTF), 58)
-    author_font = ImageFont.truetype(str(FONT_TTF), 44)
+    author_font = ImageFont.truetype(str(FONT_TTF), 52)
 
-    # Logo
+    # Logo — 900px wide, centered, starts at y=380
     logo = Image.open(str(LOGO)).convert("RGBA")
     scale = 900 / logo.width
     logo_resized = logo.resize((int(logo.width * scale), int(logo.height * scale)), Image.LANCZOS)
-    img.paste(logo_resized, ((WIDTH - logo_resized.width) // 2, 360), logo_resized)
+    logo_x = (WIDTH - logo_resized.width) // 2
+    logo_y = 380
+    img.paste(logo_resized, (logo_x, logo_y), logo_resized)
 
-    # Bonus label
+    # Bonus label — snug under logo
     label_text = "// FREE BONUS  02 //"
     bbox = draw.textbbox((0, 0), label_text, font=label_font)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, 880), label_text, fill=BROWN, font=label_font)
+    label_y = logo_y + logo_resized.height + 80
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, label_y), label_text, fill=BROWN, font=label_font)
 
-    # Title
-    title_text = "THE POWER"
-    bbox = draw.textbbox((0, 0), title_text, font=title_font)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, 1020), title_text, fill=DARK, font=title_font)
+    # Title — 2 lines, clean
+    title_y = label_y + 120
+    title_line_spacing = 150
 
-    title_text2 = "DYNAMICS"
-    bbox = draw.textbbox((0, 0), title_text2, font=title_font)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, 1150), title_text2, fill=DARK, font=title_font)
+    title_line1 = "POWER DYNAMICS"
+    bbox = draw.textbbox((0, 0), title_line1, font=title_font)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, title_y), title_line1, fill=DARK, font=title_font)
 
-    title_text3 = "CHEATSHEET"
-    bbox = draw.textbbox((0, 0), title_text3, font=title_font)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, 1280), title_text3, fill=DARK, font=title_font)
+    title_line2 = "CHEATSHEET"
+    bbox = draw.textbbox((0, 0), title_line2, font=title_font)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, title_y + title_line_spacing), title_line2, fill=DARK, font=title_font)
 
     # Gold rule
-    draw.rectangle([(WIDTH // 2 - 180, 1450), (WIDTH // 2 + 180, 1453)], fill=GOLD)
+    rule_y = title_y + title_line_spacing + 180
+    draw.rectangle([(WIDTH // 2 - 200, rule_y), (WIDTH // 2 + 200, rule_y + 3)], fill=GOLD)
 
-    # Subtitle
+    # Subtitle — 2 natural lines
     subtitle_lines = [
-        "Screenshot This.",
-        "Pull It Up Before",
-        "Any Conversation",
-        "That Matters.",
+        "Before Any Conversation",
+        "That Matters",
     ]
-    sub_y = 1520
+    sub_y = rule_y + 100
     for line in subtitle_lines:
         bbox = draw.textbbox((0, 0), line, font=subtitle_font)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, sub_y), line, fill=BROWN, font=subtitle_font)
         sub_y += 90
 
-    # Author
+    # Author — bottom
     author_text = "NATE HARLAN"
     bbox = draw.textbbox((0, 0), author_text, font=author_font)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) // 2, HEIGHT - 280), author_text, fill=DARK, font=author_font)
@@ -123,10 +112,9 @@ def build_cover():
 
 def add_page_number(paragraph):
     run = paragraph.add_run()
-    for t, val in [("w:fldChar", "begin")]:
-        el = OxmlElement(t)
-        el.set(qn("w:fldCharType"), val)
-        run._r.append(el)
+    el = OxmlElement("w:fldChar")
+    el.set(qn("w:fldCharType"), "begin")
+    run._r.append(el)
     it = OxmlElement("w:instrText")
     it.set(qn("xml:space"), "preserve")
     it.text = "PAGE"
@@ -140,94 +128,64 @@ def add_page_number(paragraph):
 
 
 def set_page_background_cream(doc):
-    """Set the page background to cream (#F4ECD8). Shows on screen and exports to PDF."""
     background = OxmlElement("w:background")
     background.set(qn("w:color"), "F4ECD8")
     doc.element.insert(0, background)
-    # Also need displayBackgroundShape in settings for Word to render it
     settings = doc.settings.element
     display_bg = OxmlElement("w:displayBackgroundShape")
     settings.append(display_bg)
 
 
-# ========== CHEATSHEET CONTENT ==========
+# ========== CHEATSHEET CONTENT (plain English, no jargon) ==========
 
 SECTIONS = [
     {
-        "title": "PRE-FLIGHT CHECK",
-        "subtitle": "Before you walk in.",
+        "title": "1.  BEFORE YOU WALK IN",
+        "subtitle": "Three things to settle in your own head.",
         "items": [
-            "Know your BATNA. What happens if this goes badly.",
-            "Pick ONE tactic to deploy. Not three.",
-            "Your walkaway number stays in your head. Never spoken.",
+            "Know what you'll do if the conversation fails. Without a clear backup plan, you'll give in under pressure.",
+            "Pick ONE thing you want to focus on doing during the conversation. Not three. One.",
+            "Decide your bottom line (the worst outcome you'd still accept). Keep this number in your head. Never say it out loud.",
         ],
-        "label_color": BROWN_RGB,
     },
     {
-        "title": "FIRST 30 SECONDS",
-        "subtitle": "The window that determines everything.",
+        "title": "2.  THE FIRST 30 SECONDS",
+        "subtitle": "The opening determines everything that follows.",
         "items": [
-            "Match their energy. Do not exceed it.",
-            "Skip the \"thanks for making time.\" Open with a specific observation.",
-            "Silence is okay. Filling it is not.",
+            "Match their energy level. If they're calm, be calm. Don't be more excited than they are.",
+            "Skip the polite openers like \"thanks for making time.\" Those are the exact words everyone else uses. Everyone else loses.",
+            "Start with something specific about them, not a pitch. A real observation. Something that shows you paid attention.",
         ],
-        "label_color": BROWN_RGB,
     },
     {
-        "title": "WHO HAS THE POWER",
-        "subtitle": "A two-second read, any moment in the conversation.",
+        "title": "3.  DURING THE CONVERSATION",
+        "subtitle": "The small moves that quietly shift the dynamic in your favor.",
         "items": [
-            "YOU hold it if: they're asking more questions than you are.",
-            "YOU hold it if: silences don't make you uncomfortable.",
-            "THEY hold it if: you're asking more questions than they are.",
-            "THEY hold it if: you're filling every pause.",
+            "After they make a statement, pause for four full seconds before you respond. They'll often fill the silence themselves.",
+            "When you don't know what to say, ask a \"how\" question. \"How would that work?\" \"How did you arrive at that?\" It keeps them talking.",
+            "Let them suggest the next step, not you. The person who names the next move has more control.",
+            "Don't explain things they didn't ask about. Over-explaining is the most common way people give away leverage.",
         ],
-        "label_color": GOLD_RGB,
     },
     {
-        "title": "POWER MOVES",
-        "subtitle": "Deploy when you feel the dynamic shifting toward you.",
+        "title": "4.  IF YOU'RE LOSING GROUND",
+        "subtitle": "Recovery moves. Use in this order.",
         "items": [
-            "Four seconds of silence after their statement.",
-            "Ask a \"how\" question when cornered.",
-            "Let them name the next step.",
-            "Short emails beat long ones. Twelve words is often enough.",
+            "First: stop talking. Count to four in your head. Do not break the silence.",
+            "Second: ask a question. Any question. It slows the pace and puts them back in the work of answering.",
+            "Third: repeat your main point using the exact same words you used earlier. Not new arguments. Same sentence.",
+            "If none of that works: \"Let me think about this. I'll follow up Monday.\" Leave. Re-engage when you're ready.",
         ],
-        "label_color": GREEN_RGB,
     },
     {
-        "title": "POWER LEAKS",
-        "subtitle": "Each of these cedes leverage you did not mean to give.",
+        "title": "5.  HOW TO END",
+        "subtitle": "The last thirty seconds matter as much as the first.",
         "items": [
-            "Over-explaining when they did not ask.",
-            "Apologizing for taking their time.",
-            "Laughing at every joke to build rapport.",
-            "Using \"just\" and \"actually\" as softeners.",
-            "Answering questions you were not asked.",
+            "If they agree to what you wanted, do not celebrate. Move to a different topic. Celebrating reminds them they just agreed to something.",
+            "Send a short email within 24 hours. Two sentences, maximum. Long emails give them something to reconsider.",
+            "Don't recap what was agreed. The recap is when people start finding things they wish they'd negotiated harder on.",
+            "The emotional state you leave them in is what they'll remember. Choose it on purpose. Don't just drift out.",
         ],
-        "label_color": RED_RGB,
-    },
-    {
-        "title": "WHEN YOU'RE LOSING",
-        "subtitle": "Recovery moves. Use in order.",
-        "items": [
-            "Stop. Silence for four seconds.",
-            "Ask a question. Any question at all.",
-            "Restate your core point verbatim. Do not re-argue it.",
-            "Worst case: \"Let me think. I'll follow up Monday.\"",
-        ],
-        "label_color": RED_RGB,
-    },
-    {
-        "title": "EXIT WELL",
-        "subtitle": "The last 30 seconds matter as much as the first.",
-        "items": [
-            "Do not celebrate a yes. Move to an unrelated topic.",
-            "Do not summarize what was agreed.",
-            "Twelve-word email within twenty-four hours.",
-            "Choose the emotional state you leave them in. That is the memory.",
-        ],
-        "label_color": BROWN_RGB,
     },
 ]
 
@@ -257,41 +215,39 @@ def build_docx():
     run = cover_p.add_run()
     run.add_picture(str(COVER_OUT), width=Inches(6), height=Inches(9))
 
-    # ==== SECTION 2: THE CHEATSHEET (single page) ====
+    # ==== SECTION 2: THE CHEATSHEET ====
     body = doc.add_section(WD_SECTION_START.NEW_PAGE)
     body.page_width = Inches(6)
     body.page_height = Inches(9)
     body.top_margin = Inches(0.6)
     body.bottom_margin = Inches(0.5)
-    body.left_margin = Inches(0.55)
-    body.right_margin = Inches(0.55)
+    body.left_margin = Inches(0.6)
+    body.right_margin = Inches(0.6)
     body.header_distance = Inches(0.2)
     body.footer_distance = Inches(0.3)
     body.header.is_linked_to_previous = False
     body.footer.is_linked_to_previous = False
 
-    # Cheatsheet has no header (one-page layout; logo lives in title area)
-    # Footer: page number (will just say "2" on this single content page)
+    # Footer: just the domain
     f = body.footer.paragraphs[0]
     f.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = f.add_run("SHADOWPERSUASION.COM")
-    run.font.name = BODY_FONT
-    run.font.size = Pt(8)
-    run.font.color.rgb = BROWN_RGB
+    r = f.add_run("SHADOWPERSUASION.COM")
+    r.font.name = BODY_FONT
+    r.font.size = Pt(8)
+    r.font.color.rgb = BROWN_RGB
 
-    # === Title block ===
-    # Logo at top right (small inline)
-    title_p = doc.add_paragraph()
-    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_p.paragraph_format.space_before = Pt(0)
-    title_p.paragraph_format.space_after = Pt(2)
-    run = title_p.add_run()
-    run.add_picture(str(LOGO), width=Inches(1.2))
+    # === Header block on cheatsheet page ===
+    # Logo
+    logo_p = doc.add_paragraph()
+    logo_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    logo_p.paragraph_format.space_before = Pt(0)
+    logo_p.paragraph_format.space_after = Pt(6)
+    run = logo_p.add_run()
+    run.add_picture(str(LOGO), width=Inches(1.3))
 
     # Title
     t = doc.add_paragraph()
     t.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    t.paragraph_format.space_before = Pt(6)
     t.paragraph_format.space_after = Pt(2)
     r = t.add_run("POWER DYNAMICS CHEATSHEET")
     r.font.name = TITLE_FONT
@@ -299,41 +255,34 @@ def build_docx():
     r.bold = True
     r.font.color.rgb = DARK_RGB
 
+    # Subtitle
     s = doc.add_paragraph()
     s.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    s.paragraph_format.space_after = Pt(8)
-    r = s.add_run("Screenshot this. Check it before any conversation that matters.")
+    s.paragraph_format.space_after = Pt(14)
+    r = s.add_run("Pull this up on your phone before any conversation that matters.")
     r.font.name = TITLE_FONT
-    r.font.size = Pt(9)
+    r.font.size = Pt(9.5)
     r.italic = True
     r.font.color.rgb = BROWN_RGB
 
-    # Separator rule
-    rule = doc.add_paragraph()
-    rule.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    rule.paragraph_format.space_after = Pt(6)
-    rr = rule.add_run("_" * 40)
-    rr.font.name = BODY_FONT
-    rr.font.size = Pt(8)
-    rr.font.color.rgb = GOLD_RGB
-
-    # === The seven sections ===
+    # === The five sections ===
     for idx, section in enumerate(SECTIONS):
-        # Section header
+        # Section number + title
         h = doc.add_paragraph()
-        h.paragraph_format.space_before = Pt(6)
+        h.paragraph_format.space_before = Pt(10)
         h.paragraph_format.space_after = Pt(1)
         h.paragraph_format.keep_with_next = True
         r = h.add_run(section["title"])
         r.font.name = TITLE_FONT
-        r.font.size = Pt(11)
+        r.font.size = Pt(11.5)
         r.bold = True
-        r.font.color.rgb = section["label_color"]
+        r.font.color.rgb = DARK_RGB
 
         # Section subtitle
         sub = doc.add_paragraph()
-        sub.paragraph_format.space_after = Pt(3)
+        sub.paragraph_format.space_after = Pt(4)
         sub.paragraph_format.keep_with_next = True
+        sub.paragraph_format.left_indent = Inches(0.08)
         r = sub.add_run(section["subtitle"])
         r.font.name = TITLE_FONT
         r.font.size = Pt(8.5)
@@ -343,25 +292,25 @@ def build_docx():
         # Items
         for i, item in enumerate(section["items"]):
             p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(1)
-            p.paragraph_format.left_indent = Inches(0.15)
-            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.left_indent = Inches(0.25)
+            p.paragraph_format.first_line_indent = Inches(-0.15)
+            p.paragraph_format.line_spacing = 1.2
             p.paragraph_format.keep_with_next = (i < len(section["items"]) - 1)
-            # Use a plain bullet
-            r1 = p.add_run("·  ")
+            r1 = p.add_run("\u2022  ")
             r1.font.name = BODY_FONT
-            r1.font.size = Pt(9.5)
+            r1.font.size = Pt(9)
             r1.bold = True
-            r1.font.color.rgb = section["label_color"]
+            r1.font.color.rgb = GOLD_RGB
             r2 = p.add_run(item)
             r2.font.name = BODY_FONT
-            r2.font.size = Pt(9.5)
+            r2.font.size = Pt(9)
             r2.font.color.rgb = DARK_RGB
 
-    # Final brand mark at bottom
+    # Bottom attribution
     foot = doc.add_paragraph()
     foot.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    foot.paragraph_format.space_before = Pt(12)
+    foot.paragraph_format.space_before = Pt(16)
     r = foot.add_run("From Shadow Persuasion by Nate Harlan")
     r.font.name = TITLE_FONT
     r.font.size = Pt(8)
