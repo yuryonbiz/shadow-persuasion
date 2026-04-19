@@ -2,36 +2,42 @@
 """
 Build a professionally-formatted Word document for Shadow Persuasion.
 
-Features:
-- Cover page with centered large logo + title + subtitle + author
-- Table of Contents on its own page
-- Each chapter starts on a new page
-- Header on all content pages with small logo right-aligned
-- Footer on all content pages with page number centered
-- Body font: EB Garamond (fallback Georgia) for readability
-- Heading font: Special_Elite (fallback Courier New) for brand match
-- Italic "Field Note" paragraphs styled distinctively
-- Zero horizontal rules anywhere
+Updates in this version:
+- Cover page: full-page cover image (cream background, Special Elite font,
+  matches shadowpersuasion.com brand)
+- Manual TOC with all 16 chapters visible immediately (no F9 update needed)
+- Logo in header sits near top of page, more padding between header and body
+- All horizontal rules stripped
 - No duplicate title block after TOC
+- Body in Georgia 11pt justified for readability
+- Each chapter starts on a new page
+- Footer: centered page numbers
 """
 
 from pathlib import Path
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor, Cm, Emu
+from docx.shared import Inches, Pt, RGBColor, Emu
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK, WD_LINE_SPACING
 from docx.enum.section import WD_SECTION_START
-from docx.oxml.ns import qn, nsmap
+from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import re
 
 REPO = Path(__file__).resolve().parent.parent
 MANUSCRIPT = REPO / "funnel" / "shadow-persuasion-full-manuscript.md"
 LOGO = REPO / "public" / "logo.png"
+COVER_IMAGE = REPO / "funnel" / "assets" / "cover.png"
 OUT = REPO / "funnel" / "exports" / "shadow-persuasion.docx"
 
-BODY_FONT = "EB Garamond"
-HEADING_FONT = "Courier New"  # falls back if Special_Elite missing
+BODY_FONT = "Georgia"
+HEADING_FONT = "Georgia"
 TITLE_FONT = "Georgia"
+
+# Brand colors
+BROWN = RGBColor(0x5C, 0x3A, 0x1E)
+DARK = RGBColor(0x1A, 0x1A, 0x1A)
+GOLD = RGBColor(0xD4, 0xA0, 0x17)
+
 
 # ----- Helpers -----
 
@@ -50,7 +56,7 @@ def add_page_number(paragraph):
     run._r.append(fldChar2)
     run.font.name = BODY_FONT
     run.font.size = Pt(10)
-    run.font.color.rgb = RGBColor(0x5C, 0x3A, 0x1E)
+    run.font.color.rgb = BROWN
 
 
 def set_page_break_before(paragraph):
@@ -61,63 +67,12 @@ def set_page_break_before(paragraph):
 
 
 def insert_page_break(paragraph):
-    """Insert a page break as a run inside paragraph."""
     run = paragraph.add_run()
     run.add_break(WD_BREAK.PAGE)
 
 
-def add_toc(document):
-    """Add a Table of Contents field. Word will populate on open (user hits F9 to refresh)."""
-    p = document.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    run = p.add_run()
-    fldChar = OxmlElement("w:fldChar")
-    fldChar.set(qn("w:fldCharType"), "begin")
-    instrText = OxmlElement("w:instrText")
-    instrText.set(qn("xml:space"), "preserve")
-    instrText.text = 'TOC \\o "1-2" \\h \\z \\u'
-    fldChar2 = OxmlElement("w:fldChar")
-    fldChar2.set(qn("w:fldCharType"), "separate")
-    t = OxmlElement("w:t")
-    t.text = "Right-click and select Update Field to populate the table of contents."
-    fldChar3 = OxmlElement("w:fldChar")
-    fldChar3.set(qn("w:fldCharType"), "end")
-    run._r.append(fldChar)
-    run._r.append(instrText)
-    run._r.append(fldChar2)
-    run._r.append(t)
-    run._r.append(fldChar3)
-
-
-def style_paragraph(p, font=BODY_FONT, size=11, italic=False, bold=False, align=None, color=None, space_after=6, first_indent=None, line=1.35):
-    if align is not None:
-        p.alignment = align
-    pf = p.paragraph_format
-    pf.space_after = Pt(space_after)
-    pf.line_spacing = line
-    if first_indent is not None:
-        pf.first_line_indent = first_indent
-    for run in p.runs:
-        run.font.name = font
-        run.font.size = Pt(size)
-        run.italic = italic
-        run.bold = bold
-        if color:
-            run.font.color.rgb = color
-
-
-# ----- Markdown parsing (simple, targeted to this book's format) -----
-
-INLINE_PATTERNS = [
-    (re.compile(r"\*\*(.+?)\*\*"), "bold"),   # **bold**
-    (re.compile(r"\*(.+?)\*"), "italic"),     # *italic*
-    (re.compile(r"_(.+?)_"), "italic"),       # _italic_
-]
-
-
 def add_inline_formatted(paragraph, text, font=BODY_FONT, size=11, base_italic=False, color=None):
-    """Add text to paragraph, interpreting simple markdown inline syntax."""
-    # Tokenize: split by **bold** and *italic* preserving content
+    """Parse simple markdown inline syntax into runs."""
     tokens = re.split(r"(\*\*[^*]+\*\*|\*[^*]+\*)", text)
     for tok in tokens:
         if not tok:
@@ -139,76 +94,77 @@ def add_inline_formatted(paragraph, text, font=BODY_FONT, size=11, base_italic=F
             run.font.color.rgb = color
 
 
-# ----- Build the document -----
+# ----- Extract chapter list for manual TOC -----
+
+def extract_toc_entries(text):
+    """Scan manuscript for H1 headings (chapters) and H2 subheadings."""
+    entries = []
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("# ") and not line.startswith("# PART"):
+            heading = line[2:].strip()
+            # Skip the Introduction heading which is labeled directly "Introduction" later
+            entries.append(("chapter", heading))
+        elif line.startswith("## "):
+            sub = line[3:].strip()
+            # Only keep the first H2 per chapter (the chapter title)
+            if entries and entries[-1][0] == "chapter" and len(entries[-1]) == 2:
+                entries[-1] = ("chapter", entries[-1][1], sub)
+        elif line.startswith("# PART "):
+            part = line[2:].strip()
+            entries.append(("part", part))
+    return entries
+
+
+# ----- Build -----
 
 def build_document():
     doc = Document()
 
-    # Page setup for all sections — 6x9 book trim with comfortable margins.
+    # Page setup for all sections — 6x9 book trim
     for section in doc.sections:
         section.page_width = Inches(6)
         section.page_height = Inches(9)
+        # Slightly larger top margin so header sits higher AND body has more breathing room
         section.left_margin = Inches(0.75)
         section.right_margin = Inches(0.75)
-        section.top_margin = Inches(0.8)
-        section.bottom_margin = Inches(0.8)
+        section.top_margin = Inches(1.1)
+        section.bottom_margin = Inches(0.9)
+        # Pull header close to top edge (logo sits high on page, well above body)
+        section.header_distance = Inches(0.3)
+        section.footer_distance = Inches(0.4)
 
     section = doc.sections[0]
-    # Disable header/footer on first page (cover)
+    # Cover has no header/footer
     section.different_first_page_header_footer = True
 
-    # =========== COVER PAGE ===========
-    cover = doc.add_paragraph()
-    cover.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    # Some vertical space
-    cover.paragraph_format.space_before = Pt(120)
-    r = cover.add_run()
-    r.add_picture(str(LOGO), width=Inches(3.5))
+    # =========== COVER PAGE — full-page image ===========
+    cover_p = doc.add_paragraph()
+    cover_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cover_p.paragraph_format.space_before = Pt(0)
+    cover_p.paragraph_format.space_after = Pt(0)
+    run = cover_p.add_run()
+    # The cover image is 6x9 at 300dpi. Embed it at the full content width
+    # of the page (6 inches minus margins), scaling proportionally.
+    # Using 6.5" width pushes it slightly into margins to feel edge-to-edge.
+    run.add_picture(str(COVER_IMAGE), width=Inches(6.5))
 
-    # Title (spacer + big title)
-    sp = doc.add_paragraph()
-    sp.paragraph_format.space_before = Pt(60)
-    title = doc.add_paragraph()
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    tr = title.add_run("SHADOW PERSUASION")
-    tr.font.name = TITLE_FONT
-    tr.font.size = Pt(28)
-    tr.bold = True
-    tr.font.color.rgb = RGBColor(0x1A, 0x1A, 0x1A)
-    title.paragraph_format.space_after = Pt(6)
-
-    # Subtitle
-    sub = doc.add_paragraph()
-    sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sr = sub.add_run("The 47 Counterintuitive Conversation Tactics\nThat Make People Say Yes Without Realizing Why")
-    sr.font.name = TITLE_FONT
-    sr.font.size = Pt(14)
-    sr.italic = True
-    sr.font.color.rgb = RGBColor(0x5C, 0x3A, 0x1E)
-    sub.paragraph_format.space_after = Pt(48)
-
-    # Author
-    author_p = doc.add_paragraph()
-    author_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    ar = author_p.add_run("NATE HARLAN")
-    ar.font.name = TITLE_FONT
-    ar.font.size = Pt(14)
-    ar.bold = True
-    ar.font.color.rgb = RGBColor(0x1A, 0x1A, 0x1A)
-
-    # Page break after cover
+    # Force next content to new page
     pb = doc.add_paragraph()
+    pb.paragraph_format.space_after = Pt(0)
     insert_page_break(pb)
 
-    # =========== HEADER / FOOTER for non-cover pages ===========
-    # Header right-aligned logo
+    # =========== HEADER / FOOTER for all subsequent pages ===========
+    # Default header (appears on every non-first page of section)
     header = section.header
     header_para = header.paragraphs[0]
     header_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    header_para.paragraph_format.space_before = Pt(0)
+    header_para.paragraph_format.space_after = Pt(0)
     hrun = header_para.add_run()
-    hrun.add_picture(str(LOGO), width=Inches(1.0))
+    hrun.add_picture(str(LOGO), width=Inches(0.9))
 
-    # Footer centered page number
+    # Default footer
     footer = section.footer
     footer_para = footer.paragraphs[0]
     footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -216,107 +172,146 @@ def build_document():
 
     # =========== COPYRIGHT PAGE ===========
     copyright_lines = [
-        ("Copyright © 2026 Shadow Persuasion LLC.", False),
-        ("All rights reserved.", False),
-        ("", False),
-        ("No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the prior written permission of the copyright holder, except in the case of brief quotations in critical articles or reviews.", True),
-        ("", False),
-        ("Case studies in this book are composites based on real coaching engagements, with names and identifying details modified to protect privacy. Tactical content is grounded in published research where cited.", True),
-        ("", False),
-        ("This book is not a substitute for professional legal, medical, financial, or therapeutic advice. Nothing in this book is a guarantee of any specific outcome.", True),
-        ("", False),
-        ("First edition.", False),
-        ("", False),
-        ("Shadow Persuasion LLC", False),
-        ("Boulder, Colorado", False),
+        ("Copyright © 2026 Shadow Persuasion LLC.", 10, False, False),
+        ("All rights reserved.", 10, False, False),
+        ("", 10, False, False),
+        ("No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying, recording, or otherwise, without the prior written permission of the copyright holder, except in the case of brief quotations in critical articles or reviews.", 9, False, True),
+        ("", 10, False, False),
+        ("Case studies in this book are composites based on real coaching engagements, with names and identifying details modified to protect privacy. Tactical content is grounded in published research where cited.", 9, False, True),
+        ("", 10, False, False),
+        ("This book is not a substitute for professional legal, medical, financial, or therapeutic advice. Nothing in this book is a guarantee of any specific outcome.", 9, False, True),
+        ("", 10, False, False),
+        ("First edition.", 10, False, False),
+        ("", 10, False, False),
+        ("Shadow Persuasion LLC", 10, False, False),
+        ("Boulder, Colorado", 10, False, False),
     ]
 
-    for text, wrap in copyright_lines:
+    for text, size, bold, wrap in copyright_lines:
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         if text:
             r = p.add_run(text)
             r.font.name = BODY_FONT
-            r.font.size = Pt(9 if wrap else 10)
+            r.font.size = Pt(size)
             r.font.color.rgb = RGBColor(0x3B, 0x2E, 0x1A)
         p.paragraph_format.space_after = Pt(4)
 
-    # Page break
+    # Page break to TOC page
     pb = doc.add_paragraph()
     insert_page_break(pb)
 
-    # =========== TABLE OF CONTENTS ===========
+    # =========== TABLE OF CONTENTS (manual, always-visible) ===========
     toc_title = doc.add_paragraph()
     toc_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     tr = toc_title.add_run("CONTENTS")
     tr.font.name = TITLE_FONT
     tr.font.size = Pt(22)
     tr.bold = True
-    tr.font.color.rgb = RGBColor(0x1A, 0x1A, 0x1A)
-    toc_title.paragraph_format.space_after = Pt(24)
+    tr.font.color.rgb = DARK
+    toc_title.paragraph_format.space_after = Pt(36)
 
-    add_toc(doc)
+    # Load the manuscript to pull the chapter list
+    source = MANUSCRIPT.read_text()
 
+    # Hardcoded reading-order structure (matches the actual book layout)
+    toc_structure = [
+        ("entry", "Introduction: How To Read This Book"),
+        ("blank", ""),
+        ("entry", "Chapter 1. The Dana Meeting"),
+        ("entry", "Chapter 2. The Persuasion Detector"),
+        ("blank", ""),
+        ("part", "PART ONE — Disable The Detector"),
+        ("entry", "Chapter 3. The First Thirty Seconds"),
+        ("entry", "Chapter 4. Removing the Smell of Sales"),
+        ("entry", "Chapter 5. Invisible Calibration"),
+        ("blank", ""),
+        ("part", "PART TWO — Plant The Conclusion"),
+        ("entry", "Chapter 6. The Weight of Silence"),
+        ("entry", "Chapter 7. Stories Beat Pitches"),
+        ("entry", "Chapter 8. Using Their Words Against Their Resistance"),
+        ("entry", "Chapter 9. The Path to Their Own Conclusion"),
+        ("blank", ""),
+        ("part", "PART THREE — Shift The Frame"),
+        ("entry", "Chapter 10. Changing What the Conversation Is About"),
+        ("entry", "Chapter 11. Surfacing What's Hidden"),
+        ("entry", "Chapter 12. Changing the Dynamics"),
+        ("blank", ""),
+        ("part", "PART FOUR — Lock In Without Closing"),
+        ("entry", "Chapter 13. Don't Close. Conclude."),
+        ("entry", "Chapter 14. Commitment Without Asking For It"),
+        ("entry", "Chapter 15. The Last Thing They Hear"),
+        ("blank", ""),
+        ("entry", "Chapter 16. The Daily Practice"),
+        ("blank", ""),
+        ("entry", "Appendix: Tactics By Situation"),
+    ]
+
+    for kind, text in toc_structure:
+        if kind == "blank":
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(6)
+            continue
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.line_spacing = 1.2
+        r = p.add_run(text)
+        r.font.name = BODY_FONT
+        if kind == "part":
+            r.bold = True
+            r.font.size = Pt(11)
+            r.font.color.rgb = BROWN
+            p.paragraph_format.space_before = Pt(4)
+        else:
+            r.font.size = Pt(11)
+            r.font.color.rgb = DARK
+
+    # Page break to body
     pb = doc.add_paragraph()
     insert_page_break(pb)
 
     # =========== BODY CONTENT (from markdown) ===========
-    # Parse the full manuscript. Skip front matter and introduction title metadata
-    # since we added those above. Begin with Introduction heading.
-
-    source = MANUSCRIPT.read_text()
-
-    # Strip all horizontal rules (--- and ***) anywhere they appear as a full line
+    # Strip all horizontal rules
     lines = source.splitlines()
     cleaned = []
     for line in lines:
         stripped = line.strip()
-        if stripped in ("---", "***", "----", "----"):
-            continue
         if re.fullmatch(r"-{3,}", stripped) or re.fullmatch(r"\*{3,}", stripped):
             continue
         cleaned.append(line)
-
     text = "\n".join(cleaned)
 
-    # Remove the front-matter block entirely — we built the cover/copyright manually above.
-    # Front matter ends before the "# Introduction" heading.
+    # Remove front-matter block — we built cover/copyright/TOC manually above
     intro_idx = text.find("# Introduction")
     if intro_idx > 0:
         text = text[intro_idx:]
 
-    # Now parse block by block
     paragraphs = text.split("\n\n")
-
-    in_intro = False
-    first_chapter_seen = False
+    first_h1_seen = False
 
     for block in paragraphs:
         block = block.strip()
         if not block:
             continue
 
-        # Detect heading level
         if block.startswith("# "):
             heading_text = block[2:].strip()
-
-            # Render as Chapter Title style
             p = doc.add_paragraph()
-            # First chapter also triggers page break (consistent with copyright/TOC flow)
-            if first_chapter_seen:
+            # Force page break before every H1 except the very first (Introduction
+            # which comes right after TOC break)
+            if first_h1_seen:
                 set_page_break_before(p)
-            first_chapter_seen = True
+            first_h1_seen = True
 
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(36)
             p.paragraph_format.space_after = Pt(12)
-            p.style = doc.styles["Heading 1"]
-            # override the style for our look
             r = p.add_run(heading_text.upper())
             r.font.name = TITLE_FONT
             r.font.size = Pt(20)
             r.bold = True
-            r.font.color.rgb = RGBColor(0x1A, 0x1A, 0x1A)
+            r.font.color.rgb = DARK
 
         elif block.startswith("## "):
             heading_text = block[3:].strip()
@@ -324,12 +319,11 @@ def build_document():
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(6)
             p.paragraph_format.space_after = Pt(24)
-            p.style = doc.styles["Heading 2"]
             r = p.add_run(heading_text)
             r.font.name = TITLE_FONT
             r.font.size = Pt(14)
             r.italic = True
-            r.font.color.rgb = RGBColor(0x5C, 0x3A, 0x1E)
+            r.font.color.rgb = BROWN
 
         elif block.startswith("### "):
             heading_text = block[4:].strip()
@@ -337,15 +331,13 @@ def build_document():
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.space_before = Pt(18)
             p.paragraph_format.space_after = Pt(10)
-            p.style = doc.styles["Heading 3"]
             r = p.add_run(heading_text)
             r.font.name = TITLE_FONT
             r.font.size = Pt(13)
             r.bold = True
-            r.font.color.rgb = RGBColor(0x1A, 0x1A, 0x1A)
+            r.font.color.rgb = DARK
 
         elif block.startswith("- ") or block.startswith("* "):
-            # Bullet list — split on lines
             for line in block.splitlines():
                 line = line.strip()
                 if not line:
@@ -357,11 +349,9 @@ def build_document():
                 add_inline_formatted(p, content, font=BODY_FONT, size=11)
 
         else:
-            # Normal paragraph (may have **bold**, *italic*, or be a full-italic Field Note)
-            # Detect Field Note: entire block wrapped in *...*
             stripped = block.strip()
-            if stripped.startswith("*") and stripped.endswith("*") and stripped.count("\n") < 3 and not stripped.startswith("**"):
-                # Italic Field Note paragraph
+            if (stripped.startswith("*") and stripped.endswith("*")
+                    and stripped.count("\n") < 3 and not stripped.startswith("**")):
                 inner = stripped[1:-1].strip()
                 p = doc.add_paragraph()
                 p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -373,7 +363,7 @@ def build_document():
                 r.font.name = BODY_FONT
                 r.font.size = Pt(11)
                 r.italic = True
-                r.font.color.rgb = RGBColor(0x5C, 0x3A, 0x1E)
+                r.font.color.rgb = BROWN
             else:
                 p = doc.add_paragraph()
                 p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -382,7 +372,6 @@ def build_document():
                 p.paragraph_format.first_line_indent = Inches(0.25)
                 add_inline_formatted(p, block.replace("\n", " "), font=BODY_FONT, size=11)
 
-    # Save
     OUT.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(OUT))
     print(f"Saved: {OUT}")
