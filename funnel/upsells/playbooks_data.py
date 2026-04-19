@@ -14,9 +14,9 @@ PLAYBOOKS = [
         "stakes": "Every dollar left on the table compounds for the rest of your career. A $15K gap at 30 is a $900K gap at 65, factoring raises and compounding.",
         "dynamics": "Your manager expects you to either undersell or oversell. They do NOT expect a calm, low-status person who knows their number, stated it once, and waited. The side that speaks first after the number loses. The side that justifies loses. The side that references their resume loses. The side that stays quiet, professional, and boring wins.",
         "tactics": [
-            ("Low-Status Opening", "p.41"),
-            ("The Strategic Pause / 11-Second Silence", "p.79"),
-            ("The One-Line Email Lock-In", "p.129"),
+            ("Tactic #5: The Consultant Stance", "Part I"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
+            ("Tactic #41: The One-Line Email", "Part IV"),
         ],
         "opening": "\u201cBefore we get into numbers, I want to flag that I\u2019ve been told I\u2019m too direct in these things, so if I come across blunt, it\u2019s not intentional. Here\u2019s what I was hoping to talk about today.\u201d",
         "moves": [
@@ -42,9 +42,9 @@ PLAYBOOKS = [
         "stakes": "The interview sets the power frame for the first 12 months of employment. Candidates who come in below end up underpaid and underleveraged. Candidates who come in as peers get the opposite.",
         "dynamics": "Every candidate performs confidence. The interviewer has seen that performance ten times this week. The differentiated candidate is quietly confident, asks real questions, and gives the interviewer moments of feeling interesting themselves. You win by making them enjoy the conversation, not by performing a script.",
         "tactics": [
-            ("The Question That Flatters", "p.94"),
-            ("Research Credibility Drop", "p.50"),
-            ("Reverse Qualifier Opener", "p.52"),
+            ("Tactic #5: The Consultant Stance", "Part I"),
+            ("Tactic #22: The Misdirected Question", "Part II"),
+            ("Tactic #33: The Reverse Qualifier", "Part III"),
         ],
         "opening": "\u201cBefore we get into my background, I read your Q3 letter this morning. You flagged the onboarding drop specifically. I\u2019d like to make sure this conversation is actually useful for that kind of problem.\u201d",
         "moves": [
@@ -70,9 +70,9 @@ PLAYBOOKS = [
         "stakes": "A bad relationship with your direct manager is the single biggest predictor of whether you leave a job in the next 12 months. The conversation either resets the dynamic or confirms you\u2019re leaving.",
         "dynamics": "Hostile managers are almost always stressed up-the-chain in ways you don\u2019t see. They\u2019re not hostile because of you. You absorb it. You do NOT fix this with a heart-to-heart. You fix it by quietly shifting from \u201ctarget\u201d to \u201ctrusted channel for information they can\u2019t get elsewhere.\u201d",
         "tactics": [
-            ("The Accusation Audit", "p.46"),
-            ("Boundary Without Anger", "p.118"),
-            ("Document the Concern", "p.125"),
+            ("Tactic #4: The Assumption Audit", "Part I"),
+            ("Tactic #6: The Confession First", "Part I"),
+            ("Tactic #41: The One-Line Email", "Part IV"),
         ],
         "opening": "\u201cI want to set up a thirty-minute conversation with you. My goal is to get better at working with you specifically. I\u2019d like to understand where I\u2019m falling short and what would make me more useful to you.\u201d",
         "moves": [
@@ -98,9 +98,9 @@ PLAYBOOKS = [
         "stakes": "Industries are small. The way you leave a job defines your reputation for the next decade, especially in tight verticals. Burn this and you burn five future jobs you don\u2019t know you wanted yet.",
         "dynamics": "Your manager will feel attacked even if you\u2019re leaving gracefully. They\u2019ll take it personally. They\u2019ll try to change your mind. They\u2019ll offer a counter. Your job is to stay warm, brief, and unmoveable. You\u2019re not negotiating. You decided.",
         "tactics": [
-            ("Pre-Frame Drop", "p.38"),
-            ("The Calibrated Refusal", "p.115"),
-            ("Gratitude Send Lock-In", "p.135"),
+            ("Tactic #2: The Pre-Frame", "Part I"),
+            ("Tactic #44: The Post-Agreement Bridge", "Part IV"),
+            ("Tactic #41: The One-Line Email", "Part IV"),
         ],
         "opening": "\u201cI want to tell you something I\u2019ve already decided. I\u2019m going to resign. My last day is [date, giving appropriate notice]. I wanted you to hear it from me first and give you enough time to plan.\u201d",
         "moves": [
@@ -126,9 +126,9 @@ PLAYBOOKS = [
         "stakes": "A good idea that doesn\u2019t land doesn\u2019t just stay dormant. It teaches your manager that you pitch things that don\u2019t matter. Every subsequent idea lands with lower weight.",
         "dynamics": "Your boss is thinking about their OWN priorities, not yours. The idea has to connect to something they already want to do. You\u2019re not pitching the idea. You\u2019re pitching the idea AS a path to something they already care about.",
         "tactics": [
-            ("Permission Frame", "p.56"),
-            ("The Assumed Conclusion", "p.69"),
-            ("Planting the Objection", "p.74"),
+            ("Tactic #2: The Pre-Frame", "Part I"),
+            ("Tactic #16: The Preview", "Part II"),
+            ("Tactic #19: The Pre-Understood Objection", "Part II"),
         ],
         "opening": "\u201cI have an idea I\u2019d like your ten minutes on. It\u2019s connected to the Q4 priority you flagged in last week\u2019s all-hands. Is now good, or should I book time?\u201d",
         "moves": [
@@ -154,9 +154,9 @@ PLAYBOOKS = [
         "stakes": "The first call sets the pattern for the entire relationship. Lead with features and you\u2019re a vendor forever. Lead with curiosity about their business and you\u2019re a peer from minute one.",
         "dynamics": "Most prospects have been pitched the same product four times this quarter. They\u2019re tuned for your pitch. What they\u2019re NOT tuned for is a vendor who refuses to pitch and instead asks real questions for 40 minutes. That vendor stays in their memory.",
         "tactics": [
-            ("Reverse Qualifier Opener", "p.52"),
-            ("Calibrated Curiosity (How/What)", "p.100"),
-            ("The Stakes Question", "p.72"),
+            ("Tactic #33: The Reverse Qualifier", "Part III"),
+            ("Tactic #21: The Discovery Path", "Part II"),
+            ("Tactic #25: The Stakes Shift", "Part III"),
         ],
         "opening": "\u201cBefore I spend any of your time on what we do, can I ask two questions to see if we\u2019re even the right fit? If the answer is no, I\u2019d rather get you back to your day.\u201d",
         "moves": [
@@ -184,9 +184,9 @@ PLAYBOOKS = [
         "stakes": "First dates are won or lost in the first 20 minutes. Most people fail by performing. The version of you that gets picked for a second date is calmer, more curious, and less trying-hard than the version you bring by default.",
         "dynamics": "Your date has expectations shaped by apps and media: that you\u2019ll interview them, perform charm, or pitch yourself. Be the rare person who does none of those. Ask real questions. Listen. Give them moments of feeling interesting.",
         "tactics": [
-            ("Environmental Comment Opener", "p.42"),
-            ("Minimal Encouragers", "p.88"),
-            ("Parallel Vulnerability", "p.87"),
+            ("Tactic #1: The Cold Open", "Part I"),
+            ("Tactic #9: The Mirror They Don't Catch", "Part I"),
+            ("Tactic #6: The Confession First", "Part I"),
         ],
         "opening": "\u201cGood to meet you. Before we sit down \u2014 have you been here before? Or is this one of those places both of us chose because it sounded neutral enough?\u201d",
         "moves": [
@@ -212,9 +212,9 @@ PLAYBOOKS = [
         "stakes": "Most matches die in endless small-talk because neither side proposes the date. The match that converts to a date within 72 hours is 3x more likely to actually meet than one that goes to day 10.",
         "dynamics": "Long chats feel safe. They\u2019re not. The longer you chat, the more the other person has invested in a fantasy version of you. Real you is never better than fantasy you. Move to real life before the fantasy cements.",
         "tactics": [
-            ("The Pre-Frame Drop", "p.38"),
-            ("Calendar Pull", "p.131"),
-            ("The Small Choice Close", "p.133"),
+            ("Tactic #2: The Pre-Frame", "Part I"),
+            ("Tactic #43: The Minimum Viable Commitment", "Part IV"),
+            ("Tactic #23: The Two Doors", "Part II"),
         ],
         "opening": "\u201cI like the rhythm of this conversation more than I like the app. Would you want to grab [coffee/a drink] this week? I\u2019m around Tuesday or Thursday evening.\u201d",
         "moves": [
@@ -240,9 +240,9 @@ PLAYBOOKS = [
         "stakes": "Two months of ambiguity costs more than a direct conversation that clarifies. Most DTR conversations don\u2019t go how people fear; they go clean. The few that go badly confirm what the ambiguity was already telling you.",
         "dynamics": "The partner who initiates the DTR is rarely the one trying to control. They\u2019re the one tired of not knowing. The conversation almost always goes better than the avoidance did. The goal is not agreement. The goal is clarity about whether you\u2019re aligned.",
         "tactics": [
-            ("Permission Frame", "p.56"),
-            ("Micro-Disclosure", "p.48"),
-            ("The Calibrated Refusal", "p.115"),
+            ("Tactic #16: The Preview", "Part II"),
+            ("Tactic #6: The Confession First", "Part I"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
         ],
         "opening": "\u201cI want to have a conversation with you. It\u2019s about what this is between us. I\u2019d rather know where we both stand than guess. Is now okay, or should we find a time?\u201d",
         "moves": [
@@ -268,9 +268,9 @@ PLAYBOOKS = [
         "stakes": "First impressions with a partner\u2019s family set the dynamic for decades. Bad starts can be recovered from; great starts buy you latitude you\u2019ll cash in for years.",
         "dynamics": "The family is not evaluating your career, your looks, or your wit. They\u2019re evaluating whether you\u2019re good FOR their person. They want evidence you\u2019re kind, stable, and not a project. Bring that and almost everything else is forgivable.",
         "tactics": [
-            ("Labeled Respect", "p.89"),
-            ("The Shared Observation", "p.91"),
-            ("Specific Compliment About the Partner (to them)", "p.44"),
+            ("Tactic #1: The Cold Open", "Part I"),
+            ("Tactic #15: The Third Party Story", "Part II"),
+            ("Tactic #8: The Unrepayable Favor", "Part I"),
         ],
         "opening": "\u201cIt\u2019s good to finally meet you. [Partner\u2019s name] has told me real things about you \u2014 not just the safe stuff. I\u2019m glad to get to put a face to the stories.\u201d",
         "moves": [
@@ -298,9 +298,9 @@ PLAYBOOKS = [
         "stakes": "Every recurring fight teaches both people that the relationship is a place where certain problems don\u2019t get resolved. Over years, this trains both partners to withhold more and more. The fight IS the problem, not just a symptom.",
         "dynamics": "The surface topic (dishes, money, his mother, her phone) is the proxy. The real topic is always one level deeper: feeling unseen, feeling controlled, feeling like effort isn\u2019t noticed. Solve the proxy, and the fight returns in six weeks under a different name. Solve the real thing, and the fight ends.",
         "tactics": [
-            ("\u201cWhat If This Isn\u2019t About...\u201d", "p.107"),
-            ("Validating Without Agreeing", "p.101"),
-            ("The Apology Without Concession", "p.112"),
+            ("Tactic #29: The Exposed Assumption", "Part III"),
+            ("Tactic #18: The Named Feeling", "Part II"),
+            ("Tactic #4: The Assumption Audit", "Part I"),
         ],
         "opening": "\u201cI\u2019ve been thinking about the fight we keep having. I don\u2019t want to have it again. Can we try something different for 15 minutes?\u201d",
         "moves": [
@@ -326,9 +326,9 @@ PLAYBOOKS = [
         "stakes": "Most apologies make things worse because they\u2019re actually defenses in apology clothing. A real apology costs you something \u2014 your position \u2014 and what you buy with it is the relationship returning.",
         "dynamics": "The person you hurt doesn\u2019t want explanations. They want proof that you understand specifically what you did and how it landed. They want to see that you see them. \u201cI\u2019m sorry you felt that way\u201d is the opposite of an apology. \u201cI\u2019m sorry I did X and it caused Y\u201d is an apology.",
         "tactics": [
-            ("Naming What They Feel", "p.88"),
-            ("The Specific Memory Citation", "p.92"),
-            ("Parallel Vulnerability", "p.87"),
+            ("Tactic #18: The Named Feeling", "Part II"),
+            ("Tactic #6: The Confession First", "Part I"),
+            ("Tactic #17: The Earlier Agreement", "Part II"),
         ],
         "opening": "\u201cI owe you a real apology. Not the version I gave you yesterday. Can we sit for 10 minutes?\u201d",
         "moves": [
@@ -354,9 +354,9 @@ PLAYBOOKS = [
         "stakes": "The conversation either surfaces the truth in a way that lets you decide with facts, or it sends them deeper into hiding. The approach matters more than the accusation.",
         "dynamics": "Cheaters don\u2019t confess because you\u2019re angry. They confess because the cost of continued hiding becomes higher than the cost of admitting. Frontal accusation rarely works. Calm, specific, evidence-based conversation often does.",
         "tactics": [
-            ("The Specific Memory Citation", "p.92"),
-            ("Rhetorical Silence", "p.84"),
-            ("Boundary Without Anger", "p.118"),
+            ("Tactic #4: The Assumption Audit", "Part I"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
+            ("Tactic #13: The Impossible Answer", "Part II"),
         ],
         "opening": "\u201cI need to have a conversation with you. I want to go into it without accusations, but I also want honesty. Can we sit down when the kids are asleep?\u201d",
         "moves": [
@@ -382,9 +382,9 @@ PLAYBOOKS = [
         "stakes": "How you ask for space determines whether it\u2019s a pause or a slow ending. Most \u201cI need space\u201d conversations accidentally sound like rejection and trigger the partner into accelerating the ending you didn\u2019t want.",
         "dynamics": "The partner hears \u201cI need space\u201d as \u201cI want to leave.\u201d The more you assure them it\u2019s not, the less they believe you. The fix is to be specific about what space means, for how long, and what you want afterwards.",
         "tactics": [
-            ("Permission Frame", "p.56"),
-            ("Pre-Frame Drop", "p.38"),
-            ("The Calibrated Refusal", "p.115"),
+            ("Tactic #2: The Pre-Frame", "Part I"),
+            ("Tactic #16: The Preview", "Part II"),
+            ("Tactic #39: The Waiting Period", "Part IV"),
         ],
         "opening": "\u201cI want to tell you something that might sound bad at first. It\u2019s not what it sounds like. Can I explain the whole thing before you react?\u201d",
         "moves": [
@@ -412,9 +412,9 @@ PLAYBOOKS = [
         "stakes": "How you break up affects the other person for months or years. It also defines who YOU are, which will show up in every future relationship. Doing this well is a kindness to both of you.",
         "dynamics": "The other person will beg, bargain, get angry, cry, or all four. Your job is to stay warm, clear, and final. Every time you soften, you extend the pain. A clear no delivered kindly is the most merciful thing you can offer.",
         "tactics": [
-            ("Pre-Frame Drop", "p.38"),
-            ("The Calibrated Refusal", "p.115"),
-            ("Boundary Without Anger", "p.118"),
+            ("Tactic #2: The Pre-Frame", "Part I"),
+            ("Tactic #37: The Unclosing", "Part IV"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
         ],
         "opening": "\u201cI\u2019ve been thinking a lot about us. I need to tell you where I\u2019ve landed. It\u2019s not what either of us wanted. I don\u2019t think we should keep going.\u201d",
         "moves": [
@@ -440,9 +440,9 @@ PLAYBOOKS = [
         "stakes": "The conversation where you get broken up with determines how you remember yourself for years. Begging prolongs nothing but makes the memory worse. Dignity doesn\u2019t get them back, but it makes the healing faster.",
         "dynamics": "They\u2019ve been thinking about this for weeks. You\u2019re hearing it for the first time. They\u2019re prepared. You\u2019re not. Your job is not to change their mind in one conversation. Your job is to hear them, ask the two questions that actually matter, and leave with your dignity intact.",
         "tactics": [
-            ("Rhetorical Silence", "p.84"),
-            ("The Delayed Response", "p.81"),
-            ("The Calibrated Refusal", "p.115"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
+            ("Tactic #39: The Waiting Period", "Part IV"),
+            ("Tactic #47: The Last-Word Exit", "Part IV"),
         ],
         "opening": "(They have spoken. You have heard them.) \u201cOkay. I hear you. Can I ask you one or two questions before we wrap this up?\u201d",
         "moves": [
@@ -468,9 +468,9 @@ PLAYBOOKS = [
         "stakes": "Most attempts to get an ex back fail because people rush. Timing matters more than words. The right conversation at the wrong time closes the door. The wrong conversation at the right time still works.",
         "dynamics": "Your ex needs to SEE you\u2019ve changed, not hear you claim it. The conversation works when it happens at least 60-90 days after the breakup, after no-contact, after you\u2019ve genuinely done the work you said you would. Before that, nothing works.",
         "tactics": [
-            ("The Cold Open", "p.34"),
-            ("Micro-Disclosure", "p.48"),
-            ("The Calibrated Refusal", "p.115"),
+            ("Tactic #1: The Cold Open", "Part I"),
+            ("Tactic #6: The Confession First", "Part I"),
+            ("Tactic #39: The Waiting Period", "Part IV"),
         ],
         "opening": "\u201cI\u2019ve thought about whether to reach out for a while. I don\u2019t want to pull you back into anything you\u2019re not ready for. I just wanted to say hi and see how you\u2019re doing. No pressure to write back.\u201d",
         "moves": [
@@ -498,9 +498,9 @@ PLAYBOOKS = [
         "stakes": "Ten years of estrangement from a parent, sibling, or adult child doesn\u2019t heal in one conversation. But one conversation handled right can open a door that was shut. Handled wrong, it slams harder.",
         "dynamics": "Estranged family members have built their identity around the estrangement. Their brain has defended it to themselves for years. Direct reconciliation attempts fire their detector instantly. Indirect, low-pressure, small-signal openings work.",
         "tactics": [
-            ("The Cold Open", "p.34"),
-            ("Unrelated Reference Open", "p.37"),
-            ("Micro-Disclosure", "p.48"),
+            ("Tactic #1: The Cold Open", "Part I"),
+            ("Tactic #6: The Confession First", "Part I"),
+            ("Tactic #8: The Unrepayable Favor", "Part I"),
         ],
         "opening": "(At a wedding, funeral, or family event where you\u2019ll naturally see them.) \u201cThat was a nice ceremony. Did you drive up or fly?\u201d",
         "moves": [
@@ -526,9 +526,9 @@ PLAYBOOKS = [
         "stakes": "The custody and financial arrangements from mediation define your life and your kids\u2019 lives for decades. Every percentage point you give up because you got emotional costs real years and real money.",
         "dynamics": "The mediator is not your friend. They are not your ex\u2019s friend. Their job is to produce an agreement, not a fair one. The person who stays calmest, cites specifics, and refuses to escalate wins every contested point. Emotion is poison. Preparation is leverage.",
         "tactics": [
-            ("The Accusation Audit", "p.46"),
-            ("Document the Concern", "p.125"),
-            ("Boundary Without Anger", "p.118"),
+            ("Tactic #4: The Assumption Audit", "Part I"),
+            ("Tactic #19: The Pre-Understood Objection", "Part II"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
         ],
         "opening": "(To the mediator, not to your ex.) \u201cThank you for your time. My goals today are [two specific things]. I\u2019ve brought documentation to support my position. I\u2019m prepared to be flexible where we can find fair compromise.\u201d",
         "moves": [
@@ -554,9 +554,9 @@ PLAYBOOKS = [
         "stakes": "A typical contractor or service dispute is $500-$15,000. The difference between handling it well and handling it badly is 2-10x that dispute value.",
         "dynamics": "Contractors who overcharge are counting on one of three things: you\u2019ll pay to avoid conflict, you\u2019ll get emotional and look unreasonable, or you\u2019ll accept their explanation at face value. The winning move is calm, specific, documented, and silent at the right moments.",
         "tactics": [
-            ("The Strategic Pause / 11-Second Silence", "p.79"),
-            ("\u201cWhat would make you comfortable?\u201d", "p.124"),
-            ("Document the Concern", "p.125"),
+            ("Tactic #11: The Strategic Pause", "Part II"),
+            ("Tactic #13: The Impossible Answer", "Part II"),
+            ("Tactic #41: The One-Line Email", "Part IV"),
         ],
         "opening": "\u201cThanks for the invoice. I looked through it and there\u2019s a gap between the estimate and the final number I want to understand. Specifically, line item 4 went from $3,200 to $13,500. Can you walk me through what happened there?\u201d",
         "moves": [
