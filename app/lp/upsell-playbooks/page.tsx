@@ -11,7 +11,8 @@
    Accept  → one-click charge card on file, then /lp/upsell-app
    ════════════════════════════════════════════════════════════ */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Special_Elite } from 'next/font/google';
 import {
   ArrowRight,
@@ -20,14 +21,10 @@ import {
   AlertTriangle,
   Lock,
   Zap,
-  Briefcase,
-  Eye,
   Sparkles,
   X,
   BookOpen,
-  FileText,
   Target,
-  TrendingUp,
   Library,
 } from 'lucide-react';
 
@@ -63,6 +60,55 @@ function Countdown() {
 }
 
 export default function UpsellPlaybooksPage() {
+  return (
+    <Suspense fallback={null}>
+      <UpsellPlaybooksInner />
+    </Suspense>
+  );
+}
+
+function UpsellPlaybooksInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paymentIntentId = searchParams.get('pi');
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleAccept() {
+    if (processing) return;
+    setError(null);
+
+    if (!paymentIntentId) {
+      // No original payment intent — they got here without completing checkout.
+      // Bounce them back to the book LP.
+      router.push('/lp/book');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const res = await fetch('/api/checkout/upsell-playbooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentIntentId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Charge failed. Please try again.');
+      }
+      // Success → move on to upsell #2 (the SaaS)
+      router.push('/lp/upsell-app?pi=' + paymentIntentId + '&upsell1=accepted');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setProcessing(false);
+    }
+  }
+
+  function handleDecline(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    router.push('/lp/upsell-app?pi=' + (paymentIntentId || '') + '&upsell1=declined');
+  }
+
   return (
     <main className={`${specialElite.className} bg-[#F4ECD8] text-[#1A1A1A] overflow-x-hidden`}>
       {/* ═════════ URGENCY BANNER ═════════ */}
@@ -369,18 +415,20 @@ export default function UpsellPlaybooksPage() {
           </div>
 
           {/* BIG YES BUTTON */}
-          <a
-            href="#accept"
-            id="accept"
-            onClick={(e) => {
-              e.preventDefault();
-              // TODO: wire to one-click upsell charge
-              alert('One-click upsell coming soon. This will charge your card on file for $47 and add both products to your order.');
-            }}
-            className="block w-full bg-[#D4A017] hover:bg-[#C4901A] text-black font-mono uppercase font-black text-lg md:text-2xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[6px_6px_0_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#1A1A1A] mb-4"
+          <button
+            type="button"
+            onClick={handleAccept}
+            disabled={processing}
+            className="block w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 disabled:cursor-not-allowed text-black font-mono uppercase font-black text-lg md:text-2xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[6px_6px_0_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#1A1A1A] mb-4"
           >
-            ✓ YES — ADD THESE TO MY ORDER FOR $47
-          </a>
+            {processing ? 'Processing…' : '✓ YES — ADD THESE TO MY ORDER FOR $47'}
+          </button>
+
+          {error && (
+            <div className="bg-[#8B0000]/10 border border-[#8B0000] text-[#8B0000] p-3 text-sm mb-4">
+              {error}
+            </div>
+          )}
 
           <p className="text-center text-xs text-[#5C3A1E] mb-4">
             One-click. We&apos;ll charge the card you just used for the book. No re-entry needed.
@@ -491,22 +539,21 @@ export default function UpsellPlaybooksPage() {
           <p className="text-center text-sm text-[#D4A017] font-bold uppercase tracking-wider mb-6">
             Save $37 · One-Time Offer
           </p>
-          <a
-            href="#accept"
-            onClick={(e) => {
-              e.preventDefault();
-              alert('One-click upsell coming soon. This will charge your card on file for $47 and add both products to your order.');
-            }}
-            className="block w-full bg-[#D4A017] hover:bg-[#C4901A] text-black font-mono uppercase font-black text-lg md:text-xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]"
+          <button
+            type="button"
+            onClick={handleAccept}
+            disabled={processing}
+            className="block w-full bg-[#D4A017] hover:bg-[#C4901A] disabled:opacity-50 disabled:cursor-not-allowed text-black font-mono uppercase font-black text-lg md:text-xl text-center px-6 py-5 md:py-6 tracking-wider transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.4)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,0.4)]"
           >
-            ✓ YES — ADD THE PLAYBOOKS + VAULT FOR $47
-          </a>
+            {processing ? 'Processing…' : '✓ YES — ADD THE PLAYBOOKS + VAULT FOR $47'}
+          </button>
         </div>
 
         {/* Decline link */}
         <div className="text-center">
           <a
             href="/lp/upsell-app"
+            onClick={handleDecline}
             className="inline-flex items-center gap-2 text-sm text-[#5C3A1E] hover:text-[#1A1A1A] underline"
           >
             <X className="h-4 w-4" />

@@ -68,7 +68,7 @@ function OrderBox({ small = false, bgVariant = 'cream' }: { small?: boolean; bgV
         Delivered instantly. Start reading in the next 2 minutes.
       </p>
       <a
-        href="#order"
+        href="/checkout/book"
         className={`inline-flex items-center gap-2 ${
           isDark
             ? 'bg-[#D4A017] hover:bg-[#C4901A] text-black'
@@ -201,7 +201,7 @@ export default function BookFunnelPage() {
     <main className={`${specialElite.className} bg-[#F4ECD8] text-[#1A1A1A] overflow-x-hidden`}>
       {/* ═════════ TOP BANNER — urgency strip ═════════ */}
       <div className="bg-black text-[#F4ECD8] py-2.5 text-center text-xs md:text-sm font-mono uppercase tracking-wider">
-        ⚠  Limited Time: Get The Field Manual For <span className="text-[#D4A017]">$7</span> (Normally $47).  <a href="#order" className="underline hover:text-[#D4A017]">Claim Now →</a>
+        ⚠  Limited Time: Get The Field Manual For <span className="text-[#D4A017]">$7</span> (Normally $47).  <a href="/checkout/book" className="underline hover:text-[#D4A017]">Claim Now →</a>
       </div>
 
       {/* ═════════ 1. HERO ═════════ */}
@@ -254,7 +254,7 @@ export default function BookFunnelPage() {
           {/* CTA */}
           <div className="flex flex-col items-center gap-4">
             <a
-              href="#order"
+              href="/checkout/book"
               className="inline-flex items-center bg-black text-[#F4ECD8] font-mono uppercase font-bold text-lg md:text-xl px-10 md:px-14 py-5 tracking-wider hover:bg-[#1A1A1A] transition-all shadow-[6px_6px_0_0_#D4A017] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_0_#D4A017]"
             >
               Get The Book For $7 <ArrowRight className="ml-3 h-6 w-6" />
@@ -947,7 +947,7 @@ export default function BookFunnelPage() {
             book and all bonuses.
           </p>
           <p className="mt-4">
-            <a href="#order" className="font-bold uppercase tracking-wider text-[#D4A017] hover:underline">
+            <a href="/checkout/book" className="font-bold uppercase tracking-wider text-[#D4A017] hover:underline">
               [ Download eBook Now → ]
             </a>
           </p>

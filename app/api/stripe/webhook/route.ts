@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { sendDeliveryEmail } from '@/lib/email';
+import type { ProductSlug } from '@/lib/pricing';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -187,6 +189,94 @@ export async function POST(req: NextRequest) {
 
         if (error) {
           console.error('[STRIPE WEBHOOK] Supabase update error (payment_failed):', error);
+        }
+        break;
+      }
+
+      /* ──────────────── One-time product flow (book funnel) ──────────────── */
+      case 'payment_intent.succeeded': {
+        const intent = event.data.object as Stripe.PaymentIntent;
+        const funnel = intent.metadata?.funnel;
+
+        // Only handle our funnel payments. Subscription checkout flows through
+        // `checkout.session.completed` above; we don't want to double-handle.
+        if (funnel !== 'book_checkout' && funnel !== 'upsell_playbooks') {
+          break;
+        }
+
+        const itemsCsv = intent.metadata?.items || '';
+        const items = itemsCsv.split(',').filter(Boolean) as ProductSlug[];
+        const email =
+          intent.receipt_email ||
+          (typeof intent.customer === 'string'
+            ? (await stripe.customers.retrieve(intent.customer).then((c) =>
+                !c.deleted && 'email' in c ? c.email || '' : ''
+              ))
+            : '');
+
+        // Flip the existing order row to paid (book_checkout pre-creates it).
+        // For upsells the row may already exist from the API route; upsert is safe.
+        const { error: updateErr } = await supabase
+          .from('orders')
+          .update({
+            status: 'paid',
+            stripe_payment_method_id:
+              typeof intent.payment_method === 'string'
+                ? intent.payment_method
+                : intent.payment_method?.id || null,
+            delivered_at: new Date().toISOString(),
+          })
+          .eq('stripe_payment_intent_id', intent.id);
+
+        if (updateErr) {
+          console.error('[STRIPE WEBHOOK] Order update failed:', updateErr);
+        }
+
+        // Fallback: if update didn't match (e.g. race with API insert), insert
+        if (updateErr || !email) {
+          // Try to upsert by payment_intent_id
+          await supabase.from('orders').upsert(
+            {
+              email: email || 'unknown@unknown.com',
+              stripe_customer_id:
+                typeof intent.customer === 'string' ? intent.customer : null,
+              stripe_payment_intent_id: intent.id,
+              items,
+              amount_cents: intent.amount,
+              currency: intent.currency,
+              status: 'paid',
+              stripe_payment_method_id:
+                typeof intent.payment_method === 'string'
+                  ? intent.payment_method
+                  : intent.payment_method?.id || null,
+              delivered_at: new Date().toISOString(),
+              metadata: { funnel },
+            },
+            { onConflict: 'stripe_payment_intent_id' }
+          );
+        }
+
+        // Deliver the goods via Resend
+        if (email && items.length > 0) {
+          const result = await sendDeliveryEmail({ to: email, items });
+          if (!result.ok) {
+            console.error('[STRIPE WEBHOOK] Delivery email failed:', result.error);
+          }
+        }
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        const pi =
+          typeof charge.payment_intent === 'string'
+            ? charge.payment_intent
+            : charge.payment_intent?.id;
+        if (pi) {
+          await supabase
+            .from('orders')
+            .update({ status: 'refunded', refunded_at: new Date().toISOString() })
+            .eq('stripe_payment_intent_id', pi);
         }
         break;
       }
