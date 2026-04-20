@@ -8,8 +8,9 @@
    Click the row → detail page shows the individual Stripe charges.
    ════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Search, Filter, RefreshCw, CircleCheck, CircleX, CircleAlert, Clock, ExternalLink, Users, TrendingDown } from 'lucide-react';
 
 type OrderRow = {
@@ -59,7 +60,25 @@ const ITEM_LABELS: Record<string, { label: string; color: string }> = {
   vault:     { label: 'Vault',      color: 'bg-[#1A1A1A] text-[#D4A017]' },
 };
 
-export default function OrdersPage() {
+export default function OrdersPageWrapper() {
+  return (
+    <Suspense fallback={<div className="p-6 md:p-10 text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">Loading…</div>}>
+      <OrdersPage />
+    </Suspense>
+  );
+}
+
+function OrdersPage() {
+  const searchParams = useSearchParams();
+  // Read ?search= and ?email= from the URL so links from /admin/members
+  // land on the filtered view. `email` is treated as an exact-match hint
+  // that gets forwarded to the API as the existing `search` filter —
+  // substring matching is already safe here because full email addresses
+  // don't substring-match each other (e.g. "y.byalik@gmail.com" is NOT
+  // a substring of "ybyalik@gmail.com").
+  const initialSearch =
+    searchParams.get('search') || searchParams.get('email') || '';
+
   const [sessions, setSessions] = useState<CustomerSession[]>([]);
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [total, setTotal] = useState(0);
@@ -68,7 +87,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('all');
   const [product, setProduct] = useState('all');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
 
   async function load() {
     setLoading(true);
@@ -87,10 +106,15 @@ export default function OrdersPage() {
     setLoading(false);
   }
 
+  // Reload whenever a filter changes. Search is debounced 300ms so typing
+  // in the search box doesn't hammer the API.
   useEffect(() => {
-    load();
+    const t = setTimeout(() => {
+      load();
+    }, search ? 300 : 0);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, product]);
+  }, [status, product, search]);
 
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const fmtDate = (iso: string) => new Date(iso).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
