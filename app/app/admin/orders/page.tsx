@@ -1,30 +1,48 @@
 'use client';
 
 /* ════════════════════════════════════════════════════════════
-   /admin/orders — Orders list with filters + funnel metrics
+   /admin/orders — Customer sessions (grouped by email)
+
+   A "session" aggregates everything one customer bought in the funnel:
+   book + bump + upsell #1 + upsell #2 subscription. One row per customer.
+   Click the row → detail page shows the individual Stripe charges.
    ════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, Filter, RefreshCw, CircleCheck, CircleX, CircleAlert, Clock, ExternalLink, Users, TrendingDown } from 'lucide-react';
 
-type OrderListItem = {
+type OrderRow = {
   id: string;
   email: string;
-  stripe_customer_id: string | null;
   stripe_payment_intent_id: string | null;
   items: string[];
   amount_cents: number;
   currency: string;
   status: 'paid' | 'pending' | 'refunded' | 'failed';
-  delivered_at: string | null;
-  refunded_at: string | null;
   created_at: string;
-  member: {
+};
+
+type CustomerSession = {
+  email: string;
+  customer_id: string | null;
+  items: string[];
+  order_count: number;
+  total_cents: number;
+  pending_cents: number;
+  refunded_cents: number;
+  statusCounts: Record<string, number>;
+  rolled_up_status: 'paid' | 'pending' | 'refunded' | 'mixed';
+  has_subscription: boolean;
+  subscription: {
+    id: string;
     plan: string;
     status: string;
     current_period_end: string | null;
   } | null;
+  first_at: string;
+  latest_at: string;
+  orders: OrderRow[];
 };
 
 type Funnel = {
@@ -42,9 +60,10 @@ const ITEM_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<OrderListItem[]>([]);
+  const [sessions, setSessions] = useState<CustomerSession[]>([]);
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [total, setTotal] = useState(0);
+  const [rawOrderCount, setRawOrderCount] = useState(0);
   const [totalRevenueCents, setTotalRevenueCents] = useState(0);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('all');
@@ -57,12 +76,13 @@ export default function OrdersPage() {
     if (status !== 'all') params.set('status', status);
     if (product !== 'all') params.set('product', product);
     if (search) params.set('search', search);
-    params.set('limit', '200');
+    params.set('limit', '300');
     const res = await fetch(`/api/admin/orders?${params.toString()}`);
     const data = await res.json();
-    setOrders(data.orders ?? []);
+    setSessions(data.sessions ?? []);
     setFunnel(data.funnel ?? null);
     setTotal(data.total ?? 0);
+    setRawOrderCount(data.rawOrderCount ?? 0);
     setTotalRevenueCents(data.totalRevenueCents ?? 0);
     setLoading(false);
   }
@@ -90,11 +110,14 @@ export default function OrdersPage() {
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-2">
-            // ORDERS //
+            // CUSTOMER SESSIONS //
           </p>
           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8]">
             Orders
           </h1>
+          <p className="text-sm text-gray-600 dark:text-[#F4ECD8]/60 mt-2">
+            Each row aggregates one customer&apos;s full funnel journey (book + bump + upsells + subscription). Drill in to see individual Stripe charges.
+          </p>
         </div>
         <button
           onClick={load}
@@ -155,10 +178,10 @@ export default function OrdersPage() {
             className="px-3 py-2 bg-white dark:bg-[#0A0A0A] border border-gray-300 dark:border-[#D4A017]/30 text-gray-900 dark:text-[#F4ECD8] text-sm font-mono focus:outline-none focus:border-[#D4A017]"
           >
             <option value="all">All</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
+            <option value="paid">Paid (all)</option>
+            <option value="pending">Has pending</option>
+            <option value="mixed">Mixed</option>
             <option value="refunded">Refunded</option>
-            <option value="failed">Failed</option>
           </select>
         </div>
         <div>
@@ -188,7 +211,7 @@ export default function OrdersPage() {
 
       {/* Summary */}
       <div className="mb-4 text-xs text-gray-500 dark:text-[#F4ECD8]/60 font-mono">
-        Showing {orders.length} of {total} · Revenue (filtered view): {fmt(totalRevenueCents)}
+        Showing {sessions.length} of {total} sessions · {rawOrderCount} individual Stripe charges underlying · Revenue (filtered view): {fmt(totalRevenueCents)}
       </div>
 
       {/* Table */}
@@ -196,40 +219,40 @@ export default function OrdersPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#D4A017]/20 text-left">
             <tr>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Date</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Latest</th>
               <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Email</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Items</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-[#D4A017]/80 font-mono text-right">Amount</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Items purchased</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono text-right">Paid</th>
               <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Status</th>
-              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Member?</th>
+              <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono">Subscription</th>
               <th className="px-4 py-3 text-[10px] uppercase tracking-wider text-gray-500 dark:text-[#D4A017]/80 font-mono"></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">
-                  Loading…
-                </td>
-              </tr>
-            ) : orders.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">
-                  No orders match these filters.
-                </td>
-              </tr>
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">Loading…</td></tr>
+            ) : sessions.length === 0 ? (
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">No customer sessions match these filters.</td></tr>
             ) : (
-              orders.map((o) => (
-                <tr key={o.id} className="border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A]">
+              sessions.map((s) => (
+                <tr key={s.email} className="border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A]">
                   <td className="px-4 py-3 text-xs text-gray-600 dark:text-[#F4ECD8]/70 font-mono whitespace-nowrap">
-                    {fmtDate(o.created_at)}
+                    {fmtDate(s.latest_at)}
                   </td>
                   <td className="px-4 py-3 text-gray-900 dark:text-[#F4ECD8] text-sm">
-                    {o.email}
+                    {s.email}
+                    {s.order_count > 1 && (
+                      <div className="text-[10px] text-gray-500 dark:text-[#F4ECD8]/50 font-mono mt-0.5">
+                        {s.order_count} charges
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
-                      {o.items.map((slug) => {
+                      {s.items.length === 0 && s.has_subscription && (
+                        <span className="text-xs text-gray-500 dark:text-[#F4ECD8]/50 italic">SaaS only</span>
+                      )}
+                      {s.items.map((slug) => {
                         const cfg = ITEM_LABELS[slug] || { label: slug, color: 'bg-gray-300 dark:bg-[#333] text-gray-800 dark:text-[#F4ECD8]' };
                         return (
                           <span
@@ -243,30 +266,44 @@ export default function OrdersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-mono font-bold text-[#D4A017]">
-                    {fmt(o.amount_cents)}
+                    {fmt(s.total_cents)}
+                    {s.pending_cents > 0 && (
+                      <div className="text-[10px] text-yellow-600 dark:text-yellow-400 font-normal">
+                        + {fmt(s.pending_cents)} pending
+                      </div>
+                    )}
+                    {s.refunded_cents > 0 && (
+                      <div className="text-[10px] text-red-600 dark:text-red-400 font-normal">
+                        − {fmt(s.refunded_cents)} refunded
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={o.status} />
+                    <StatusBadge status={s.rolled_up_status} />
                   </td>
                   <td className="px-4 py-3">
-                    {o.member ? (
+                    {s.subscription ? (
                       <span className="inline-flex items-center gap-1 text-xs text-[#D4A017]">
                         <Users className="h-3 w-3" />
-                        {o.member.plan}
-                        <span className="text-gray-500 dark:text-[#F4ECD8]/50 ml-1">({o.member.status})</span>
+                        {s.subscription.plan}
+                        <span className="text-gray-500 dark:text-[#F4ECD8]/50 ml-1">({s.subscription.status})</span>
                       </span>
                     ) : (
                       <span className="text-xs text-gray-400 dark:text-[#F4ECD8]/30">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/app/admin/orders/${o.id}`}
-                      className="inline-flex items-center gap-1 text-xs text-[#D4A017] hover:underline font-mono uppercase tracking-wider"
-                    >
-                      View
-                      <ExternalLink className="h-3 w-3" />
-                    </Link>
+                    {s.orders.length > 0 ? (
+                      <Link
+                        href={`/app/admin/orders/${s.orders[0].id}`}
+                        className="inline-flex items-center gap-1 text-xs text-[#D4A017] hover:underline font-mono uppercase tracking-wider"
+                      >
+                        Open
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-gray-400 dark:text-[#F4ECD8]/30">—</span>
+                    )}
                   </td>
                 </tr>
               ))
@@ -303,10 +340,11 @@ function FunnelCard({
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { icon: React.ComponentType<{ className?: string }>; className: string; label: string }> = {
-    paid:     { icon: CircleCheck, className: 'bg-green-600/20 border-green-600 text-green-400', label: 'Paid' },
-    pending:  { icon: Clock,       className: 'bg-yellow-600/20 border-yellow-600 text-yellow-300', label: 'Pending' },
-    refunded: { icon: CircleX,     className: 'bg-red-600/20 border-red-600 text-red-400', label: 'Refunded' },
-    failed:   { icon: CircleAlert, className: 'bg-red-800/20 border-red-800 text-red-500', label: 'Failed' },
+    paid:     { icon: CircleCheck, className: 'bg-green-600/20 border-green-600 text-green-700 dark:text-green-400', label: 'Paid' },
+    pending:  { icon: Clock,       className: 'bg-yellow-600/20 border-yellow-600 text-yellow-700 dark:text-yellow-300', label: 'Pending' },
+    refunded: { icon: CircleX,     className: 'bg-red-600/20 border-red-600 text-red-700 dark:text-red-400', label: 'Refunded' },
+    mixed:    { icon: CircleAlert, className: 'bg-blue-500/20 border-blue-500 text-blue-700 dark:text-blue-400', label: 'Mixed' },
+    failed:   { icon: CircleAlert, className: 'bg-red-800/20 border-red-800 text-red-700 dark:text-red-500', label: 'Failed' },
   };
   const cfg = map[status] || { icon: CircleAlert, className: 'bg-gray-200 dark:bg-[#333] text-gray-600 dark:text-[#F4ECD8]/70', label: status };
   const Icon = cfg.icon;

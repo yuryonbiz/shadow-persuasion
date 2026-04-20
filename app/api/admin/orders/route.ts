@@ -1,19 +1,24 @@
 /**
  * GET /api/admin/orders
  *
- * List all orders with filter + pagination support.
+ * Returns CUSTOMER SESSIONS — one per buyer — each aggregating all orders
+ * (book + bump + upsell) and any subscription from the same email/customer.
+ *
+ * This matches how most funnel admins think about purchases: "Yury paid $71
+ * across one flow and subscribed to monthly" is one session, not 2+ orders.
+ *
+ * The raw `orders` rows are still preserved and returned inside each session
+ * so the detail page can refund individual charges when needed.
+ *
  * Query params:
- *   status: 'all' | 'paid' | 'pending' | 'refunded' | 'failed'  (default 'all')
- *   product: 'all' | 'book' | 'briefing' | 'playbooks' | 'vault'  (default 'all')
- *   search: email substring (optional)
- *   from, to: ISO date strings (optional)
- *   limit: max 500 (default 100)
- *   offset: pagination (default 0)
+ *   status:  'all' | 'paid' | 'pending' | 'refunded' | 'mixed'  (default 'all')
+ *   product: 'all' | 'book' | 'briefing' | 'playbooks' | 'vault'
+ *   search:  email substring
+ *   from, to: ISO dates
+ *   limit: max 500 (default 200)
+ *   offset: pagination
  *
- * Returns: { orders: [...], total, totalRevenueCents, funnel }
- *
- * Each order includes a `member` field — the subscription row for the
- * buyer's email if one exists (i.e. "this buyer became a SaaS member").
+ * Returns: { sessions, total, totalRevenueCents, funnel, rawOrderCount }
  */
 
 import { NextResponse } from 'next/server';
@@ -40,12 +45,47 @@ type OrderRow = {
 };
 
 type SubRow = {
+  id: string;
   email: string | null;
   stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   plan: string;
   status: string;
   current_period_end: string | null;
+  created_at: string;
 };
+
+type SessionStatus = 'paid' | 'pending' | 'refunded' | 'mixed';
+
+type CustomerSession = {
+  email: string;
+  customer_id: string | null;
+  items: string[];                  // union of all items across orders
+  order_count: number;
+  total_cents: number;               // sum of paid orders only
+  pending_cents: number;             // sum of pending orders
+  refunded_cents: number;            // sum of refunded orders
+  statusCounts: Record<string, number>;
+  rolled_up_status: SessionStatus;   // single label for the whole session
+  has_subscription: boolean;
+  subscription: {
+    id: string;
+    plan: string;
+    status: string;
+    current_period_end: string | null;
+  } | null;
+  first_at: string;                  // first order timestamp
+  latest_at: string;                 // most recent order timestamp
+  orders: OrderRow[];                // raw rows for detail page drilldown
+};
+
+function rollupStatus(counts: Record<string, number>): SessionStatus {
+  const statuses = Object.keys(counts).filter((s) => counts[s] > 0);
+  if (statuses.length === 1) return statuses[0] as SessionStatus;
+  if (statuses.includes('paid') && statuses.includes('refunded')) return 'mixed';
+  if (statuses.includes('paid') && statuses.includes('pending')) return 'mixed';
+  return 'mixed';
+}
 
 export async function GET(req: Request) {
   try {
@@ -55,120 +95,170 @@ export async function GET(req: Request) {
     const search = url.searchParams.get('search')?.trim().toLowerCase() || '';
     const from = url.searchParams.get('from') || '';
     const to = url.searchParams.get('to') || '';
-    const limit = Math.min(Number(url.searchParams.get('limit') || 100), 500);
+    const limit = Math.min(Number(url.searchParams.get('limit') || 200), 500);
     const offset = Number(url.searchParams.get('offset') || 0);
 
-    // Build base query
-    let query = supabase.from('orders').select('*', { count: 'exact' });
-    if (status !== 'all') query = query.eq('status', status);
-    if (product !== 'all') query = query.contains('items', [product]);
-    if (search) query = query.ilike('email', `%${search}%`);
-    if (from) query = query.gte('created_at', from);
-    if (to) query = query.lte('created_at', to);
-    query = query
+    // Fetch a wide window of orders + subs, then group + filter in memory.
+    // This is fine up to low tens of thousands of rows; at scale we'd move
+    // the grouping to a SQL view.
+    const { data: rawOrders, error: ordersErr } = await supabase
+      .from('orders')
+      .select('*')
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .limit(2000);
+    if (ordersErr) throw ordersErr;
 
-    const { data: orders, count, error } = await query;
-    if (error) throw error;
+    const orders = (rawOrders ?? []) as OrderRow[];
 
-    // Collect emails to join against subscriptions for "member?" indication
-    const emails = Array.from(new Set((orders ?? []).map((o) => o.email).filter(Boolean)));
-    let subsByEmail = new Map<string, SubRow>();
-    let subsByCustomerId = new Map<string, SubRow>();
+    const { data: rawSubs } = await supabase
+      .from('subscriptions')
+      .select('id, email, stripe_customer_id, stripe_subscription_id, plan, status, current_period_end, created_at')
+      .order('created_at', { ascending: false })
+      .limit(2000);
+    const subs = (rawSubs ?? []) as SubRow[];
 
-    if (emails.length > 0) {
-      const { data: subs } = await supabase
-        .from('subscriptions')
-        .select('email, stripe_customer_id, plan, status, current_period_end')
-        .in('email', emails);
-      for (const s of (subs ?? []) as SubRow[]) {
-        if (s.email) subsByEmail.set(s.email.toLowerCase(), s);
-        if (s.stripe_customer_id) subsByCustomerId.set(s.stripe_customer_id, s);
+    // Index subs by email (primary) + customer_id (fallback)
+    const subsByEmail = new Map<string, SubRow>();
+    const subsByCustomer = new Map<string, SubRow>();
+    for (const s of subs) {
+      if (s.email) subsByEmail.set(s.email.toLowerCase(), s);
+      if (s.stripe_customer_id) subsByCustomer.set(s.stripe_customer_id, s);
+    }
+
+    // Group orders by email (lowercased)
+    const bucket = new Map<string, OrderRow[]>();
+    for (const o of orders) {
+      const key = (o.email || '').toLowerCase();
+      if (!key) continue;
+      if (!bucket.has(key)) bucket.set(key, []);
+      bucket.get(key)!.push(o);
+    }
+
+    const sessions: CustomerSession[] = [];
+    for (const [email, os] of bucket.entries()) {
+      const sorted = [...os].sort((a, b) => a.created_at.localeCompare(b.created_at));
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+
+      const statusCounts: Record<string, number> = {};
+      const itemsSet = new Set<string>();
+      let totalCents = 0;
+      let pendingCents = 0;
+      let refundedCents = 0;
+      let customerId: string | null = null;
+
+      for (const o of os) {
+        statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+        for (const it of (o.items as string[]) || []) itemsSet.add(it);
+        if (o.stripe_customer_id) customerId = o.stripe_customer_id;
+        if (o.status === 'paid') totalCents += o.amount_cents;
+        else if (o.status === 'pending') pendingCents += o.amount_cents;
+        else if (o.status === 'refunded') refundedCents += o.amount_cents;
       }
-    }
 
-    // Also catch subs that don't have email set (new ones from upsell-app flow
-    // before link). We look them up by stripe_customer_id.
-    const customerIds = Array.from(
-      new Set((orders ?? []).map((o) => o.stripe_customer_id).filter(Boolean))
-    ) as string[];
-    if (customerIds.length > 0) {
-      const { data: subs2 } = await supabase
-        .from('subscriptions')
-        .select('email, stripe_customer_id, plan, status, current_period_end')
-        .in('stripe_customer_id', customerIds);
-      for (const s of (subs2 ?? []) as SubRow[]) {
-        if (s.stripe_customer_id && !subsByCustomerId.has(s.stripe_customer_id)) {
-          subsByCustomerId.set(s.stripe_customer_id, s);
-        }
-      }
-    }
-
-    // Aggregate revenue across currently-visible order set for top-of-page stat
-    let totalRevenueCents = 0;
-    for (const o of (orders ?? []) as OrderRow[]) {
-      if (o.status === 'paid') totalRevenueCents += o.amount_cents;
-    }
-
-    // Decorate each order with member sub info
-    const decorated = (orders ?? []).map((o: OrderRow) => {
       const sub =
-        subsByEmail.get(o.email?.toLowerCase() ?? '') ||
-        (o.stripe_customer_id && subsByCustomerId.get(o.stripe_customer_id)) ||
+        subsByEmail.get(email) ||
+        (customerId ? subsByCustomer.get(customerId) : null) ||
         null;
-      return {
-        ...o,
-        member: sub
+
+      sessions.push({
+        email,
+        customer_id: customerId,
+        items: Array.from(itemsSet),
+        order_count: os.length,
+        total_cents: totalCents,
+        pending_cents: pendingCents,
+        refunded_cents: refundedCents,
+        statusCounts,
+        rolled_up_status: rollupStatus(statusCounts),
+        has_subscription: !!sub,
+        subscription: sub
           ? {
+              id: sub.id,
               plan: sub.plan,
               status: sub.status,
               current_period_end: sub.current_period_end,
             }
           : null,
-      };
-    });
+        first_at: first.created_at,
+        latest_at: last.created_at,
+        orders: sorted,
+      });
+    }
 
-    // Funnel summary (for "conversion rate" at top of page).
-    // Looks across ALL orders, not just the currently filtered ones.
-    const { data: allForFunnel } = await supabase
-      .from('orders')
-      .select('email, items, status');
-    const allOrders = (allForFunnel ?? []) as Pick<OrderRow, 'email' | 'items' | 'status'>[];
+    // Also include email-less subscription-only customers (existing SaaS
+    // subscribers who never bought the book)
+    const emailsWithOrders = new Set(bucket.keys());
+    for (const s of subs) {
+      const emailKey = (s.email || '').toLowerCase();
+      if (emailKey && !emailsWithOrders.has(emailKey)) {
+        sessions.push({
+          email: s.email!,
+          customer_id: s.stripe_customer_id,
+          items: [],
+          order_count: 0,
+          total_cents: 0,
+          pending_cents: 0,
+          refunded_cents: 0,
+          statusCounts: {},
+          rolled_up_status: 'paid',
+          has_subscription: true,
+          subscription: {
+            id: s.id,
+            plan: s.plan,
+            status: s.status,
+            current_period_end: s.current_period_end,
+          },
+          first_at: s.created_at,
+          latest_at: s.created_at,
+          orders: [],
+        });
+      }
+    }
 
+    // Sort newest first
+    sessions.sort((a, b) => b.latest_at.localeCompare(a.latest_at));
+
+    // Apply filters against sessions
+    let filtered = sessions;
+    if (status !== 'all') filtered = filtered.filter((s) => s.rolled_up_status === status);
+    if (product !== 'all') filtered = filtered.filter((s) => s.items.includes(product));
+    if (search) filtered = filtered.filter((s) => s.email.toLowerCase().includes(search));
+    if (from) filtered = filtered.filter((s) => s.first_at >= from);
+    if (to) filtered = filtered.filter((s) => s.latest_at <= to);
+
+    const total = filtered.length;
+    const paged = filtered.slice(offset, offset + limit);
+
+    // Filtered revenue
+    let totalRevenueCents = 0;
+    for (const s of filtered) totalRevenueCents += s.total_cents;
+
+    // Global funnel stats (unfiltered)
     const bookPaid = new Set<string>();
     const bumpPaid = new Set<string>();
     const upsell1Paid = new Set<string>();
-
-    for (const o of allOrders) {
-      if (o.status !== 'paid') continue;
-      const items = (o.items as string[]) || [];
-      const email = (o.email || '').toLowerCase();
-      if (!email) continue;
-      if (items.includes('book')) bookPaid.add(email);
-      if (items.includes('briefing')) bumpPaid.add(email);
-      if (items.includes('playbooks') || items.includes('vault')) upsell1Paid.add(email);
+    for (const s of sessions) {
+      if (s.items.includes('book') && s.statusCounts.paid) bookPaid.add(s.email);
+      if (s.items.includes('briefing') && s.statusCounts.paid) bumpPaid.add(s.email);
+      if ((s.items.includes('playbooks') || s.items.includes('vault')) && s.statusCounts.paid) {
+        upsell1Paid.add(s.email);
+      }
     }
-
-    // Subs that came from book-funnel buyers (upsell_app takers)
-    let upsell2Count = 0;
-    if (bookPaid.size > 0) {
-      const { data: bookBuyerSubs } = await supabase
-        .from('subscriptions')
-        .select('email')
-        .in('email', Array.from(bookPaid));
-      upsell2Count = (bookBuyerSubs ?? []).length;
-    }
+    const upsell2Taken = sessions.filter(
+      (s) => s.has_subscription && s.items.includes('book')
+    ).length;
 
     return NextResponse.json({
-      orders: decorated,
-      total: count ?? decorated.length,
+      sessions: paged,
+      total,
       totalRevenueCents,
+      rawOrderCount: orders.length,
       funnel: {
         bookBuyers: bookPaid.size,
         bumpTakers: bumpPaid.size,
         upsell1Takers: upsell1Paid.size,
-        upsell2Takers: upsell2Count,
+        upsell2Takers: upsell2Taken,
       },
     });
   } catch (err) {

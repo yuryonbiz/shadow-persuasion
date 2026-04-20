@@ -577,7 +577,7 @@ function UpsellPlaybooksInner() {
         {/* Decline link */}
         <div className="text-center">
           <a
-            href="/lp/upsell-app"
+            href={`/lp/upsell-app${paymentIntentId ? `?pi=${paymentIntentId}&upsell1=declined` : ''}`}
             onClick={handleDecline}
             className="inline-flex items-center gap-2 text-sm text-[#5C3A1E] hover:text-[#1A1A1A] underline"
           >

@@ -11,6 +11,12 @@
 
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 type PlanKey = 'weekly' | 'monthly' | 'yearly';
 
@@ -88,6 +94,42 @@ export async function POST(req: Request) {
       },
       expand: ['latest_invoice.payment_intent'],
     });
+
+    // Also pull email from customer (for the subscriptions row).
+    const customer = await stripe.customers.retrieve(customerId);
+    const customerEmail =
+      !customer.deleted && 'email' in customer ? customer.email || null : null;
+
+    // Determine current_period_end (moved onto items in Stripe SDK v22+).
+    const periodEndUnix =
+      subscription.items.data[0]?.current_period_end ??
+      subscription.trial_end ??
+      null;
+    const currentPeriodEnd = periodEndUnix
+      ? new Date(periodEndUnix * 1000).toISOString()
+      : new Date().toISOString();
+
+    // Insert the subscription row directly so we don't depend on the
+    // customer.subscription.created webhook event (which some Stripe dashboards
+    // don't expose in their selector UI). The webhook can still flow through
+    // customer.subscription.updated/deleted for lifecycle changes.
+    const userId = `stripe_${customerId}`;
+    const { error: subInsertErr } = await supabase.from('subscriptions').upsert(
+      {
+        user_id: userId,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscription.id,
+        plan,
+        status: subscription.status === 'active' ? 'active' : subscription.status,
+        current_period_end: currentPeriodEnd,
+        email: customerEmail,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
+    if (subInsertErr) {
+      console.error('[upsell-app] subscription upsert failed:', subInsertErr);
+    }
 
     return NextResponse.json({
       success: subscription.status === 'active' || subscription.status === 'trialing',

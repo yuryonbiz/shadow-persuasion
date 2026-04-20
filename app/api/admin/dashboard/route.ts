@@ -25,21 +25,52 @@ export async function GET() {
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
-    // Orders aggregate
+    // Orders aggregate — group by email so one "order" = one customer session
     const { data: ordersAll } = await supabase
       .from('orders')
-      .select('amount_cents, status, created_at');
+      .select('email, amount_cents, status, created_at');
 
-    const orders = ordersAll ?? [];
-    const paidOrders = orders.filter((o) => o.status === 'paid');
-    const refundedOrders = orders.filter((o) => o.status === 'refunded');
-    const recentOrders = orders.filter(
-      (o) => o.created_at && o.created_at >= yesterday && o.status === 'paid'
-    );
+    const rawOrders = ordersAll ?? [];
 
-    const revenueCents = paidOrders.reduce((sum, o) => sum + (o.amount_cents ?? 0), 0);
-    const last24hRevenueCents = recentOrders.reduce(
-      (sum, o) => sum + (o.amount_cents ?? 0),
+    // Bucket by email for customer-session semantics
+    const sessionsByEmail = new Map<string, {
+      firstAt: string;
+      hasPaid: boolean;
+      hasPending: boolean;
+      hasRefunded: boolean;
+      totalPaidCents: number;
+      paidInLast24h: boolean;
+    }>();
+
+    for (const o of rawOrders) {
+      const email = (o.email || '').toLowerCase();
+      if (!email) continue;
+      const bucket = sessionsByEmail.get(email) || {
+        firstAt: o.created_at,
+        hasPaid: false,
+        hasPending: false,
+        hasRefunded: false,
+        totalPaidCents: 0,
+        paidInLast24h: false,
+      };
+      if (o.status === 'paid') {
+        bucket.hasPaid = true;
+        bucket.totalPaidCents += o.amount_cents ?? 0;
+        if (o.created_at >= yesterday) bucket.paidInLast24h = true;
+      } else if (o.status === 'pending') bucket.hasPending = true;
+      else if (o.status === 'refunded') bucket.hasRefunded = true;
+      if (o.created_at < bucket.firstAt) bucket.firstAt = o.created_at;
+      sessionsByEmail.set(email, bucket);
+    }
+
+    const sessions = Array.from(sessionsByEmail.values());
+    const paidSessions = sessions.filter((s) => s.hasPaid && !s.hasRefunded);
+    const refundedSessions = sessions.filter((s) => s.hasRefunded);
+    const recentSessions = sessions.filter((s) => s.paidInLast24h);
+
+    const revenueCents = paidSessions.reduce((sum, s) => sum + s.totalPaidCents, 0);
+    const last24hRevenueCents = recentSessions.reduce(
+      (sum, s) => sum + s.totalPaidCents,
       0
     );
 
@@ -64,11 +95,14 @@ export async function GET() {
 
     return NextResponse.json({
       stats: {
-        ordersTotal: orders.length,
-        ordersPaid: paidOrders.length,
-        ordersRefunded: refundedOrders.length,
+        // "ordersTotal" now = customer sessions (one per email), not raw Stripe
+        // charges. A single funnel completion that hits book+bump+upsell = 1.
+        ordersTotal: sessions.length,
+        ordersPaid: paidSessions.length,
+        ordersRefunded: refundedSessions.length,
+        rawChargesTotal: rawOrders.length,
         revenueCents,
-        last24hOrders: recentOrders.length,
+        last24hOrders: recentSessions.length,
         last24hRevenueCents,
         membersTotal: membersTotal ?? 0,
         membersActive: membersActive ?? 0,
