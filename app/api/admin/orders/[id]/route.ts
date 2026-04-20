@@ -77,22 +77,37 @@ export async function GET(
       }
     }
 
-    // Find any related orders (same customer) for a mini customer history
+    // Find any related orders (same customer OR same email) so the detail
+    // page can render the full customer session on one screen.
     let relatedOrders: Array<{
       id: string;
+      email: string;
       items: unknown;
       amount_cents: number;
+      currency: string;
       status: string;
+      stripe_payment_intent_id: string | null;
+      delivered_at: string | null;
+      refunded_at: string | null;
       created_at: string;
     }> = [];
-    if (order.stripe_customer_id) {
-      const { data: rel } = await supabase
-        .from('orders')
-        .select('id, items, amount_cents, status, created_at')
-        .eq('stripe_customer_id', order.stripe_customer_id)
-        .neq('id', id)
-        .order('created_at', { ascending: false });
-      relatedOrders = rel ?? [];
+    {
+      // Prefer matching by email (most reliable across PIs); fall back to customer id.
+      const filters: string[] = [];
+      if (order.email) filters.push(`email.eq.${order.email}`);
+      if (order.stripe_customer_id)
+        filters.push(`stripe_customer_id.eq.${order.stripe_customer_id}`);
+      if (filters.length > 0) {
+        const { data: rel } = await supabase
+          .from('orders')
+          .select(
+            'id, email, items, amount_cents, currency, status, stripe_payment_intent_id, delivered_at, refunded_at, created_at'
+          )
+          .or(filters.join(','))
+          .neq('id', id)
+          .order('created_at', { ascending: true });
+        relatedOrders = rel ?? [];
+      }
     }
 
     // Find subscription for this customer / email

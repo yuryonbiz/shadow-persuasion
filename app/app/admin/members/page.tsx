@@ -42,17 +42,20 @@ export default function MembersPage() {
       const data = await res.json();
       if (Array.isArray(data)) setUsers(data);
 
-      // Also fetch orders to aggregate counts per email
+      // Also fetch customer sessions to aggregate order count + total spent
+      // per email. Orders API now returns `sessions` (one row per buyer),
+      // each with order_count and total_cents already rolled up.
       const ordersRes = await fetch('/api/admin/orders?limit=500');
       const ordersData = await ordersRes.json();
       const byEmail = new Map<string, OrderSummary>();
-      for (const o of ordersData.orders ?? []) {
-        if (!o.email) continue;
-        const email = o.email.toLowerCase();
-        const s = byEmail.get(email) || { email, orderCount: 0, totalCents: 0 };
-        s.orderCount += 1;
-        if (o.status === 'paid') s.totalCents += o.amount_cents;
-        byEmail.set(email, s);
+      for (const s of ordersData.sessions ?? []) {
+        if (!s.email) continue;
+        const email = s.email.toLowerCase();
+        byEmail.set(email, {
+          email,
+          orderCount: s.order_count ?? 0,
+          totalCents: s.total_cents ?? 0,
+        });
       }
       setOrderSummaries(byEmail);
     } catch {}

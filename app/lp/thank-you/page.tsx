@@ -163,7 +163,7 @@ function ThankYouInner() {
                 Sign up with the same email you used at checkout. Your membership will link automatically.
               </p>
               <a
-                href="/signup"
+                href={`/login?tab=signup${order?.email ? `&email=${encodeURIComponent(order.email)}` : ''}`}
                 className="inline-flex items-center gap-2 bg-black text-[#D4A017] font-mono uppercase font-bold text-base md:text-lg px-8 py-4 tracking-wider hover:bg-[#1A1A1A] transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.3)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,0.3)]"
               >
                 Activate My Account

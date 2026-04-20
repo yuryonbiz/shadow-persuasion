@@ -17,10 +17,11 @@ export async function GET() {
       console.error('[ADMIN_USERS] users query error:', usersError);
     }
 
-    // 2. Fetch all subscriptions
+    // 2. Fetch all subscriptions (include email so guest-checkout subs with
+    // user_id = stripe_cus_* still show the real buyer address in admin)
     const { data: subscriptions, error: subError } = await supabase
       .from('subscriptions')
-      .select('user_id, plan, status, current_period_end, stripe_customer_id, updated_at');
+      .select('user_id, email, plan, status, current_period_end, stripe_customer_id, updated_at');
 
     if (subError) {
       console.error('[ADMIN_USERS] subscriptions query error:', subError);
@@ -29,7 +30,7 @@ export async function GET() {
     // 3. Fetch session counts per user
     const { data: sessions, error: sessError } = await supabase
       .from('chat_sessions')
-      .select('user_id, created_at, updated_at');
+      .select('id, user_id, created_at, updated_at');
 
     if (sessError) {
       console.error('[ADMIN_USERS] chat_sessions query error:', sessError);
@@ -67,22 +68,34 @@ export async function GET() {
       userMessages[userId] = (userMessages[userId] || 0) + 1;
     }
 
-    // Build subscription map
-    const subMap: Record<string, {
+    // Build subscription map — keyed by user_id AND by email so we can
+    // reunite a stripe_cus_* guest-checkout sub with its Firebase user
+    // when they signed up later with the same email.
+    type SubInfo = {
       plan: string;
       status: string;
       current_period_end: string | null;
       stripe_customer_id: string | null;
-    }> = {};
+      email: string | null;
+    };
+    const subMap: Record<string, SubInfo> = {};
+    const subByEmail: Record<string, SubInfo> = {};
     for (const sub of subscriptions || []) {
       if (!sub.user_id) continue;
-      subMap[sub.user_id] = {
+      const info: SubInfo = {
         plan: sub.plan || 'unknown',
         status: sub.status || 'unknown',
         current_period_end: sub.current_period_end || null,
         stripe_customer_id: sub.stripe_customer_id || null,
+        email: sub.email || null,
       };
+      subMap[sub.user_id] = info;
+      if (sub.email) subByEmail[sub.email.toLowerCase()] = info;
     }
+
+    // Track stripe_cus_ subs that get merged into a Firebase user so we
+    // don't list them twice in the orphan pass.
+    const mergedSubIds = new Set<string>();
 
     // Build user list from registered users (primary source)
     const seenIds = new Set<string>();
@@ -90,7 +103,20 @@ export async function GET() {
 
     for (const u of registeredUsers || []) {
       seenIds.add(u.firebase_uid);
-      const sub = subMap[u.firebase_uid];
+      // Prefer sub matched by firebase_uid, fall back to email match so
+      // guest-checkout customers who later sign up aren't split in two.
+      let sub = subMap[u.firebase_uid];
+      if (!sub && u.email) {
+        const emailKey = u.email.toLowerCase();
+        const emailSub = subByEmail[emailKey];
+        if (emailSub) {
+          sub = emailSub;
+          // Mark the guest-checkout row's user_id (stripe_cus_*) so we skip it later.
+          for (const [uid, info] of Object.entries(subMap)) {
+            if (info === emailSub) mergedSubIds.add(uid);
+          }
+        }
+      }
       users.push({
         user_id: u.firebase_uid,
         email: u.email,
@@ -107,14 +133,16 @@ export async function GET() {
       });
     }
 
-    // Also include users from sessions/subscriptions not yet in users table
+    // Also include users from sessions/subscriptions not yet in users table.
+    // For sub-only rows, surface the sub's email instead of the raw stripe_cus_ id.
     for (const uid of [...Object.keys(userSessionCounts), ...Object.keys(subMap)]) {
       if (seenIds.has(uid)) continue;
+      if (mergedSubIds.has(uid)) continue;
       seenIds.add(uid);
       const sub = subMap[uid];
       users.push({
         user_id: uid,
-        email: null,
+        email: sub?.email || null,
         display_name: null,
         registered_at: null,
         last_login_at: null,

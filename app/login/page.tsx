@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -12,11 +12,23 @@ import {
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 
-export default function LoginPage() {
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPage />
+    </Suspense>
+  );
+}
+
+function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading } = useAuth();
-  const [tab, setTab] = useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = useState('');
+  const initialTab: 'signin' | 'signup' =
+    searchParams.get('tab') === 'signup' ? 'signup' : 'signin';
+  const initialEmail = searchParams.get('email') || '';
+  const [tab, setTab] = useState<'signin' | 'signup'>(initialTab);
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
