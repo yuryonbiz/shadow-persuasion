@@ -17,6 +17,7 @@ import {
   BookOpen,
   Shuffle,
   FolderTree,
+  Mail,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -27,6 +28,7 @@ const NAV = [
   { href: '/app/admin/members',    label: 'Members',   icon: Users },
   { href: '/app/admin/orders',     label: 'Orders',    icon: ShoppingBag },
   { href: '/app/admin/leads',      label: 'Leads',     icon: UserPlus },
+  { href: '/app/admin/emails',     label: 'Emails',    icon: Mail },
   { href: '/app/admin/books',      label: 'Books',     icon: BookOpen },
   { href: '/app/admin/techniques', label: 'Techniques', icon: Shuffle },
   { href: '/app/admin/taxonomy',   label: 'Taxonomy',  icon: FolderTree },
