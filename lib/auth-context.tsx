@@ -25,15 +25,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
       setLoading(false);
 
-      // Register/update user in database on login
+      // Register/update user in database on login.
+      // This is also the server-side entitlement gate: if the user has
+      // no paid subscription (someone who snuck past the client gate or
+      // was added manually in Firebase), the server returns 403 and we
+      // sign them out so they can't reach the app.
       if (user) {
         try {
           const token = await user.getIdToken();
-          fetch('/api/user/register', {
+          const res = await fetch('/api/user/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ email: user.email, displayName: user.displayName }),
-          }).catch(() => {});
+          });
+          if (res.status === 403) {
+            // No entitlement — boot them and park a message on /login.
+            const data = await res.json().catch(() => ({}));
+            if (data?.error === 'not_entitled') {
+              try {
+                sessionStorage.setItem('sp_login_notice', 'not_entitled');
+              } catch {}
+              await firebaseSignOut(auth);
+              if (typeof window !== 'undefined') {
+                window.location.href = '/login';
+              }
+            }
+          }
         } catch {}
       }
     });

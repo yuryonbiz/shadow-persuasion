@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   signInWithEmailAndPassword,
@@ -8,9 +9,28 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
+  getAdditionalUserInfo,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
+
+// Signup is gated — only buyers (active SaaS subscribers) can register.
+// This helper returns true when the email has a valid entitlement in
+// Supabase. If it returns false, we refuse to create the Firebase user
+// and steer them to /checkout to purchase first.
+async function isEntitledToSignup(email: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/auth/check-entitlement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    return !!data?.entitled;
+  } catch {
+    return false;
+  }
+}
 
 export default function LoginPageWrapper() {
   return (
@@ -44,6 +64,18 @@ function LoginPage() {
     }
   }, [user, loading, router]);
 
+  // Pick up "you were booted because you have no entitlement" notice
+  // dropped by auth-context when the server-side gate fires.
+  React.useEffect(() => {
+    try {
+      if (sessionStorage.getItem('sp_login_notice') === 'not_entitled') {
+        setError('NOT_ENTITLED');
+        setTab('signup');
+        sessionStorage.removeItem('sp_login_notice');
+      }
+    } catch {}
+  }, []);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -72,6 +104,15 @@ function LoginPage() {
     }
     setSubmitting(true);
     try {
+      // Gate: only let buyers register. We check Supabase for an active
+      // subscription tied to this email BEFORE creating the Firebase user
+      // so we don't leave orphan accounts behind.
+      const entitled = await isEntitledToSignup(email);
+      if (!entitled) {
+        setError('NOT_ENTITLED');
+        setSubmitting(false);
+        return;
+      }
       await createUserWithEmailAndPassword(auth, email, password);
       router.push('/app');
     } catch (err: unknown) {
@@ -87,7 +128,29 @@ function LoginPage() {
     setSubmitting(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const info = getAdditionalUserInfo(result);
+      // If this is a BRAND NEW Google account (no prior Firebase user),
+      // treat it as a signup and enforce the same entitlement gate.
+      // Returning users — already signed up when they had a sub — pass
+      // through, even if the sub later lapsed (app-level logic handles that).
+      if (info?.isNewUser) {
+        const emailAddr = result.user.email || '';
+        const entitled = emailAddr ? await isEntitledToSignup(emailAddr) : false;
+        if (!entitled) {
+          // Clean up the freshly-created Firebase user so they can't
+          // sneak in via Google without paying.
+          try {
+            await result.user.delete();
+          } catch {
+            // If delete fails (e.g. token expiry), fall back to signing
+            // them out; server-side register will still refuse them.
+            try { await auth.signOut(); } catch {}
+          }
+          setError('NOT_ENTITLED');
+          return;
+        }
+      }
       router.push('/app');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sign in with Google';
@@ -176,11 +239,32 @@ function LoginPage() {
           </div>
 
           {/* Error */}
-          {error && (
+          {error === 'NOT_ENTITLED' ? (
+            <div className="mb-6 p-4 bg-[#D4A017]/10 border border-[#D4A017]/40 rounded-lg">
+              <p className="text-sm font-bold text-gray-900 dark:text-[#E8E8E0] mb-1">
+                No subscription found for this email.
+              </p>
+              <p className="text-sm text-gray-600 dark:text-[#888888] mb-3">
+                Shadow Persuasion is available to members only. Purchase access
+                to start training, then come back to create your account with
+                the same email.
+              </p>
+              <Link
+                href="/checkout?plan=monthly"
+                className="inline-block w-full text-center py-2.5 bg-[#D4A017] hover:bg-[#B8860B] text-[#0A0A0A] font-bold rounded-lg transition-colors text-sm tracking-wider"
+              >
+                GET ACCESS
+              </Link>
+              <p className="text-xs text-gray-500 dark:text-[#888888] mt-3 text-center">
+                Already paid? Make sure you&apos;re using the same email as your
+                Stripe receipt. If you just paid, wait 30 seconds and try again.
+              </p>
+            </div>
+          ) : error ? (
             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
               {error}
             </div>
-          )}
+          ) : null}
 
           {/* Sign In Form */}
           {tab === 'signin' && (
