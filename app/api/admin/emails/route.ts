@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    const row = {
+    const row: Record<string, unknown> = {
       key,
       name: String(body?.name || key),
       description: body?.description ?? null,
@@ -66,7 +66,14 @@ export async function POST(req: Request) {
       provider: 'resend',
       is_system: false,
       enabled: body?.enabled !== false,
+      is_transactional: body?.is_transactional === true,
     };
+    // Sequence fields are optional — only include them if the caller
+    // explicitly set them, otherwise Postgres stores NULL (standalone).
+    if (typeof body?.sequence_key === 'string' && body.sequence_key.trim() !== '')
+      row.sequence_key = body.sequence_key.trim();
+    if (typeof body?.sequence_step === 'number') row.sequence_step = body.sequence_step;
+    if (typeof body?.delay_hours === 'number') row.delay_hours = body.delay_hours;
     const { data, error } = await supabase
       .from('email_templates')
       .insert(row)
