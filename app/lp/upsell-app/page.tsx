@@ -501,7 +501,7 @@ function UpsellAppInner() {
 
         <div className="text-center">
           <a
-            href="/lp/thank-you"
+            href={`/lp/thank-you${paymentIntentId ? `?pi=${paymentIntentId}` : ''}`}
             onClick={handleDecline}
             className="inline-flex items-center gap-2 text-sm text-[#5C3A1E] hover:text-[#1A1A1A] underline"
           >
