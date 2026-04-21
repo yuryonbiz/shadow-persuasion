@@ -16,7 +16,12 @@
  */
 
 import { Resend } from 'resend';
-import { describeOrder, flattenDownloads, type ProductSlug } from './pricing';
+import {
+  describeOrder,
+  fetchProductFiles,
+  type DownloadFile,
+  type ProductSlug,
+} from './pricing';
 import {
   loadTemplate,
   renderTemplate,
@@ -37,11 +42,22 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://shadowpersuasion.c
    Order delivery — sends download links after a paid order.
    ════════════════════════════════════════════════════════════ */
 
-function renderDownloadRowsHtml(items: ProductSlug[]): string {
-  const files = flattenDownloads(items);
+/**
+ * URL resolver — DB-seeded rows store absolute URLs (either the
+ * bundled-in-/public/downloads/ path prefixed with the site host,
+ * or a Supabase Storage public URL). Legacy hardcoded rows in
+ * lib/pricing.ts use relative paths like `/downloads/foo.pdf` which
+ * need the SITE_URL prefix. Handle both by checking for scheme.
+ */
+function resolveDownloadUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${SITE_URL}${path.startsWith('/') ? path : '/' + path}`;
+}
+
+function renderDownloadRowsHtml(files: DownloadFile[]): string {
   return files
     .map((f) => {
-      const url = `${SITE_URL}${f.path}`;
+      const url = resolveDownloadUrl(f.path);
       return `
         <tr>
           <td style="padding:12px 0;border-bottom:1px solid #5C3A1E22;">
@@ -61,10 +77,8 @@ function renderDownloadRowsHtml(items: ProductSlug[]): string {
     .join('');
 }
 
-function renderDownloadRowsText(items: ProductSlug[]): string {
-  return flattenDownloads(items)
-    .map((f) => `${f.name}\n${SITE_URL}${f.path}\n`)
-    .join('\n');
+function renderDownloadRowsText(files: DownloadFile[]): string {
+  return files.map((f) => `${f.name}\n${resolveDownloadUrl(f.path)}\n`).join('\n');
 }
 
 /**
@@ -118,12 +132,19 @@ export async function sendDeliveryEmail(opts: {
   // Delivery is transactional — Stripe requires we deliver what the
   // customer paid for. So we do NOT check the unsubscribe list here.
   const body = tpl ?? deliveryFallback();
+
+  // Pull the file list from the DB (admin-managed). Falls back to
+  // the hardcoded lib/pricing definitions if the DB query fails,
+  // so a bad deploy or down database never blocks a real delivery.
+  const files = await fetchProductFiles(opts.items);
+  const fileCount = files.length;
+
   const vars: Record<string, string> = {
     greeting: opts.firstName ? `${opts.firstName},` : 'Hey,',
     order_description: describeOrder(opts.items),
-    download_plural: opts.items.length > 1 ? 's' : '',
-    download_rows: renderDownloadRowsHtml(opts.items),
-    download_rows_text: renderDownloadRowsText(opts.items),
+    download_plural: fileCount > 1 ? 's' : '',
+    download_rows: renderDownloadRowsHtml(files),
+    download_rows_text: renderDownloadRowsText(files),
     unsubscribe_url: buildUnsubscribeUrl(opts.to), // harmless if the template doesn't reference it
   };
 

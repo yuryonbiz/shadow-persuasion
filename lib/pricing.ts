@@ -67,9 +67,65 @@ export const PRODUCTS: Record<ProductSlug, ProductDef> = {
   },
 };
 
-/** Flat list of all downloads across a set of products, in order. */
+/**
+ * Flat list of all downloads across a set of products, in order.
+ *
+ * Sync version — uses the hardcoded `PRODUCTS` definitions above.
+ * Kept for any caller that can't await a DB query. The DB-backed
+ * version below (`fetchProductFiles`) should be preferred because
+ * it respects admin-uploaded / deactivated files.
+ */
 export function flattenDownloads(slugs: ProductSlug[]): DownloadFile[] {
   return slugs.flatMap((s) => PRODUCTS[s].downloads);
+}
+
+/**
+ * Async version that reads from the `product_files` Supabase table.
+ * This is the source of truth for the delivery email (and anything
+ * else that wants to respect the admin's file management at
+ * /app/admin/files).
+ *
+ * Fallback: if the DB query fails OR returns zero rows for a given
+ * product slug, we fall back to the hardcoded `PRODUCTS[slug].downloads`
+ * so delivery never silently breaks while migrations are being applied.
+ */
+export async function fetchProductFiles(slugs: ProductSlug[]): Promise<DownloadFile[]> {
+  // Dynamic import so this module doesn't pull supabase on pages that
+  // only use the sync helpers above (keeps client bundles small).
+  const { createClient } = await import('@supabase/supabase-js');
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data, error } = await supabase
+      .from('product_files')
+      .select('product_slug, name, storage_url, sort_order')
+      .in('product_slug', slugs)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+
+    const rows = data ?? [];
+    // Preserve the order of `slugs` in the output (e.g. book first,
+    // then briefing), and within each slug sort by sort_order.
+    const out: DownloadFile[] = [];
+    for (const slug of slugs) {
+      const forSlug = rows.filter((r) => r.product_slug === slug);
+      if (forSlug.length === 0) {
+        // DB has nothing for this slug → fall back to hardcoded list.
+        out.push(...(PRODUCTS[slug]?.downloads ?? []));
+      } else {
+        for (const r of forSlug) {
+          out.push({ name: r.name as string, path: r.storage_url as string });
+        }
+      }
+    }
+    return out;
+  } catch (err) {
+    console.warn('[fetchProductFiles] DB lookup failed, falling back to static:', err);
+    return flattenDownloads(slugs);
+  }
 }
 
 // Bundle: playbooks + vault sold together for $47
