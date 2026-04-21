@@ -237,30 +237,49 @@ function ThankYouInner() {
   );
 }
 
-/* ─────────────── Downloads list (looks up per-product files) ─────────────── */
-function DownloadList({ items }: { items: string[] }) {
-  // Map product slugs → human-readable list of files, using public paths
-  // matching what lib/pricing.ts defines on the server
-  const CATALOG: Record<string, { name: string; path: string }[]> = {
-    book: [
-      { name: 'Shadow Persuasion (The Book)', path: '/downloads/shadow-persuasion-book.pdf' },
-      { name: 'Bonus #1: The Manipulation Tactics Decoder', path: '/downloads/bonus-1-manipulation-decoder.pdf' },
-      { name: 'Bonus #2: The Power Dynamics Cheatsheet', path: '/downloads/bonus-2-power-dynamics-cheatsheet.pdf' },
-      { name: 'Bonus #3: 48 Salary Negotiation Scripts', path: '/downloads/bonus-3-salary-scripts.pdf' },
-      { name: 'Bonus #4: The Reactance Detector Cheatsheet', path: '/downloads/bonus-4-reactance-detector.pdf' },
-    ],
-    briefing: [
-      { name: 'The Pre-Conversation Briefing', path: '/downloads/pre-conversation-briefing.pdf' },
-    ],
-    playbooks: [
-      { name: 'The Situation Playbooks', path: '/downloads/situation-playbooks.pdf' },
-    ],
-    vault: [
-      { name: 'The Shadow Persuasion Vault', path: '/downloads/shadow-persuasion-vault.pdf' },
-    ],
-  };
+/* ─────────────── Downloads list ───────────────
+   Reads the current active file list for the buyer's purchased
+   products from /api/product-files, which in turn reads the
+   admin-managed `product_files` table. That way an admin
+   uploading a new bonus or swapping a file at /app/admin/files
+   is reflected here on the next page load — no redeploy. */
+type DownloadFile = { name: string; path: string };
 
-  const files = items.flatMap((slug) => CATALOG[slug] ?? []);
+function DownloadList({ items }: { items: string[] }) {
+  const [files, setFiles] = useState<DownloadFile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setFiles([]);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const qs = encodeURIComponent(items.join(','));
+        const res = await fetch(`/api/product-files?items=${qs}`);
+        const d = await res.json();
+        if (!cancelled) {
+          setFiles(Array.isArray(d.files) ? d.files : []);
+        }
+      } catch {
+        if (!cancelled) setFiles([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
+
+  if (loading) {
+    return (
+      <p className="text-center text-[#5C3A1E] italic py-4">Loading your downloads…</p>
+    );
+  }
 
   if (files.length === 0) {
     return (
