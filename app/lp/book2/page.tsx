@@ -430,7 +430,7 @@ export default function BookFunnelPageV2() {
                 You win these conversations <HL>without the other person ever realizing they were being persuaded.</HL>
               </p>
               <p>
-                We do it by deploying <strong>47 below-the-radar tactics</strong> that bypass the brain&apos;s
+                We do it by deploying <strong>47 below-the-radar tactics</strong>{' '}that bypass the brain&apos;s
                 built-in &ldquo;persuasion detector.&rdquo; That is the defense mechanism firing in your listener&apos;s head
                 the second they sense you are trying to influence them. It is also the reason why 90% of the techniques
                 you read about in every other influence book quietly stop working the moment you deploy them.
@@ -579,7 +579,7 @@ export default function BookFunnelPageV2() {
               <HL>1,200+ readers from every walk of life</HL> are now using to win the conversations they used to lose.
             </p>
             <p>
-              And in turn, <strong>landing outcomes they had been chasing for years</strong> faster than they thought
+              And in turn, <strong>landing outcomes they had been chasing for years</strong>{' '}faster than they thought
               possible (one reader closed a $42K salary bump in a single 22-minute call after two years of &ldquo;we&apos;ll
               revisit it next quarter&rdquo;).
             </p>
@@ -827,7 +827,7 @@ export default function BookFunnelPageV2() {
             field manual is the first thing I&apos;ve ever made public under this name.
           </p>
           <p>
-            My life&apos;s pretty good right now. I live in <HL>Austin, Texas</HL> with my wife Sarah and our
+            My life&apos;s pretty good right now. I live in <HL>Austin, Texas</HL>{' '}with my wife Sarah and our
             four-year-old daughter. I walk my kid to preschool in the mornings, take calls with private clients in the
             afternoons, and spend the rest of my time recording, reviewing, and refining the tactics in this book. I
             get to pick which conversations I want to be in. I haven&apos;t had to &ldquo;win&rdquo; a fight with
@@ -849,7 +849,7 @@ export default function BookFunnelPageV2() {
 
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#F4ECD8]/90">
             <p>
-              I was <strong>29 years old</strong> and living in a 400-square-foot studio apartment in Philadelphia.
+              I was <strong>29 years old</strong>{' '}and living in a 400-square-foot studio apartment in Philadelphia.
               The neighbor above me played drums at 11 p.m. three nights a week. I didn&apos;t have the
               conversational tools to ask him to stop.
             </p>
@@ -994,7 +994,7 @@ export default function BookFunnelPageV2() {
               high-stakes conversation.
             </p>
             <p>
-              All you have to do is learn the <strong>four structural moves</strong> that make up the Shadow
+              All you have to do is learn the <strong>four structural moves</strong>{' '}that make up the Shadow
               Persuasion system. Disable. Plant. Shift. Lock In. They&apos;re not scripts. They&apos;re positions.
               You adapt them to the conversation you&apos;re actually in.
             </p>
@@ -1237,7 +1237,7 @@ export default function BookFunnelPageV2() {
           </p>
           <p>I promise you this...</p>
           <p>
-            <strong>Anyone</strong> can win almost any high-stakes conversation with the right model. That includes
+            <strong>Anyone</strong>{' '}can win almost any high-stakes conversation with the right model. That includes
             the introverted. The soft-spoken. The ones who stammer under pressure. The ones who think of the right
             thing to say in the shower the next morning. Shadow Persuasion doesn&apos;t require you to become a
             different kind of person. It just requires you to stop firing the detector.
@@ -1251,7 +1251,7 @@ export default function BookFunnelPageV2() {
 
         <div className="bg-white border-2 border-[#5C3A1E]/40 p-6 md:p-10 shadow-[8px_8px_0_0_rgba(0,0,0,0.08)]">
           <p className="text-base md:text-lg leading-relaxed text-[#1A1A1A] mb-6 text-center">
-            Because over <HL>1,200 other readers</HL> are doing it too right now inside the private Shadow Persuasion
+            Because over <HL>1,200 other readers</HL>{' '}are doing it too right now inside the private Shadow Persuasion
             community. Here&apos;s what some of them have been posting recently:
           </p>
           <div className="grid md:grid-cols-2 gap-5">
@@ -1575,7 +1575,7 @@ export default function BookFunnelPageV2() {
             people.
           </p>
           <p>
-            Then I sold the Shadow Persuasion book for <strong>$27</strong> and over 800 people downloaded it at that
+            Then I sold the Shadow Persuasion book for <strong>$27</strong>{' '}and over 800 people downloaded it at that
             price. Which was great, but then I realized: hey, this is an eBook. It doesn&apos;t cost me anything to
             sell other than a few bucks to advertise it.
           </p>
