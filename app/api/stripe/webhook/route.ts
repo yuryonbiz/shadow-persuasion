@@ -322,10 +322,12 @@ export async function POST(req: NextRequest) {
               : 0;
             const newStatus = recoveryEmailsSent > 0 ? 'recovered' : 'converted';
             // Figure out which recovery email step closed the sale (if any
-            // was sent in the last 48h before conversion).
+            // was sent in the last 72h before conversion).
+            // Matches the sequence cadence: step 3 sends at 72h, so a
+            // click-through + 24h-to-buy still lands inside the window.
             let recoveredByStep: number | null = null;
             if (recoveryEmailsSent > 0) {
-              const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+              const cutoff = Date.now() - 72 * 60 * 60 * 1000;
               const recent = (lead.recovery_emails as Array<{ step: number; sent_at: string }>).filter(
                 (r) => r.sent_at && new Date(r.sent_at).getTime() >= cutoff
               );

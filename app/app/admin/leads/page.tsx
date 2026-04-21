@@ -29,6 +29,7 @@ type Lead = {
   recovery_emails: Array<{ step: number; sent_at: string; email_id: string | null }> | null;
   recovered_by_email_step: number | null;
   stripe_payment_intent_id: string | null;
+  is_test: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -61,12 +62,14 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');
+  const [includeTest, setIncludeTest] = useState(false);
 
   async function load() {
     setLoading(true);
     const params = new URLSearchParams();
     if (status !== 'all') params.set('status', status);
     if (search) params.set('search', search);
+    if (includeTest) params.set('includeTest', '1');
     params.set('limit', '500');
     try {
       const res = await fetch(`/api/admin/leads?${params.toString()}`);
@@ -82,7 +85,7 @@ export default function LeadsPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  }, [status, includeTest]);
 
   const fmt$ = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const fmtDate = (iso: string) =>
@@ -226,6 +229,15 @@ export default function LeadsPage() {
             <option value="abandoned">Abandoned</option>
           </select>
         </div>
+        <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-[#F4ECD8]/70 self-end pb-2">
+          <input
+            type="checkbox"
+            checked={includeTest}
+            onChange={(e) => setIncludeTest(e.target.checked)}
+            className="accent-[#D4A017]"
+          />
+          Include test leads
+        </label>
         <button
           onClick={load}
           className="px-4 py-2 bg-[#D4A017] text-black font-mono text-xs uppercase tracking-wider font-bold hover:bg-[#C4901A]"
@@ -259,12 +271,19 @@ export default function LeadsPage() {
                 const meta = STATUS_META[l.status] || { label: l.status, cls: 'bg-gray-200 text-gray-700' };
                 const emailsSent = (l.recovery_emails?.length ?? 0);
                 return (
-                  <tr key={l.id} className="border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A]">
+                  <tr key={l.id} className={`border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A] ${l.is_test ? 'opacity-60' : ''}`}>
                     <td className="px-4 py-2.5 text-xs text-gray-600 dark:text-[#F4ECD8]/70 font-mono whitespace-nowrap">
                       {fmtDate(l.created_at)}
                     </td>
                     <td className="px-4 py-2.5">
-                      <div className="text-sm text-gray-900 dark:text-[#F4ECD8]">{l.email}</div>
+                      <div className="text-sm text-gray-900 dark:text-[#F4ECD8] flex items-center gap-2 flex-wrap">
+                        {l.email}
+                        {l.is_test && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-purple-600 text-white font-bold">
+                            Test
+                          </span>
+                        )}
+                      </div>
                       {l.first_name && (
                         <div className="text-xs text-gray-500 dark:text-[#F4ECD8]/50">{l.first_name}</div>
                       )}

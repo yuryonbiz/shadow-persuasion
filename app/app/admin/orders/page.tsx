@@ -44,6 +44,7 @@ type CustomerSession = {
   first_at: string;
   latest_at: string;
   orders: OrderRow[];
+  is_test: boolean;
 };
 
 type Funnel = {
@@ -88,6 +89,9 @@ function OrdersPage() {
   const [status, setStatus] = useState('all');
   const [product, setProduct] = useState('all');
   const [search, setSearch] = useState(initialSearch);
+  // Test orders are hidden by default. Toggle on to review flagged
+  // test data (e.g. to unmark one that was flagged by mistake).
+  const [includeTest, setIncludeTest] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -95,6 +99,7 @@ function OrdersPage() {
     if (status !== 'all') params.set('status', status);
     if (product !== 'all') params.set('product', product);
     if (search) params.set('search', search);
+    if (includeTest) params.set('includeTest', '1');
     params.set('limit', '300');
     const res = await fetch(`/api/admin/orders?${params.toString()}`);
     const data = await res.json();
@@ -114,7 +119,7 @@ function OrdersPage() {
     }, search ? 300 : 0);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, product, search]);
+  }, [status, product, search, includeTest]);
 
   const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const fmtDate = (iso: string) => new Date(iso).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
@@ -224,6 +229,15 @@ function OrdersPage() {
             <option value="vault">Vault</option>
           </select>
         </div>
+        <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-[#F4ECD8]/70 self-end pb-2">
+          <input
+            type="checkbox"
+            checked={includeTest}
+            onChange={(e) => setIncludeTest(e.target.checked)}
+            className="accent-[#D4A017]"
+          />
+          Include test orders
+        </label>
         <button
           onClick={load}
           className="px-4 py-2 bg-[#D4A017] text-black font-mono text-xs uppercase tracking-wider font-bold hover:bg-[#C4901A]"
@@ -259,12 +273,19 @@ function OrdersPage() {
               <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-[#F4ECD8]/50 font-mono text-sm">No customer sessions match these filters.</td></tr>
             ) : (
               sessions.map((s) => (
-                <tr key={s.email} className="border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A]">
+                <tr key={s.email} className={`border-b border-gray-100 dark:border-[#D4A017]/10 hover:bg-gray-50 dark:hover:bg-[#0A0A0A] ${s.is_test ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-3 text-xs text-gray-600 dark:text-[#F4ECD8]/70 font-mono whitespace-nowrap">
                     {fmtDate(s.latest_at)}
                   </td>
                   <td className="px-4 py-3 text-gray-900 dark:text-[#F4ECD8] text-sm">
-                    {s.email}
+                    <span className="inline-flex items-center gap-2 flex-wrap">
+                      {s.email}
+                      {s.is_test && (
+                        <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider bg-purple-600 text-white font-bold">
+                          Test
+                        </span>
+                      )}
+                    </span>
                     {s.order_count > 1 && (
                       <div className="text-[10px] text-gray-500 dark:text-[#F4ECD8]/50 font-mono mt-0.5">
                         {s.order_count} charges

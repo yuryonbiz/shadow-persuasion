@@ -39,6 +39,7 @@ type OrderRow = {
   metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+  is_test: boolean;
 };
 
 type RelatedOrderRow = {
@@ -293,18 +294,55 @@ export default function OrderDetailPage() {
       </Link>
 
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-[#D4A017]/70 mb-2">
             // CUSTOMER SESSION //
           </p>
-          <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8]">
+          <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-[#F4ECD8] flex items-center gap-3 flex-wrap">
             {order.email}
+            {order.is_test && (
+              <span className="px-2 py-1 text-xs font-mono uppercase tracking-wider bg-purple-600 text-white font-bold">
+                Test Order
+              </span>
+            )}
           </h1>
           <p className="font-mono text-xs text-gray-500 dark:text-[#F4ECD8]/50 mt-2">
             {allOrders.length} order{allOrders.length === 1 ? '' : 's'}
             {' · '}first {fmtDate(allOrders[0].created_at)}
           </p>
         </div>
+        {/* Mark-as-test toggle lives in the header so it's findable
+            from any order detail. Cascade hits every order tied to
+            this email plus the associated sub + lead row. */}
+        <button
+          onClick={async () => {
+            const next = !order.is_test;
+            if (!confirm(next
+              ? `Mark this whole customer session as TEST? All orders (${allOrders.length}), the subscription (if any), and the checkout lead for ${order.email} will be excluded from dashboard metrics.`
+              : `Un-mark this customer session as test? It will start counting in revenue, leads, and conversions again.`)) return;
+            try {
+              const res = await fetch(`/api/admin/orders/${order.id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'mark_test', isTest: next }),
+              });
+              const d = await res.json();
+              if (!res.ok) throw new Error(d.error || 'Failed');
+              setFlash(next ? 'Marked as test' : 'Unmarked test');
+              await load();
+              setTimeout(() => setFlash(null), 3000);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : String(err));
+            }
+          }}
+          className={`inline-flex items-center gap-2 px-3 py-1.5 font-mono text-xs uppercase tracking-wider border ${
+            order.is_test
+              ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700'
+              : 'bg-white dark:bg-[#111] border-gray-300 dark:border-[#D4A017]/40 text-gray-900 dark:text-[#F4ECD8] hover:border-purple-600'
+          }`}
+        >
+          {order.is_test ? 'Unmark Test' : 'Mark As Test'}
+        </button>
       </div>
 
       {error && (

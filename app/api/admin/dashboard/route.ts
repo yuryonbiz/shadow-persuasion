@@ -25,10 +25,15 @@ export async function GET() {
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
-    // Orders aggregate — group by email so one "order" = one customer session
+    // Orders aggregate — group by email so one "order" = one customer session.
+    // Test orders (is_test = true) are filtered out so dashboard metrics
+    // reflect real revenue / conversions only. The admin can still see
+    // test orders individually in /app/admin/orders with the "Include
+    // test orders" toggle.
     const { data: ordersAll } = await supabase
       .from('orders')
-      .select('email, amount_cents, status, created_at');
+      .select('email, amount_cents, status, created_at')
+      .eq('is_test', false);
 
     const rawOrders = ordersAll ?? [];
 
@@ -74,15 +79,17 @@ export async function GET() {
       0
     );
 
-    // Members / subscriptions
+    // Members / subscriptions — exclude test subscriptions from dashboard counts
     const { count: membersTotal } = await supabase
       .from('subscriptions')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('is_test', false);
 
     const { count: membersActive } = await supabase
       .from('subscriptions')
       .select('*', { count: 'exact', head: true })
-      .in('status', ['active', 'trialing']);
+      .in('status', ['active', 'trialing'])
+      .eq('is_test', false);
 
     // Knowledge base: count distinct books via SQL RPC would be best, but a
     // simple select+dedup gets us there without migration.

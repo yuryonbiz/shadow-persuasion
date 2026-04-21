@@ -32,8 +32,13 @@ export async function GET(req: Request) {
     const to = url.searchParams.get('to') || '';
     const limit = Math.min(Number(url.searchParams.get('limit') || 200), 500);
     const offset = Number(url.searchParams.get('offset') || 0);
+    // Admin can opt in to seeing test leads (those whose linked order
+    // was flagged via the mark-test action). Off by default so the
+    // metrics on this page stay real.
+    const includeTest = url.searchParams.get('includeTest') === '1';
 
     let query = supabase.from('checkout_leads').select('*', { count: 'exact' });
+    if (!includeTest) query = query.eq('is_test', false);
     if (status !== 'all') query = query.eq('status', status);
     if (search) query = query.ilike('email', `%${search}%`);
     if (from) query = query.gte('created_at', from);
@@ -43,10 +48,12 @@ export async function GET(req: Request) {
     const { data: leads, count, error } = await query;
     if (error) throw error;
 
-    // Stats across the FULL dataset (not filtered)
+    // Stats across the FULL dataset (excluding test leads always —
+    // these numbers drive the KPI cards, so keep them real).
     const { data: allLeads } = await supabase
       .from('checkout_leads')
-      .select('status, recovered_by_email_step, amount_cents, created_at, converted_at');
+      .select('status, recovered_by_email_step, amount_cents, created_at, converted_at')
+      .eq('is_test', false);
 
     const all = allLeads ?? [];
     const total = all.length;

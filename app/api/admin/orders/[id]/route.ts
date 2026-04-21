@@ -228,7 +228,8 @@ type ActionBody =
   | { action: 'refund'; reason?: string }
   | { action: 'resend_email' }
   | { action: 'mark_delivered' }
-  | { action: 'update_note'; note: string };
+  | { action: 'update_note'; note: string }
+  | { action: 'mark_test'; isTest: boolean };
 
 export async function POST(
   req: Request,
@@ -323,6 +324,54 @@ export async function POST(
           })
           .eq('id', id);
         return NextResponse.json({ ok: true });
+      }
+
+      /**
+       * Toggle the order's is_test flag and CASCADE to the related
+       * lead / subscription / other orders in the same session so
+       * the entire customer journey is hidden from admin metrics.
+       *
+       * We cascade by email + stripe_customer_id (same keys the
+       * session-rollup views use), so a single click covers:
+       *   - every order row with this email
+       *   - the subscription (if any) tied to this email or customer
+       *   - the checkout_lead row for this email + funnel
+       */
+      case 'mark_test': {
+        const isTest = body.isTest === true;
+        const email = (order.email || '').toLowerCase();
+        const customerId = order.stripe_customer_id;
+
+        // Orders
+        if (email) {
+          await supabase
+            .from('orders')
+            .update({ is_test: isTest })
+            .ilike('email', email);
+        } else {
+          await supabase.from('orders').update({ is_test: isTest }).eq('id', id);
+        }
+
+        // Subscriptions — match by email OR stripe_customer_id
+        if (email || customerId) {
+          const orFilters: string[] = [];
+          if (email) orFilters.push(`email.eq.${email}`);
+          if (customerId) orFilters.push(`stripe_customer_id.eq.${customerId}`);
+          await supabase
+            .from('subscriptions')
+            .update({ is_test: isTest })
+            .or(orFilters.join(','));
+        }
+
+        // Checkout leads — match by email (case-insensitive)
+        if (email) {
+          await supabase
+            .from('checkout_leads')
+            .update({ is_test: isTest })
+            .ilike('email', email);
+        }
+
+        return NextResponse.json({ ok: true, isTest });
       }
 
       default:

@@ -42,6 +42,7 @@ type OrderRow = {
   refunded_at: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
+  is_test: boolean;
 };
 
 type SubRow = {
@@ -77,6 +78,7 @@ type CustomerSession = {
   first_at: string;                  // first order timestamp
   latest_at: string;                 // most recent order timestamp
   orders: OrderRow[];                // raw rows for detail page drilldown
+  is_test: boolean;                  // true when every order in the session is flagged test
 };
 
 function rollupStatus(counts: Record<string, number>): SessionStatus {
@@ -97,24 +99,32 @@ export async function GET(req: Request) {
     const to = url.searchParams.get('to') || '';
     const limit = Math.min(Number(url.searchParams.get('limit') || 200), 500);
     const offset = Number(url.searchParams.get('offset') || 0);
+    // Test orders are hidden from the list by default. The admin UI
+    // exposes an "Include test orders" toggle that sets ?includeTest=1
+    // to surface them with a TEST badge.
+    const includeTest = url.searchParams.get('includeTest') === '1';
 
     // Fetch a wide window of orders + subs, then group + filter in memory.
     // This is fine up to low tens of thousands of rows; at scale we'd move
     // the grouping to a SQL view.
-    const { data: rawOrders, error: ordersErr } = await supabase
+    let ordersQuery = supabase
       .from('orders')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(2000);
+    if (!includeTest) ordersQuery = ordersQuery.eq('is_test', false);
+    const { data: rawOrders, error: ordersErr } = await ordersQuery;
     if (ordersErr) throw ordersErr;
 
     const orders = (rawOrders ?? []) as OrderRow[];
 
-    const { data: rawSubs } = await supabase
+    let subsQuery = supabase
       .from('subscriptions')
-      .select('id, email, stripe_customer_id, stripe_subscription_id, plan, status, current_period_end, created_at')
+      .select('id, email, stripe_customer_id, stripe_subscription_id, plan, status, current_period_end, created_at, is_test')
       .order('created_at', { ascending: false })
       .limit(2000);
+    if (!includeTest) subsQuery = subsQuery.eq('is_test', false);
+    const { data: rawSubs } = await subsQuery;
     const subs = (rawSubs ?? []) as SubRow[];
 
     // Index subs by email (primary) + customer_id (fallback)
@@ -161,6 +171,11 @@ export async function GET(req: Request) {
         (customerId ? subsByCustomer.get(customerId) : null) ||
         null;
 
+      // A session is "test" when every order row in it is flagged
+      // test (cascade from the mark_test action on one order hits
+      // every order for that email, so this is normally 0 or all).
+      const sessionIsTest = os.length > 0 && os.every((o) => o.is_test === true);
+
       sessions.push({
         email,
         customer_id: customerId,
@@ -183,6 +198,7 @@ export async function GET(req: Request) {
         first_at: first.created_at,
         latest_at: last.created_at,
         orders: sorted,
+        is_test: sessionIsTest,
       });
     }
 
@@ -212,6 +228,7 @@ export async function GET(req: Request) {
           first_at: s.created_at,
           latest_at: s.created_at,
           orders: [],
+          is_test: (s as SubRow & { is_test?: boolean }).is_test === true,
         });
       }
     }
