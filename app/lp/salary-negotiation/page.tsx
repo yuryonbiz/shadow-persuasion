@@ -62,10 +62,10 @@ export default function SalaryNegotiationLP() {
         <div className="max-w-4xl mx-auto text-center">
           <img src="/logo.png" alt="Shadow Persuasion" className="w-40 md:w-52 mx-auto mb-8" />
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#6B5B3E] mb-4">
-            <span className="font-bold">CLASSIFICATION:</span> Salary Negotiation Intelligence
+            <span className="font-bold">CLASSIFICATION:</span>{' '}Salary Negotiation Intelligence
           </p>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-wider leading-tight mb-6">
-            Stop Leaving <span className="text-[#D4A017]">$5K-$50K+</span> on the Table
+            Stop Leaving <span className="text-[#D4A017]">$5K-$50K+</span>{' '}on the Table
           </h1>
           <p className="text-lg md:text-xl text-[#5C3A1E] max-w-2xl mx-auto mb-4 leading-relaxed">
             Your boss has scripts, HR training, and budget authority. You walk in with nothing but hope. Shadow Persuasion gives you the exact words, tactics, and counter-strategies to close the gap.
@@ -89,9 +89,9 @@ export default function SalaryNegotiationLP() {
           <div className="flex flex-col lg:flex-row gap-10 lg:gap-14">
             <div className="flex-1 space-y-6 text-lg leading-relaxed text-[#3B2E1A]">
               <p>You know you are underpaid. Your market research confirms it. But every time you bring it up, your boss deflects with &quot;not the right time,&quot; &quot;budget constraints,&quot; or &quot;let&apos;s revisit next quarter.&quot; Next quarter never comes.</p>
-              <p>You replay the conversation in your head and think of what you <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>SHOULD</span> have said. You watch less experienced coworkers earn more because they negotiated on the way in. You didn&apos;t. <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>Every month you wait, you lose money you already earned but never collected.</span></p>
+              <p>You replay the conversation in your head and think of what you <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>SHOULD</span>{' '}have said. You watch less experienced coworkers earn more because they negotiated on the way in. You didn&apos;t. <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>Every month you wait, you lose money you already earned but never collected.</span></p>
               <p>Shadow Persuasion changes that. Powered by a proprietary knowledge base of psychology, negotiation research, and influence techniques that general AI has never seen. Upload what your boss said and get the exact counter-strategy. Practice the conversation with AI before the real meeting. Walk in prepared. <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>Stop leaving leverage on the table.</span></p>
-              <p>Members report <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>$5,000 to $50,000+ salary increases</span> after their first negotiation using the system. The difference is not talent. It is having a system that decodes what your boss really means and tells you exactly what to say back.</p>
+              <p>Members report <span style={{ background: 'rgba(200, 168, 78, 0.25)' }}>$5,000 to $50,000+ salary increases</span>{' '}after their first negotiation using the system. The difference is not talent. It is having a system that decodes what your boss really means and tells you exactly what to say back.</p>
             </div>
             <div className="lg:w-[340px] shrink-0">
               <div className="border-2 border-[#A0884A] bg-[#F4ECD8]/50 p-6 sticky top-8">

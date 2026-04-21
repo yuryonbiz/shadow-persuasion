@@ -120,7 +120,7 @@ function UpsellAppInner() {
         </div>
       ) : (
         <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
-          ⚠  <span className="font-bold">ONE FINAL OFFER.</span> Before your order is complete.
+          ⚠  <span className="font-bold">ONE FINAL OFFER.</span>{' '}Before your order is complete.
         </div>
       )}
 
@@ -459,7 +459,7 @@ function UpsellAppInner() {
         <div className="max-w-3xl mx-auto text-center">
           <Shield className="h-16 w-16 text-[#D4A017] mx-auto mb-4" />
           <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-6">
-            <span className="text-[#D4A017]">30-Day Money-Back.</span> Even On The Membership.
+            <span className="text-[#D4A017]">30-Day Money-Back.</span>{' '}Even On The Membership.
           </h2>
           <p className="text-base md:text-lg text-[#F4ECD8]/90 leading-relaxed mb-5">
             Run five real conversations through the app in 30 days. If you can&apos;t point to at least one that went better because of it, email me the word &ldquo;refund&rdquo; and I send back the full first payment. Monthly or annual.

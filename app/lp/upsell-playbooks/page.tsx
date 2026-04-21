@@ -133,7 +133,7 @@ function UpsellPlaybooksInner() {
         </div>
       ) : (
         <div className="bg-[#8B0000] text-[#F4ECD8] py-3 text-center font-mono uppercase tracking-wider text-sm md:text-base">
-          ⚠  <span className="font-bold">WAIT.</span> Your order isn&apos;t quite finished. This offer expires in <Countdown />.
+          ⚠  <span className="font-bold">WAIT.</span>{' '}Your order isn&apos;t quite finished. This offer expires in <Countdown />.
         </div>
       )}
 
@@ -151,7 +151,7 @@ function UpsellPlaybooksInner() {
 
           <div className="bg-[#1A1A1A] text-[#F4ECD8] p-6 md:p-8 max-w-3xl mx-auto border-4 border-[#D4A017] shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] mb-10">
             <p className="text-lg md:text-xl leading-relaxed mb-4">
-              Your payment for <strong>Shadow Persuasion</strong> cleared. The book is hitting your inbox as you read this.
+              Your payment for <strong>Shadow Persuasion</strong>{' '}cleared. The book is hitting your inbox as you read this.
             </p>
             <p className="text-lg md:text-xl leading-relaxed">
               Give me ninety seconds before you close this tab. There&apos;s something the regular site doesn&apos;t sell, and I only show it to new operators right now, once, at this exact moment. <HL>Not at this price. Never bundled like this again.</HL>
@@ -500,10 +500,10 @@ function UpsellPlaybooksInner() {
           </p>
           <ol className="space-y-3 pl-6 list-decimal marker:text-[#D4A017] marker:font-bold">
             <li>
-              <strong>They only stack cleanly with the book.</strong> The Playbooks reference the book&apos;s 47 tactics by name. The Vault extends them. If you haven&apos;t read the book, half the value is missing.
+              <strong>They only stack cleanly with the book.</strong>{' '}The Playbooks reference the book&apos;s 47 tactics by name. The Vault extends them. If you haven&apos;t read the book, half the value is missing.
             </li>
             <li>
-              <strong>The discount only makes sense right now, at the moment of sale.</strong> I&apos;m already paying around $22 in ad spend to get you here. Tacking on $40 of bundle margin on top of the book is the only reason I can knock $37 off retail. Come back next week, the math breaks, you pay the $84.
+              <strong>The discount only makes sense right now, at the moment of sale.</strong>{' '}I&apos;m already paying around $22 in ad spend to get you here. Tacking on $40 of bundle margin on top of the book is the only reason I can knock $37 off retail. Come back next week, the math breaks, you pay the $84.
             </li>
           </ol>
           <p>
@@ -592,7 +592,7 @@ function UpsellPlaybooksInner() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white border-l-4 border-[#D4A017] p-6 md:p-8">
             <p className="font-bold text-[#1A1A1A] mb-3 text-base md:text-lg">
-              <strong>P.S.</strong> If you&apos;re on the fence, ask yourself what one bad conversation actually costs you.
+              <strong>P.S.</strong>{' '}If you&apos;re on the fence, ask yourself what one bad conversation actually costs you.
             </p>
             <p className="text-base md:text-lg text-[#1A1A1A] mb-3">
               A lost negotiation. The fight that didn&apos;t have to happen but did. The relationship you couldn&apos;t put back together because you froze at the wrong moment. A custody deal you&apos;re going to resent for the next fourteen years.

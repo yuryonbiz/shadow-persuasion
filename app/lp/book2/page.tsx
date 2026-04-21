@@ -67,7 +67,7 @@ function OrderBox({ small = false, bgVariant = 'cream' }: { small?: boolean; bgV
         Save $40 Today
       </p>
       <p className={`text-base mb-6 ${isDark ? 'text-[#F4ECD8]/80' : 'text-[#3B2E1A]'}`}>
-        Download the eBook for <span className="line-through">$47</span> just <strong>$7</strong>.<br />
+        Download the eBook for <span className="line-through">$47</span>{' '}just <strong>$7</strong>.<br />
         Delivered instantly. Start reading in the next 2 minutes.
       </p>
       <a
@@ -421,7 +421,7 @@ export default function BookFunnelPageV2() {
             </h2>
             <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A]">
               <p>
-                <strong>Shadow Persuasion</strong> is a counterintuitive approach to influence that lets you win
+                <strong>Shadow Persuasion</strong>{' '}is a counterintuitive approach to influence that lets you win
                 the conversations that actually decide your life. Salary negotiations. Fights with your partner.
                 Arguments with teenagers. Custody mediation. Reconnecting with estranged family. Sales calls.
                 Job interviews. Conversations with manipulators you cannot cut out of your life.
@@ -527,14 +527,14 @@ export default function BookFunnelPageV2() {
       <section className="px-6 py-8 md:py-12 max-w-3xl mx-auto text-base md:text-lg leading-[1.85] text-[#1A1A1A] space-y-5">
         <p><strong>Dear Future Shadow Persuader,</strong></p>
         <p>
-          <strong>From:</strong> The laptop of Nate Harlan<br />
-          <strong>Re:</strong> Why every persuasion book in your house is making you worse at this (and the only counterintuitive way out)
+          <strong>From:</strong>{' '}The laptop of Nate Harlan<br />
+          <strong>Re:</strong>{' '}Why every persuasion book in your house is making you worse at this (and the only counterintuitive way out)
         </p>
 
         <hr className="border-[#5C3A1E]/30 my-8" />
 
         <p>
-          Would it surprise you to learn that I went from <HL>losing 90% of my important conversations</HL> to winning
+          Would it surprise you to learn that I went from <HL>losing 90% of my important conversations</HL>{' '}to winning
           almost every one I walk into, using the information revealed in this field manual?
         </p>
         <p>Skeptical?</p>
@@ -561,7 +561,7 @@ export default function BookFunnelPageV2() {
         </p>
         <p>
           All purchases entail risk as well as massive and consistent effort and action. If you&apos;re not willing to
-          accept that, please <strong>DO NOT</strong> get this eBook.
+          accept that, please <strong>DO NOT</strong>{' '}get this eBook.
         </p>
         <p>And yes, it took me time and energy to figure this out.</p>
         <p>With that said... let me jump right in and show you...</p>
@@ -575,8 +575,8 @@ export default function BookFunnelPageV2() {
           </h2>
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A] max-w-3xl mx-auto">
             <p>
-              The same <strong>Shadow Persuasion</strong> model that{' '}
-              <HL>1,200+ readers from every walk of life</HL> are now using to win the conversations they used to lose.
+              The same <strong>Shadow Persuasion</strong>{' '}model that{' '}
+              <HL>1,200+ readers from every walk of life</HL>{' '}are now using to win the conversations they used to lose.
             </p>
             <p>
               And in turn, <strong>landing outcomes they had been chasing for years</strong>{' '}faster than they thought
@@ -585,7 +585,7 @@ export default function BookFunnelPageV2() {
             </p>
             <p>
               All while <strong>never sounding &ldquo;salesy,&rdquo; never deploying a single memorized script, and
-              never having anyone catch them &ldquo;running a technique&rdquo;</strong> on the other side of the table,
+              never having anyone catch them &ldquo;running a technique&rdquo;</strong>{' '}on the other side of the table,
               so they can focus on the actual conversation instead of juggling frameworks in their head.
             </p>
             <p>
@@ -598,7 +598,7 @@ export default function BookFunnelPageV2() {
       {/* ═════════ 7. TESTIMONIAL #1 + weaving ═════════ */}
       <section className="px-6 py-12 md:py-16 max-w-5xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-black uppercase tracking-wide mb-8 leading-tight">
-          Just Like <span className="text-[#D4A017]">Marcus T.</span>, Who Downloaded Shadow Persuasion A Few Months Ago And Soon After Closed A <HL>$42,000 Salary Increase</HL> Without His Manager Realizing The Negotiation Had Even Started
+          Just Like <span className="text-[#D4A017]">Marcus T.</span>, Who Downloaded Shadow Persuasion A Few Months Ago And Soon After Closed A <HL>$42,000 Salary Increase</HL>{' '}Without His Manager Realizing The Negotiation Had Even Started
         </h2>
 
         <div className="max-w-2xl mx-auto mb-8">
@@ -621,7 +621,7 @@ export default function BookFunnelPageV2() {
           </p>
           <p>
             That&apos;s what every visible negotiation book gets wrong. They teach you to win the negotiation at the
-            cost of the relationship. Shadow Persuasion lets you win <em>and</em> leave the other person feeling good
+            cost of the relationship. Shadow Persuasion lets you win <em>and</em>{' '}leave the other person feeling good
             about it.
           </p>
           <p>And Marcus isn&apos;t the only one either...</p>
@@ -688,8 +688,7 @@ export default function BookFunnelPageV2() {
             And You Can <span className="text-[#D4A017]">BET</span>...
           </h2>
           <p className="text-lg md:text-xl text-center text-[#F4ECD8]/80 mb-10">
-            This Shadow Persuasion model is unlike any method you&apos;ve heard of before. This is something
-            <strong className="text-[#D4A017]">{' '}completely different</strong>, because...
+            This Shadow Persuasion model is unlike any method you&apos;ve heard of before. This is something{' '}<strong className="text-[#D4A017]">{' '}completely different</strong>, because...
           </p>
           <ul className="space-y-4 text-lg md:text-xl">
             {[
@@ -723,7 +722,7 @@ export default function BookFunnelPageV2() {
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85">
             The Shadow Persuasion model let me get rid of <strong className="text-[#D4A017]">99% of all the BS I
-            hated</strong> about trying to influence anyone, about trying to &ldquo;be more persuasive,&rdquo; about
+            hated</strong>{' '}about trying to influence anyone, about trying to &ldquo;be more persuasive,&rdquo; about
             trying to be someone other than who I am in conversations that mattered.
           </p>
         </div>
@@ -908,7 +907,7 @@ export default function BookFunnelPageV2() {
             So I did what everyone else does in that situation. I started looking for a way out. I looked everywhere.
           </p>
           <p>
-            A few months later, I stumbled onto a thread on a private forum where a group of people called themselves
+            A few months later, I stumbled onto a thread on a private forum where a group of people called themselves{' '}
             <strong>&ldquo;Operators&rdquo;</strong>. They were ex-hostage negotiators, M&amp;A lawyers, family
             mediators, a couple of professional poker players, and one retired FBI profiler. They were talking about
             &ldquo;below-the-radar influence&rdquo; in a way I had never heard before.
@@ -919,7 +918,7 @@ export default function BookFunnelPageV2() {
             conversations that mattered most.
           </p>
           <p>
-            <strong>The only difference was:</strong> somewhere along the way they stopped trying to look like they
+            <strong>The only difference was:</strong>{' '}somewhere along the way they stopped trying to look like they
             were persuading, and started trying to look like they <em>weren&apos;t</em>.
           </p>
         </div>
@@ -959,8 +958,8 @@ export default function BookFunnelPageV2() {
             survival risk, so the brain learned to resist first and evaluate later.
           </p>
           <p className="text-base md:text-lg leading-relaxed mb-4">
-            When the detector fires, three things happen instantly. <HL>Trust drops.</HL> The listener becomes{' '}
-            <HL>resistant.</HL> They start <HL>mentally pushing back</HL> on whatever you say next, even things they would
+            When the detector fires, three things happen instantly. <HL>Trust drops.</HL>{' '}The listener becomes{' '}
+            <HL>resistant.</HL>{' '}They start <HL>mentally pushing back</HL>{' '}on whatever you say next, even things they would
             have agreed with five minutes earlier.
           </p>
           <p className="text-lg md:text-xl font-bold text-[#D4A017]">
@@ -1041,7 +1040,7 @@ export default function BookFunnelPageV2() {
           </p>
           <p>
             But in the process, I created a new problem: <strong>I had 400 hours of recorded conversations sitting on
-            a hard drive and no system to extract what was actually working from what was just luck.</strong> I
+            a hard drive and no system to extract what was actually working from what was just luck.</strong>{' '}I
             needed to reverse-engineer the patterns or I&apos;d plateau.
           </p>
           <p>
@@ -1090,7 +1089,7 @@ export default function BookFunnelPageV2() {
               asked &ldquo;who helped you with that?&rdquo;
             </p>
             <p>
-              You see, most people in this space end up spending all their time <HL>performing persuasion</HL> instead
+              You see, most people in this space end up spending all their time <HL>performing persuasion</HL>{' '}instead
               of doing it. They become brands. They have to. The model they&apos;re teaching requires them to be
               on stage.
             </p>
@@ -1111,7 +1110,7 @@ export default function BookFunnelPageV2() {
       {/* ═════════ 20. MAIN DIFFERENCE WITH OLD WAY + NEW WAY FLOW GRAPHIC ═════════ */}
       <section className="px-6 py-12 md:py-16 max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-8 text-center">
-          Wanna Know What The Main Difference Is With The Shadow Persuasion Model And That <span className="text-[#D4A017]">&ldquo;Old Way&rdquo;</span> Of Doing Things?
+          Wanna Know What The Main Difference Is With The Shadow Persuasion Model And That <span className="text-[#D4A017]">&ldquo;Old Way&rdquo;</span>{' '}Of Doing Things?
         </h2>
 
         <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A] mb-10">
@@ -1201,7 +1200,7 @@ export default function BookFunnelPageV2() {
         <div className="max-w-3xl mx-auto text-center">
           <Sparkles className="h-10 w-10 text-[#D4A017] mx-auto mb-4" />
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-6">
-            And You Know What? I&apos;ll Stake My Entire <span className="text-[#D4A017]">Reputation</span> On This One Promise
+            And You Know What? I&apos;ll Stake My Entire <span className="text-[#D4A017]">Reputation</span>{' '}On This One Promise
           </h2>
           <p className="text-xl md:text-2xl text-[#D4A017] font-bold leading-relaxed mb-8">
             You can win virtually any high-stakes conversation in your life without the other person ever realizing you tried to.
@@ -1211,7 +1210,7 @@ export default function BookFunnelPageV2() {
             isn&apos;t something you ever need to worry about again. Or even think about.
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85 mb-4">
-            It&apos;s something that happens <HL>naturally</HL> once you stop firing detectors. The outcome becomes
+            It&apos;s something that happens <HL>naturally</HL>{' '}once you stop firing detectors. The outcome becomes
             the default instead of the exception.
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85">
@@ -1226,7 +1225,7 @@ export default function BookFunnelPageV2() {
       {/* ═════════ 23. IF I CAN DO THIS SO CAN YOU + COMMUNITY ═════════ */}
       <section className="px-6 py-16 md:py-20 max-w-4xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-6 text-center">
-          And Just A Few Years Ago, I&apos;d Have Told You That You Were <HL>Crazy</HL> If You Thought Such A Model Existed. But Today I Know Better
+          And Just A Few Years Ago, I&apos;d Have Told You That You Were <HL>Crazy</HL>{' '}If You Thought Such A Model Existed. But Today I Know Better
         </h2>
         <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A] max-w-3xl mx-auto mb-10">
           <p>Listen:</p>
@@ -1280,10 +1279,10 @@ export default function BookFunnelPageV2() {
           </h2>
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#1A1A1A]">
             <p>
-              It took me <strong>eight years</strong> to figure this out.
+              It took me <strong>eight years</strong>{' '}to figure this out.
             </p>
             <p>
-              And another <strong>two years</strong> after that to perfect it and turn it into something teachable.
+              And another <strong>two years</strong>{' '}after that to perfect it and turn it into something teachable.
             </p>
             <p>
               Which is safe to say that <HL>there isn&apos;t anything left for you to figure out</HL>.
@@ -1363,17 +1362,17 @@ export default function BookFunnelPageV2() {
       <section className="px-6 py-12 md:py-20 bg-[#1A1A1A] text-[#F4ECD8]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-wide mb-6">
-            Now, Speaking Of The Model... I&apos;m Going To Share Something A Little <HL>Disturbing</HL> With You
+            Now, Speaking Of The Model... I&apos;m Going To Share Something A Little <HL>Disturbing</HL>{' '}With You
           </h2>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85 mb-5">Here it goes:</p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85 mb-5">
-            I am <strong>hurting my own private coaching business</strong> by showing you this. My $2,500-per-session
+            I am <strong>hurting my own private coaching business</strong>{' '}by showing you this. My $2,500-per-session
             clients pay what they pay precisely because this information is hard to get. Putting 47 of my best tactics
             in a $7 book makes my premium pricing harder to defend.
           </p>
           <p className="text-base md:text-lg leading-relaxed text-[#F4ECD8]/85 mb-8">
             And the other gurus out there are making loads of money by teaching the exact opposite of what I teach.
-            Their whole business model depends on the visible toolkit <em>not</em> working, so you keep buying their
+            Their whole business model depends on the visible toolkit <em>not</em>{' '}working, so you keep buying their
             next book. I&apos;m about to tell you why it doesn&apos;t work.
           </p>
           <p className="text-lg md:text-xl text-[#D4A017] font-bold mb-8">Ready for it?</p>
@@ -1385,14 +1384,14 @@ export default function BookFunnelPageV2() {
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-[#F4ECD8]/90">
             <p>Here&apos;s why:</p>
             <p>
-              There are two types of persuaders out there. There are the <strong>Visible Persuaders</strong> and
+              There are two types of persuaders out there. There are the <strong>Visible Persuaders</strong>{' '}and
               there are <strong className="text-[#D4A017]">Shadow Persuaders</strong>.
             </p>
             <p>
               For my first eight years, I was a Visible Persuader. Visible Persuaders are always out there trying to{' '}
               <strong>look skilled</strong>. They want to sound confident. They want the other person to see them
               running a technique. Part of them, secretly, wants to get caught, because getting caught means someone
-              noticed how good they were. Their strategy is to try to <strong>out-technique</strong> the other person.
+              noticed how good they were. Their strategy is to try to <strong>out-technique</strong>{' '}the other person.
             </p>
 
             <p>And by focusing on this strategy, they spend a ton of time on:</p>
@@ -1587,7 +1586,7 @@ export default function BookFunnelPageV2() {
             I consider that a true win/win.
           </p>
           <p>
-            Also, in most cases, <strong>I take a loss when selling the book at this price.</strong> It costs me just
+            Also, in most cases, <strong>I take a loss when selling the book at this price.</strong>{' '}It costs me just
             over $22 in advertising expense to sell one book. So why would I do that?
           </p>
           <p>
@@ -1688,9 +1687,9 @@ export default function BookFunnelPageV2() {
             q="How is this different from other persuasion books?"
             a={
               <p>
-                Every other book teaches you <strong>visible</strong> techniques. Anchoring. Mirroring. Frame control.
+                Every other book teaches you <strong>visible</strong>{' '}techniques. Anchoring. Mirroring. Frame control.
                 The other person sees you running them and trust drops. This book teaches the 47 tactics that operate{' '}
-                <em>below</em> the threshold where the other person can detect them. That&apos;s why they actually work
+                <em>below</em>{' '}the threshold where the other person can detect them. That&apos;s why they actually work
                 in real conversations with sophisticated people.
               </p>
             }
@@ -1764,7 +1763,7 @@ export default function BookFunnelPageV2() {
 
         <div className="bg-[#EBE0C7] border-l-4 border-[#D4A017] p-6">
           <p className="font-bold text-[#1A1A1A] mb-3">
-            <strong>P.S.</strong> Remember, the <em>Shadow Persuasion</em> book comes with the BEST money-back
+            <strong>P.S.</strong>{' '}Remember, the <em>Shadow Persuasion</em>{' '}book comes with the BEST money-back
             guarantee in the world.
           </p>
           <p>
